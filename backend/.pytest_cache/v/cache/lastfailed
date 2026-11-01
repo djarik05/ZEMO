@@ -1,0 +1,16 @@
+{
+  "tests/test_providers.py::TestProviderAPI::test_list_providers": true,
+  "tests/test_providers.py::TestProviderAPI::test_get_provider": true,
+  "tests/test_providers.py::TestProviderAPI::test_update_provider": true,
+  "tests/test_providers.py::TestProviderAPI::test_test_provider_connection": true,
+  "tests/test_providers.py::TestProviderAPI::test_smoke_test_provider": true,
+  "tests/test_providers.py::TestProviderAPI::test_list_provider_models": true,
+  "tests/test_providers.py::TestProviderAPI::test_get_model_capabilities": true,
+  "tests/test_providers.py::TestProviderAPI::test_upsert_model_capability": true,
+  "tests/test_providers.py::TestProviderAPI::test_update_model_capability": true,
+  "tests/test_providers.py::TestProviderAPI::test_delete_model_capability": true,
+  "tests/test_providers.py::TestProviderAPI::test_disable_provider": true,
+  "tests/test_providers.py::TestProviderAPI::test_delete_provider": true,
+  "tests/test_providers.py::TestProviderRegistryService::test_create_provider_service": true,
+  "tests/test_providers.py::TestProviderRegistryService::test_list_providers_service": true
+}
