@@ -31,6 +31,7 @@ from core.logging import setup_logging
 from api.v1.health import router as health_router
 from api.v1.datasets.router import router as datasets_router
 from api.v1.algorithms.router import router as algorithms_router
+from api.v1.experiments.router import router as experiments_router
 
 
 def create_test_app() -> FastAPI:
@@ -56,6 +57,7 @@ def create_test_app() -> FastAPI:
     app.include_router(health_router, prefix=settings.api_prefix)
     app.include_router(datasets_router, prefix=settings.api_prefix)
     app.include_router(algorithms_router, prefix=settings.api_prefix)
+    app.include_router(experiments_router, prefix=f"{settings.api_prefix}/experiments")
 
     return app
 

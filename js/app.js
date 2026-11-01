@@ -347,11 +347,24 @@
     btnSaveDraft: document.getElementById('btnSaveDraft'),
     btnValidateConfig: document.getElementById('btnValidateConfig'),
     btnAddToQueue: document.getElementById('btnAddToQueue'),
+    btnTrainModel: document.getElementById('btnTrainModel'),
     prototypeNotice: document.getElementById('prototypeNotice'),
+
+    // Training Progress Telemetry
+    activeTrainingJobName: document.getElementById('activeTrainingJobName'),
+    activeTrainingJobStatus: document.getElementById('activeTrainingJobStatus'),
+    trainingProgressBar: document.getElementById('trainingProgressBar'),
+    trainingStatStage: document.getElementById('trainingStatStage'),
+    trainingStatProgress: document.getElementById('trainingStatProgress'),
+    trainingStatElapsed: document.getElementById('trainingStatElapsed'),
+    trainingStatRemaining: document.getElementById('trainingStatRemaining'),
+    trainingLog: document.getElementById('trainingLog'),
+    btnDownloadTrainedModel: document.getElementById('btnDownloadTrainedModel'),
 
     // Results Placeholder
     resultsPlaceholderPanel: document.getElementById('resultsPlaceholderPanel'),
     resultExperimentName: document.getElementById('resultExperimentName'),
+    resultExperimentBadge: document.getElementById('resultExperimentBadge'),
     resultMetricLabel1: document.getElementById('resultMetricLabel1'),
     resultMetricVal1: document.getElementById('resultMetricVal1'),
     resultMetricLabel2: document.getElementById('resultMetricLabel2'),
@@ -2696,7 +2709,166 @@
       });
     }
 
-    // Add to Queue button
+    // Train Model (Live Engine) button
+    if (el.btnTrainModel) {
+      el.btnTrainModel.addEventListener('click', async () => {
+        if (!state.dataset || !state.dataset.id) {
+          showNotification('Please upload or select a dataset before initiating model training.', 'warning');
+          return;
+        }
+
+        const task = (state.algorithmConfig && state.algorithmConfig.task) || 'classification';
+        const isClustering = task === 'clustering';
+        const targetCol = isClustering ? null : (state.restrictions.constraints.targetColumn || null);
+
+        if (!isClustering && !targetCol) {
+          showNotification('Please select a target column for supervised training in the Data Preparation section.', 'warning');
+          return;
+        }
+
+        const selectedFeatures = (state.dataset.headers || []).filter(
+          (h) => h !== targetCol && state.restrictions.columns[h] !== 'exclude'
+        );
+
+        if (selectedFeatures.length === 0) {
+          showNotification('Please select at least one feature column for model training.', 'warning');
+          return;
+        }
+
+        const algorithmId = (state.algorithmConfig && state.algorithmConfig.id) || (isClustering ? 'kmeans' : 'random_forest');
+
+        // Extract user hyperparameters from dynamic input fields
+        const params = {};
+        const inputs = el.dynamicHyperparamFields ? el.dynamicHyperparamFields.querySelectorAll('.dynamic-hp-input') : [];
+        inputs.forEach((inp) => {
+          const pName = inp.dataset.param;
+          const pType = inp.dataset.type;
+          const allowNone = inp.dataset.allowNone === 'true';
+          const val = inp.value;
+
+          if (val === '__none__' || (val === '' && allowNone)) {
+            params[pName] = null;
+          } else if (pType === 'int') {
+            params[pName] = val === '' ? null : parseInt(val, 10);
+          } else if (pType === 'float') {
+            params[pName] = val === '' ? null : parseFloat(val);
+          } else if (pType === 'bool') {
+            params[pName] = val === 'true';
+          } else {
+            params[pName] = val;
+          }
+        });
+
+        // Mapping helpers
+        const missingMap = {
+          mean: 'mean',
+          median: 'median',
+          mode: 'most_frequent',
+          constant: 'constant',
+          drop: 'mean',
+        };
+        const encMap = {
+          auto: 'auto',
+          onehot: 'onehot',
+          label: 'ordinal',
+          none: 'none',
+        };
+
+        const missingNum = missingMap[state.restrictions.constraints.missingHandling] || 'mean';
+        const encoding = encMap[state.restrictions.constraints.encoding] || 'auto';
+        const scaling = state.restrictions.constraints.scaling || 'standard';
+        const testRatio = state.restrictions.constraints.split === '70-30' ? 0.3 : state.restrictions.constraints.split === '90-10' ? 0.1 : 0.2;
+
+        const expName = el.expName && el.expName.value.trim()
+          ? el.expName.value.trim()
+          : `${algorithmId}-${task}-${Date.now().toString().slice(-4)}`;
+
+        const payload = {
+          name: expName,
+          dataset_id: state.dataset.id,
+          task: task,
+          target_column: targetCol,
+          selected_features: selectedFeatures,
+          missing_numeric_strategy: missingNum,
+          missing_categorical_strategy: 'most_frequent',
+          encoding_strategy: encoding,
+          scaling_strategy: scaling,
+          algorithm_id: algorithmId,
+          hyperparameters: Object.keys(params).length > 0 ? params : (state.algorithmConfig ? state.algorithmConfig.hyperparameters || {} : {}),
+          test_size: testRatio,
+          random_state: 42,
+          cv_folds: 5,
+        };
+
+        try {
+          if (el.btnTrainModel) {
+            el.btnTrainModel.disabled = true;
+            el.btnTrainModel.innerHTML = '<span class="pulse-dot"></span> Dispatching Worker...';
+          }
+
+          const resp = await fetch(`${API_BASE}/experiments/train`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          if (!resp.ok) {
+            const err = await resp.json().catch(() => ({ detail: 'Server error' }));
+            showNotification(`Training dispatch failed: ${err.detail || 'Unknown error'}`, 'error');
+            return;
+          }
+
+          const expData = await resp.json();
+          const expId = expData.id;
+
+          const queueItem = {
+            id: expId,
+            backendExpId: expId,
+            name: expName,
+            model: state.algorithmConfig ? state.algorithmConfig.display_name : algorithmId,
+            dataset: state.dataset.name,
+            time: 'Just now',
+            status: 'training',
+            expData: expData,
+          };
+
+          state.queue.unshift(queueItem);
+          renderQueue();
+
+          // Reset Telemetry Cards
+          if (el.activeTrainingJobName) el.activeTrainingJobName.textContent = `${expName} (${algorithmId})`;
+          if (el.activeTrainingJobStatus) {
+            el.activeTrainingJobStatus.className = 'queue-status training';
+            el.activeTrainingJobStatus.innerHTML = '<span class="pulse-dot"></span> Training';
+          }
+          if (el.trainingStatStage) el.trainingStatStage.textContent = 'Pipeline Fitting';
+          if (el.trainingStatProgress) el.trainingStatProgress.textContent = '25%';
+          if (el.trainingProgressBar) el.trainingProgressBar.style.width = '25%';
+
+          showNotification(`Training job "${expName}" queued and executing in background worker!`, 'success');
+
+          // Scroll to progress section
+          const progressSection = document.getElementById('activeTrainingJobName');
+          if (progressSection) progressSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+          pollExperimentJob(expId, queueItem);
+
+        } catch (error) {
+          console.error('Training dispatch error:', error);
+          showNotification(`Network error while initiating training: ${error.message}`, 'error');
+        } finally {
+          if (el.btnTrainModel) {
+            el.btnTrainModel.disabled = false;
+            el.btnTrainModel.innerHTML = `
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              Train Model (Live ML Engine)
+            `;
+          }
+        }
+      });
+    }
+
+    // Add to Queue button (Demonstration / Queue tracking)
     if (el.btnAddToQueue) {
       el.btnAddToQueue.addEventListener('click', () => {
         const name = el.expName && el.expName.value.trim() ? el.expName.value.trim() : 'experiment-' + Math.floor(Math.random() * 900 + 100);
@@ -2715,13 +2887,12 @@
         state.queue.unshift(newItem);
         renderQueue();
 
-        // Reveal prototype notice
         if (el.prototypeNotice) {
           el.prototypeNotice.classList.remove('hidden');
           el.prototypeNotice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        showNotification(`Experiment "${name}" added to waiting queue (Frontend demonstration).`, 'success');
+        showNotification(`Experiment "${name}" added to waiting queue. Click "Train Model" to execute live.`, 'info');
       });
     }
 
@@ -2729,7 +2900,224 @@
     renderQueue();
   }
 
-  function viewExperimentBenchmark(exp) {
+  let activePollInterval = null;
+  function pollExperimentJob(expId, queueItem) {
+    if (activePollInterval) clearInterval(activePollInterval);
+
+    const startTime = Date.now();
+    activePollInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`${API_BASE}/experiments/${encodeURIComponent(expId)}`);
+        if (!res.ok) return;
+        const exp = await res.json();
+
+        // Update elapsed time
+        const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+        const mm = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
+        const ss = String(elapsedSec % 60).padStart(2, '0');
+        if (el.trainingStatElapsed) el.trainingStatElapsed.textContent = `00:${mm}:${ss}`;
+
+        // Stream real logs from training engine
+        if (el.trainingLog && Array.isArray(exp.logs) && exp.logs.length > 0) {
+          el.trainingLog.innerHTML = exp.logs.map((log) => {
+            const timeStr = log.timestamp ? log.timestamp.split('T')[1].split('.')[0] : '--:--:--';
+            const lvl = (log.level || 'info').toLowerCase();
+            return `
+              <div class="log-entry">
+                <span class="log-timestamp">[${escapeHtml(timeStr)}]</span>
+                <span class="log-level ${escapeHtml(lvl)}">${escapeHtml(lvl.toUpperCase())}</span>
+                <span class="log-message">${escapeHtml(log.message)}</span>
+              </div>
+            `;
+          }).join('');
+          el.trainingLog.scrollTop = el.trainingLog.scrollHeight;
+        }
+
+        if (exp.status === 'running') {
+          if (el.trainingStatStage) el.trainingStatStage.textContent = 'Estimator Fitting';
+          if (el.trainingStatProgress) el.trainingStatProgress.textContent = '65%';
+          if (el.trainingProgressBar) el.trainingProgressBar.style.width = '65%';
+        } else if (exp.status === 'completed') {
+          clearInterval(activePollInterval);
+          activePollInterval = null;
+
+          if (el.trainingStatStage) el.trainingStatStage.textContent = 'Finished';
+          if (el.trainingStatProgress) el.trainingStatProgress.textContent = '100%';
+          if (el.trainingProgressBar) el.trainingProgressBar.style.width = '100%';
+          if (el.activeTrainingJobStatus) {
+            el.activeTrainingJobStatus.className = 'queue-status completed';
+            el.activeTrainingJobStatus.textContent = 'Completed';
+          }
+          if (queueItem) {
+            queueItem.status = 'completed';
+            queueItem.expData = exp;
+            renderQueue();
+          }
+
+          displayExperimentResults(exp);
+          showNotification(`Training completed: ${exp.name} (Duration: ${exp.duration_seconds ? exp.duration_seconds.toFixed(2) + 's' : '0.1s'})`, 'success');
+
+        } else if (exp.status === 'failed' || exp.status === 'cancelled') {
+          clearInterval(activePollInterval);
+          activePollInterval = null;
+
+          if (el.trainingStatStage) el.trainingStatStage.textContent = exp.status.toUpperCase();
+          if (el.activeTrainingJobStatus) {
+            el.activeTrainingJobStatus.className = 'queue-status draft';
+            el.activeTrainingJobStatus.textContent = exp.status.toUpperCase();
+          }
+          if (queueItem) {
+            queueItem.status = 'failed';
+            queueItem.expData = exp;
+            renderQueue();
+          }
+
+          showNotification(`Training ${exp.status}: ${exp.error_message || 'Training error encountered'}`, 'error');
+        }
+      } catch (err) {
+        console.error('Polling experiment status error:', err);
+      }
+    }, 600);
+  }
+
+  function displayExperimentResults(exp) {
+    if (!exp) return;
+    const metrics = exp.metrics || {};
+    const task = exp.task || 'classification';
+
+    if (el.resultExperimentName) {
+      el.resultExperimentName.textContent = `${exp.name} (${exp.algorithm_id})`;
+    }
+    if (el.resultExperimentBadge) {
+      el.resultExperimentBadge.textContent = `Completed (${exp.duration_seconds ? exp.duration_seconds.toFixed(2) + 's' : 'live'})`;
+      el.resultExperimentBadge.style.background = 'rgba(76, 175, 80, 0.15)';
+      el.resultExperimentBadge.style.color = '#2e7d32';
+    }
+
+    if (task === 'classification') {
+      if (el.resultMetricLabel1) el.resultMetricLabel1.textContent = 'Accuracy';
+      if (el.resultMetricVal1) el.resultMetricVal1.textContent = metrics.accuracy != null ? `${(metrics.accuracy * 100).toFixed(2)}%` : '—';
+
+      if (el.resultMetricLabel2) el.resultMetricLabel2.textContent = 'Weighted F1';
+      if (el.resultMetricVal2) el.resultMetricVal2.textContent = metrics.f1_weighted != null ? metrics.f1_weighted.toFixed(4) : '—';
+
+      if (el.resultMetricLabel3) el.resultMetricLabel3.textContent = 'CV Score (Mean)';
+      if (el.resultMetricVal3) el.resultMetricVal3.textContent = metrics.cv_mean_score != null ? metrics.cv_mean_score.toFixed(4) : '—';
+
+      if (el.resultMetricLabel4) el.resultMetricLabel4.textContent = 'Model Size';
+      if (el.resultMetricVal4) el.resultMetricVal4.textContent = exp.model_size_bytes ? `${(exp.model_size_bytes / 1024).toFixed(1)} KB` : '—';
+
+    } else if (task === 'regression') {
+      if (el.resultMetricLabel1) el.resultMetricLabel1.textContent = 'R² Score';
+      if (el.resultMetricVal1) el.resultMetricVal1.textContent = metrics.r2 != null ? metrics.r2.toFixed(4) : '—';
+
+      if (el.resultMetricLabel2) el.resultMetricLabel2.textContent = 'RMSE';
+      if (el.resultMetricVal2) el.resultMetricVal2.textContent = metrics.rmse != null ? metrics.rmse.toFixed(4) : '—';
+
+      if (el.resultMetricLabel3) el.resultMetricLabel3.textContent = 'MAE';
+      if (el.resultMetricVal3) el.resultMetricVal3.textContent = metrics.mae != null ? metrics.mae.toFixed(4) : '—';
+
+      if (el.resultMetricLabel4) el.resultMetricLabel4.textContent = 'CV R² (Mean)';
+      if (el.resultMetricVal4) el.resultMetricVal4.textContent = metrics.cv_mean_score != null ? metrics.cv_mean_score.toFixed(4) : '—';
+
+    } else if (task === 'clustering') {
+      if (el.resultMetricLabel1) el.resultMetricLabel1.textContent = 'Clusters Found';
+      if (el.resultMetricVal1) el.resultMetricVal1.textContent = metrics.num_clusters != null ? metrics.num_clusters : '—';
+
+      if (el.resultMetricLabel2) el.resultMetricLabel2.textContent = 'Silhouette Score';
+      if (el.resultMetricVal2) el.resultMetricVal2.textContent = metrics.silhouette_score != null ? metrics.silhouette_score.toFixed(4) : 'N/A';
+
+      if (el.resultMetricLabel3) el.resultMetricLabel3.textContent = 'Davies-Bouldin';
+      if (el.resultMetricVal3) el.resultMetricVal3.textContent = metrics.davies_bouldin != null ? metrics.davies_bouldin.toFixed(4) : 'N/A';
+
+      if (el.resultMetricLabel4) el.resultMetricLabel4.textContent = 'Samples Clustered';
+      if (el.resultMetricVal4) el.resultMetricVal4.textContent = metrics.total_samples != null ? metrics.total_samples : '—';
+    }
+
+    // Render Confusion Matrix or Cluster Breakdown in visual-matrix-placeholder
+    const matrixBox = document.querySelector('.visual-matrix-placeholder');
+    if (matrixBox) {
+      if (task === 'classification' && metrics.confusion_matrix && metrics.classes) {
+        let cmHtml = `
+          <div style="width: 100%; text-align: center;">
+            <div class="caption font-mono mb-2" style="font-weight: 600;">Confusion Matrix (Classes: ${metrics.classes.join(', ')})</div>
+            <table style="margin: 0 auto; border-collapse: collapse; font-family: var(--font-mono); font-size: 12px;">
+              <thead>
+                <tr>
+                  <th style="padding: 4px 8px; border: 1px solid var(--border-subtle); background: var(--bg-surface-elevated);">True \\ Pred</th>
+                  ${metrics.classes.map((c) => `<th style="padding: 4px 8px; border: 1px solid var(--border-subtle); background: var(--bg-surface-elevated);">${escapeHtml(c)}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${metrics.confusion_matrix.map((row, rIdx) => `
+                  <tr>
+                    <td style="padding: 4px 8px; border: 1px solid var(--border-subtle); font-weight: 600; background: var(--bg-surface-elevated);">${escapeHtml(metrics.classes[rIdx])}</td>
+                    ${row.map((val) => `<td style="padding: 4px 8px; border: 1px solid var(--border-subtle); text-align: center; ${val > 0 ? 'background: rgba(76, 175, 80, 0.12); font-weight: 600;' : ''}">${val}</td>`).join('')}
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+        matrixBox.innerHTML = cmHtml;
+      } else if (task === 'clustering' && metrics.cluster_distribution) {
+        let distHtml = `
+          <div style="width: 100%; text-align: center;">
+            <div class="caption font-mono mb-2" style="font-weight: 600;">Cluster Member Distribution</div>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+              ${Object.entries(metrics.cluster_distribution).map(([cluster, count]) => `
+                <div style="padding: 6px 12px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--bg-surface-elevated);">
+                  <div style="font-size: 11px; color: var(--text-muted);">${cluster === '-1' ? 'Noise (-1)' : 'Cluster ' + cluster}</div>
+                  <div style="font-size: 16px; font-weight: 600; font-family: var(--font-mono);">${count}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        matrixBox.innerHTML = distHtml;
+      } else if (task === 'regression') {
+        matrixBox.innerHTML = `
+          <div style="text-align: center; padding: 12px;">
+            <div class="caption font-mono" style="font-weight: 600; color: var(--deep-olive);">Regression Model Fitted Successfully</div>
+            <div class="caption text-muted mt-2">Test R²: <strong>${metrics.r2 != null ? metrics.r2.toFixed(4) : '—'}</strong> | Test RMSE: <strong>${metrics.rmse != null ? metrics.rmse.toFixed(4) : '—'}</strong> | MAE: <strong>${metrics.mae != null ? metrics.mae.toFixed(4) : '—'}</strong></div>
+          </div>
+        `;
+      }
+    }
+
+    // Enable and update model download link
+    const dlBtn = document.getElementById('btnDownloadTrainedModel');
+    if (dlBtn && exp.id) {
+      dlBtn.classList.remove('hidden');
+      dlBtn.href = `${API_BASE}/experiments/${encodeURIComponent(exp.id)}/download`;
+      dlBtn.setAttribute('download', `${exp.name || 'model'}.joblib`);
+    }
+
+    const panel = document.getElementById('resultsPlaceholderPanel');
+    if (panel) {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  async function viewExperimentBenchmark(exp) {
+    if (exp.expData) {
+      displayExperimentResults(exp.expData);
+      return;
+    }
+    if (exp.backendExpId) {
+      try {
+        const res = await fetch(`${API_BASE}/experiments/${encodeURIComponent(exp.backendExpId)}`);
+        if (res.ok) {
+          const data = await res.json();
+          exp.expData = data;
+          displayExperimentResults(data);
+          return;
+        }
+      } catch (e) {
+        console.warn('Failed to fetch experiment benchmark:', e);
+      }
+    }
+
     if (el.resultExperimentName) {
       el.resultExperimentName.textContent = `${exp.name} (${exp.model})`;
     }

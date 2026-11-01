@@ -22,6 +22,7 @@ from core.database.models.integration import (
     Provider,
     ModelCapabilityInfo,
 )  # noqa: F401
+from core.database.models.experiment import Experiment  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -1442,11 +1442,17 @@
           </div>
         </div>
 
-        <!-- E. Experiment Results & Evaluation Metrics (Demonstration Placeholder) -->
+        <!-- E. Experiment Results & Evaluation Metrics -->
         <div class="subsection reveal reveal-delay-5">
           <div class="flex-between mb-4">
-            <h3 class="subsection-title" style="margin-bottom: 0;">Experiment Results & Evaluation (Demonstration)</h3>
-            <span class="illustrative-badge">Demonstration Output Placeholder</span>
+            <h3 class="subsection-title" style="margin-bottom: 0;">Experiment Results & Model Diagnostics</h3>
+            <div class="flex-gap-2 align-center">
+              <a id="btnDownloadTrainedModel" class="btn btn-secondary hidden" style="font-size: 11px; padding: 4px 10px; text-decoration: none;" target="_blank">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download Model (.joblib)
+              </a>
+              <span class="badge badge-include" id="evaluationLiveBadge">Live Engine Output</span>
+            </div>
           </div>
 
           <div class="results-placeholder-panel" id="resultsPlaceholderPanel">
@@ -1498,7 +1504,11 @@
             Save Draft
           </button>
           <button class="btn btn-secondary" id="btnValidateConfig">Validate Configuration</button>
-          <button class="btn btn-primary" id="btnAddToQueue">Add to Queue</button>
+          <button class="btn btn-ghost" id="btnAddToQueue">Add to Queue</button>
+          <button class="btn btn-primary" id="btnTrainModel" style="background: var(--deep-olive); color: #fff; border-color: var(--deep-olive); box-shadow: var(--shadow-sm);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Train Model (Live ML Engine)
+          </button>
         </div>
 
         <!-- Prototype Notice -->

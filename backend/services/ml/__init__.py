@@ -21,6 +21,9 @@ from .registry import (
     get_algorithm_registry,
 )
 from .visualizer import VisualizationEngine, get_visualization_engine
+from .pipeline_builder import DynamicPipelineBuilder, TrainingConfig, PipelineBuildResult
+from .trainer import MLTrainingEngine, TrainingResult
+from .job_manager import TrainingJobManager, ActiveJobState
 
 __all__ = [
     "DatasetLoader",
@@ -40,6 +43,13 @@ __all__ = [
     "get_algorithm_registry",
     "AlgorithmInfo",
     "HyperparameterSpec",
+    "DynamicPipelineBuilder",
+    "TrainingConfig",
+    "PipelineBuildResult",
+    "MLTrainingEngine",
+    "TrainingResult",
+    "TrainingJobManager",
+    "ActiveJobState",
 ]
 
 

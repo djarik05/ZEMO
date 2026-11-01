@@ -145,6 +145,8 @@ class AlgorithmRegistry:
         algo_id = self.resolve_algorithm_id(identifier, task)
         return self._algorithms[algo_id][0]
 
+    get_algorithm = get
+
     def list_algorithms(self, task: Optional[str] = None) -> List[AlgorithmInfo]:
         """List all algorithms, optionally filtered by task."""
         algos = [info for info, _ in self._algorithms.values()]
