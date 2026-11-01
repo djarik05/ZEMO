@@ -404,7 +404,7 @@ class ProviderRegistryService:
                 capability.pricing_input_per_1k = pricing_input_per_1k
                 capability.pricing_output_per_1k = pricing_output_per_1k
                 capability.is_deprecated = is_deprecated
-                capability.metadata = metadata or {}
+                capability.model_metadata = metadata or {}
                 capability.updated_at = datetime.utcnow()
             else:
                 capability = ModelCapabilityInfo(

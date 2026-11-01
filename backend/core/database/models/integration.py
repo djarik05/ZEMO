@@ -234,9 +234,14 @@ class ModelCapabilityInfo(Base):
     pricing_input_per_1k: Mapped[Optional[float]] = mapped_column(JSON, default=None, nullable=True)
     pricing_output_per_1k: Mapped[Optional[float]] = mapped_column(JSON, default=None, nullable=True)
     is_deprecated: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    metadata: Mapped[dict[str, str]] = mapped_column(JSON, default=dict, nullable=False)
+    model_metadata: Mapped[dict[str, str]] = mapped_column("metadata", JSON, default=dict, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    def __init__(self, **kwargs):
+        if "metadata" in kwargs:
+            kwargs["model_metadata"] = kwargs.pop("metadata")
+        super().__init__(**kwargs)
 
     __table_args__ = (
         Index("ix_model_capabilities_provider_model", "provider_id", "model_identifier", unique=True),
