@@ -4875,7 +4875,7 @@
 
     // Live Gemini AI Fallback for studio chat
     const activeDsId = state.dataset && state.dataset.id ? state.dataset.id : null;
-    fetch('/api/v1/chatbot/message', {
+    fetch(`${API_BASE}/chatbot/message`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -5029,7 +5029,7 @@
     if (clearBtn) {
       clearBtn.addEventListener('click', async () => {
         try {
-          await fetch('/api/v1/chatbot/clear', {
+          await fetch(`${API_BASE}/chatbot/clear`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ conversation_id: zemoChatState.conversationId })
@@ -5075,7 +5075,7 @@
       const activeDatasetId = state.dataset && state.dataset.id ? state.dataset.id : null;
 
       try {
-        const response = await fetch('/api/v1/chatbot/message', {
+        const response = await fetch(`${API_BASE}/chatbot/message`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
