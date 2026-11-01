@@ -24,6 +24,7 @@ from .visualizer import VisualizationEngine, get_visualization_engine
 from .pipeline_builder import DynamicPipelineBuilder, TrainingConfig, PipelineBuildResult
 from .trainer import MLTrainingEngine, TrainingResult
 from .job_manager import TrainingJobManager, ActiveJobState
+from .evaluator import ModelEvaluator, ExperimentComparator
 
 __all__ = [
     "DatasetLoader",
@@ -50,6 +51,8 @@ __all__ = [
     "TrainingResult",
     "TrainingJobManager",
     "ActiveJobState",
+    "ModelEvaluator",
+    "ExperimentComparator",
 ]
 
 

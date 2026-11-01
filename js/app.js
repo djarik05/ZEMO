@@ -374,6 +374,20 @@
     resultMetricLabel4: document.getElementById('resultMetricLabel4'),
     resultMetricVal4: document.getElementById('resultMetricVal4'),
 
+    // Model Comparison & Detailed Evaluation
+    btnCompareModels: document.getElementById('btnCompareModels'),
+    compareCountBadge: document.getElementById('compareCountBadge'),
+    modelComparisonModal: document.getElementById('modelComparisonModal'),
+    btnCloseComparisonModal: document.getElementById('btnCloseComparisonModal'),
+    comparisonModalBody: document.getElementById('comparisonModalBody'),
+    featureImportanceContainer: document.getElementById('featureImportanceContainer'),
+    featureImportanceMethodBadge: document.getElementById('featureImportanceMethodBadge'),
+    featureImportanceExplanation: document.getElementById('featureImportanceExplanation'),
+    featureImportanceBarsList: document.getElementById('featureImportanceBarsList'),
+    evaluationDiagnosticsContainer: document.getElementById('evaluationDiagnosticsContainer'),
+    evalDetailSecondaryBadge: document.getElementById('evalDetailSecondaryBadge'),
+    evaluationDiagnosticsContent: document.getElementById('evaluationDiagnosticsContent'),
+
     // Feedback
     notification: document.getElementById('notification'),
     notificationText: document.getElementById('notificationText'),
@@ -3001,11 +3015,18 @@
       if (el.resultMetricLabel2) el.resultMetricLabel2.textContent = 'Weighted F1';
       if (el.resultMetricVal2) el.resultMetricVal2.textContent = metrics.f1_weighted != null ? metrics.f1_weighted.toFixed(4) : '—';
 
-      if (el.resultMetricLabel3) el.resultMetricLabel3.textContent = 'CV Score (Mean)';
-      if (el.resultMetricVal3) el.resultMetricVal3.textContent = metrics.cv_mean_score != null ? metrics.cv_mean_score.toFixed(4) : '—';
+      if (el.resultMetricLabel3) el.resultMetricLabel3.textContent = 'Macro F1';
+      if (el.resultMetricVal3) el.resultMetricVal3.textContent = metrics.f1_macro != null ? metrics.f1_macro.toFixed(4) : '—';
 
-      if (el.resultMetricLabel4) el.resultMetricLabel4.textContent = 'Model Size';
-      if (el.resultMetricVal4) el.resultMetricVal4.textContent = exp.model_size_bytes ? `${(exp.model_size_bytes / 1024).toFixed(1)} KB` : '—';
+      if (el.resultMetricLabel4) el.resultMetricLabel4.textContent = 'ROC-AUC';
+      if (el.resultMetricVal4) {
+        if (metrics.roc_auc != null) {
+          el.resultMetricVal4.textContent = metrics.roc_auc.toFixed(4);
+        } else {
+          el.resultMetricVal4.textContent = 'N/A';
+          el.resultMetricVal4.title = metrics.roc_auc_note || 'Probability scores not supported';
+        }
+      }
 
     } else if (task === 'regression') {
       if (el.resultMetricLabel1) el.resultMetricLabel1.textContent = 'R² Score';
@@ -3017,8 +3038,8 @@
       if (el.resultMetricLabel3) el.resultMetricLabel3.textContent = 'MAE';
       if (el.resultMetricVal3) el.resultMetricVal3.textContent = metrics.mae != null ? metrics.mae.toFixed(4) : '—';
 
-      if (el.resultMetricLabel4) el.resultMetricLabel4.textContent = 'CV R² (Mean)';
-      if (el.resultMetricVal4) el.resultMetricVal4.textContent = metrics.cv_mean_score != null ? metrics.cv_mean_score.toFixed(4) : '—';
+      if (el.resultMetricLabel4) el.resultMetricLabel4.textContent = 'Explained Var';
+      if (el.resultMetricVal4) el.resultMetricVal4.textContent = metrics.explained_variance != null ? metrics.explained_variance.toFixed(4) : '—';
 
     } else if (task === 'clustering') {
       if (el.resultMetricLabel1) el.resultMetricLabel1.textContent = 'Clusters Found';
@@ -3030,8 +3051,8 @@
       if (el.resultMetricLabel3) el.resultMetricLabel3.textContent = 'Davies-Bouldin';
       if (el.resultMetricVal3) el.resultMetricVal3.textContent = metrics.davies_bouldin != null ? metrics.davies_bouldin.toFixed(4) : 'N/A';
 
-      if (el.resultMetricLabel4) el.resultMetricLabel4.textContent = 'Samples Clustered';
-      if (el.resultMetricVal4) el.resultMetricVal4.textContent = metrics.total_samples != null ? metrics.total_samples : '—';
+      if (el.resultMetricLabel4) el.resultMetricLabel4.textContent = 'Calinski-Harabasz';
+      if (el.resultMetricVal4) el.resultMetricVal4.textContent = metrics.calinski_harabasz != null ? metrics.calinski_harabasz.toFixed(1) : 'N/A';
     }
 
     // Render Confusion Matrix or Cluster Breakdown in visual-matrix-placeholder
@@ -3076,10 +3097,165 @@
         `;
         matrixBox.innerHTML = distHtml;
       } else if (task === 'regression') {
+        const predPoints = metrics.prediction_points || [];
+        let pointsSampleHtml = '';
+        if (predPoints.length > 0) {
+          pointsSampleHtml = `
+            <div class="mt-2" style="max-height: 120px; overflow-y: auto; font-family: var(--font-mono); font-size: 11px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+              <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                  <tr style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-subtle);">
+                    <th style="padding: 4px 8px;">Actual</th>
+                    <th style="padding: 4px 8px;">Predicted</th>
+                    <th style="padding: 4px 8px;">Residual</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${predPoints.slice(0, 5).map(pt => `
+                    <tr style="border-bottom: 1px solid var(--border-subtle);">
+                      <td style="padding: 3px 8px;">${pt.actual}</td>
+                      <td style="padding: 3px 8px;">${pt.predicted}</td>
+                      <td style="padding: 3px 8px; color: ${pt.residual >= 0 ? '#2e7d32' : '#c62828'};">${pt.residual >= 0 ? '+' : ''}${pt.residual}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+
         matrixBox.innerHTML = `
-          <div style="text-align: center; padding: 12px;">
-            <div class="caption font-mono" style="font-weight: 600; color: var(--deep-olive);">Regression Model Fitted Successfully</div>
-            <div class="caption text-muted mt-2">Test R²: <strong>${metrics.r2 != null ? metrics.r2.toFixed(4) : '—'}</strong> | Test RMSE: <strong>${metrics.rmse != null ? metrics.rmse.toFixed(4) : '—'}</strong> | MAE: <strong>${metrics.mae != null ? metrics.mae.toFixed(4) : '—'}</strong></div>
+          <div style="text-align: center; padding: 12px; width: 100%;">
+            <div class="caption font-mono" style="font-weight: 600; color: var(--deep-olive);">Regression Residuals & Predictions</div>
+            <div class="caption text-muted mt-2">Test R²: <strong>${metrics.r2 != null ? metrics.r2.toFixed(4) : '—'}</strong> | RMSE: <strong>${metrics.rmse != null ? metrics.rmse.toFixed(4) : '—'}</strong> | Mean Residual: <strong>${metrics.mean_residual != null ? metrics.mean_residual.toFixed(4) : '0.0'}</strong></div>
+            ${pointsSampleHtml}
+          </div>
+        `;
+      }
+    }
+
+    // Render Feature Importance Panel
+    if (el.featureImportanceContainer && el.featureImportanceBarsList) {
+      const featImp = metrics.feature_importance;
+      if (featImp && featImp.available && Array.isArray(featImp.importances) && featImp.importances.length > 0) {
+        el.featureImportanceContainer.classList.remove('hidden');
+        if (el.featureImportanceMethodBadge) {
+          el.featureImportanceMethodBadge.textContent = (featImp.method || 'weights').replace(/_/g, ' ').toUpperCase();
+        }
+        if (el.featureImportanceExplanation) {
+          el.featureImportanceExplanation.textContent = featImp.explanation || 'Attribution computed from fitted estimator.';
+        }
+
+        const topFeatures = featImp.importances.slice(0, 8);
+        const maxVal = Math.max(...topFeatures.map((f) => f.importance || 0), 0.001);
+
+        el.featureImportanceBarsList.innerHTML = topFeatures
+          .map((item) => {
+            const pct = Math.min(100, Math.max(3, (item.importance / maxVal) * 100));
+            return `
+              <div style="display: flex; align-items: center; gap: 12px; font-size: 12px;">
+                <span style="width: 140px; font-family: var(--font-mono); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="${escapeHtml(item.feature)}">${escapeHtml(item.feature)}</span>
+                <div style="flex: 1; background: var(--bg-surface); height: 8px; border-radius: 4px; overflow: hidden; border: 1px solid var(--border-subtle);">
+                  <div style="background: var(--deep-olive); height: 100%; width: ${pct}%;"></div>
+                </div>
+                <span style="width: 55px; text-align: right; font-family: var(--font-mono); font-weight: 600; font-size: 11px;">${item.importance.toFixed(4)}</span>
+              </div>
+            `;
+          })
+          .join('');
+      } else {
+        if (featImp && featImp.explanation) {
+          el.featureImportanceContainer.classList.remove('hidden');
+          if (el.featureImportanceMethodBadge) el.featureImportanceMethodBadge.textContent = 'NOT APPLICABLE';
+          if (el.featureImportanceExplanation) el.featureImportanceExplanation.textContent = featImp.explanation;
+          el.featureImportanceBarsList.innerHTML = '';
+        } else {
+          el.featureImportanceContainer.classList.add('hidden');
+        }
+      }
+    }
+
+    // Render Detailed Diagnostics (Classification Report / Residuals / Evaluation Notes)
+    if (el.evaluationDiagnosticsContainer && el.evaluationDiagnosticsContent) {
+      el.evaluationDiagnosticsContainer.classList.remove('hidden');
+      if (task === 'classification') {
+        if (el.evalDetailSecondaryBadge) el.evalDetailSecondaryBadge.textContent = 'Classification Report & Predictions';
+        let reportHtml = '';
+        if (metrics.classification_report) {
+          const rep = metrics.classification_report;
+          const classes = Object.keys(rep).filter((k) => !['accuracy', 'macro avg', 'weighted avg'].includes(k));
+          reportHtml = `
+            <div style="margin-bottom: 12px;">
+              <table style="width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 11px;">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--border-subtle); background: var(--bg-surface);">
+                    <th style="padding: 4px 8px; text-align: left;">Class Label</th>
+                    <th style="padding: 4px 8px; text-align: right;">Precision</th>
+                    <th style="padding: 4px 8px; text-align: right;">Recall</th>
+                    <th style="padding: 4px 8px; text-align: right;">F1-Score</th>
+                    <th style="padding: 4px 8px; text-align: right;">Support</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${classes.map(c => `
+                    <tr style="border-bottom: 1px solid var(--border-subtle);">
+                      <td style="padding: 4px 8px; font-weight: 600;">${escapeHtml(c)}</td>
+                      <td style="padding: 4px 8px; text-align: right;">${rep[c].precision ? rep[c].precision.toFixed(4) : '0.0000'}</td>
+                      <td style="padding: 4px 8px; text-align: right;">${rep[c].recall ? rep[c].recall.toFixed(4) : '0.0000'}</td>
+                      <td style="padding: 4px 8px; text-align: right;">${rep[c]['f1-score'] ? rep[c]['f1-score'].toFixed(4) : '0.0000'}</td>
+                      <td style="padding: 4px 8px; text-align: right;">${rep[c].support || 0}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+
+        let samplesHtml = '';
+        if (metrics.prediction_samples && metrics.prediction_samples.length > 0) {
+          samplesHtml = `
+            <div>
+              <div class="caption font-mono mb-2" style="font-weight: 600;">Sample Hold-out Predictions</div>
+              <table style="width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 11px;">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--border-subtle); background: var(--bg-surface);">
+                    <th style="padding: 4px 8px; text-align: left;">Actual Class</th>
+                    <th style="padding: 4px 8px; text-align: left;">Predicted Class</th>
+                    <th style="padding: 4px 8px; text-align: right;">Result</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${metrics.prediction_samples.slice(0, 6).map(s => `
+                    <tr style="border-bottom: 1px solid var(--border-subtle);">
+                      <td style="padding: 3px 8px;">${escapeHtml(s.actual)}</td>
+                      <td style="padding: 3px 8px;">${escapeHtml(s.predicted)}</td>
+                      <td style="padding: 3px 8px; text-align: right; color: ${s.correct ? '#2e7d32' : '#c62828'}; font-weight: 600;">
+                        ${s.correct ? '✓ Correct' : '✕ Error'}
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+        el.evaluationDiagnosticsContent.innerHTML = reportHtml + samplesHtml;
+
+      } else if (task === 'regression') {
+        if (el.evalDetailSecondaryBadge) el.evalDetailSecondaryBadge.textContent = 'Residual Diagnostics';
+        el.evaluationDiagnosticsContent.innerHTML = `
+          <div style="font-family: var(--font-mono); font-size: 11px; padding: 6px;">
+            <div>Mean Residual Error: <strong>${metrics.mean_residual != null ? metrics.mean_residual.toFixed(4) : '0.0'}</strong></div>
+            <div class="mt-1">Residual Standard Deviation: <strong>${metrics.std_residual != null ? metrics.std_residual.toFixed(4) : '0.0'}</strong></div>
+            <div class="mt-1">Explained Variance Score: <strong>${metrics.explained_variance != null ? metrics.explained_variance.toFixed(4) : '—'}</strong></div>
+          </div>
+        `;
+      } else if (task === 'clustering') {
+        if (el.evalDetailSecondaryBadge) el.evalDetailSecondaryBadge.textContent = 'Clustering Metrics Notes';
+        el.evaluationDiagnosticsContent.innerHTML = `
+          <div style="font-size: 12px; color: var(--text-muted); padding: 4px;">
+            ${escapeHtml(metrics.evaluation_notes || 'All geometric clustering evaluation metrics computed successfully.')}
           </div>
         `;
       }
@@ -3121,28 +3297,19 @@
     if (el.resultExperimentName) {
       el.resultExperimentName.textContent = `${exp.name} (${exp.model})`;
     }
-    if (exp.status === 'completed') {
-      if (el.resultMetricVal1) el.resultMetricVal1.textContent = '0.0142';
-      if (el.resultMetricVal2) el.resultMetricVal2.textContent = '0.9480';
-      if (el.resultMetricVal3) el.resultMetricVal3.textContent = '0.8 ms/batch';
-      if (el.resultMetricVal4) el.resultMetricVal4.textContent = '+0.0021';
-    } else if (exp.status === 'training') {
-      if (el.resultMetricVal1) el.resultMetricVal1.textContent = '0.0289';
-      if (el.resultMetricVal2) el.resultMetricVal2.textContent = '0.9142';
-      if (el.resultMetricVal3) el.resultMetricVal3.textContent = '1.4 ms/batch';
-      if (el.resultMetricVal4) el.resultMetricVal4.textContent = '+0.0055';
-    } else {
-      if (el.resultMetricVal1) el.resultMetricVal1.textContent = '— (Pending)';
-      if (el.resultMetricVal2) el.resultMetricVal2.textContent = '— (Pending)';
-      if (el.resultMetricVal3) el.resultMetricVal3.textContent = '— (Pending)';
-      if (el.resultMetricVal4) el.resultMetricVal4.textContent = '— (Pending)';
-    }
-
     const panel = document.getElementById('resultsPlaceholderPanel');
     if (panel) {
       panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-    showNotification(`Loaded benchmark metrics for "${exp.name}" [Demonstration Data]`, 'info');
+    showNotification(`Loaded benchmark metrics for "${exp.name}"`, 'info');
+  }
+
+  const selectedQueueExperiments = new Set();
+
+  function updateCompareCount() {
+    if (el.compareCountBadge) {
+      el.compareCountBadge.textContent = selectedQueueExperiments.size;
+    }
   }
 
   function renderQueue() {
@@ -3151,9 +3318,11 @@
     if (!state.queue || state.queue.length === 0) {
       el.queueList.innerHTML = `
         <div class="empty-queue-placeholder">
-          <p class="text-muted caption" style="margin: 0; padding: 20px; text-align: center;">No experiments queued or running. Configure an experiment above and click "Add to Queue".</p>
+          <p class="text-muted caption" style="margin: 0; padding: 20px; text-align: center;">No experiments queued or running. Configure an experiment above and click "Train Model (Live ML Engine)".</p>
         </div>
       `;
+      selectedQueueExperiments.clear();
+      updateCompareCount();
       return;
     }
 
@@ -3172,9 +3341,14 @@
         statusBadge = '<span class="queue-status draft">Draft</span>';
       }
 
+      const expId = item.backendExpId || item.id;
+      const isCompleted = item.status === 'completed';
+      const isChecked = selectedQueueExperiments.has(expId);
+
       html += `
-        <div class="queue-item" data-index="${index}">
-          <div class="queue-item-info">
+        <div class="queue-item" data-index="${index}" style="display: flex; align-items: center; gap: 12px;">
+          <input type="checkbox" class="queue-select-checkbox" data-id="${escapeHtml(expId)}" ${!isCompleted ? 'disabled title="Only completed experiments can be compared"' : ''} ${isChecked ? 'checked' : ''} style="width: 16px; height: 16px; cursor: pointer;">
+          <div class="queue-item-info" style="flex: 1;">
             <span class="queue-item-name">${escapeHtml(item.name)}</span>
             <span class="queue-item-model">${escapeHtml(item.model)}</span>
             <span class="queue-item-dataset">${escapeHtml(item.dataset)}</span>
@@ -3188,6 +3362,19 @@
 
     el.queueList.innerHTML = html;
 
+    // Attach checkbox listeners
+    el.queueList.querySelectorAll('.queue-select-checkbox').forEach((cb) => {
+      cb.addEventListener('change', (e) => {
+        const id = e.target.dataset.id;
+        if (e.target.checked) {
+          selectedQueueExperiments.add(id);
+        } else {
+          selectedQueueExperiments.delete(id);
+        }
+        updateCompareCount();
+      });
+    });
+
     // Attach click listeners to view buttons
     el.queueList.querySelectorAll('.btn-queue-view').forEach((btn) => {
       btn.addEventListener('click', (e) => {
@@ -3198,6 +3385,132 @@
         }
       });
     });
+
+    updateCompareCount();
+  }
+
+  // Model comparison trigger
+  if (el.btnCompareModels) {
+    el.btnCompareModels.addEventListener('click', async () => {
+      const selectedIds = Array.from(selectedQueueExperiments);
+      if (selectedIds.length < 2) {
+        showNotification('Please select at least 2 completed experiments to compare.', 'warning');
+        return;
+      }
+
+      try {
+        el.btnCompareModels.disabled = true;
+        el.btnCompareModels.innerHTML = '<span class="pulse-dot"></span> Comparing...';
+
+        const res = await fetch(`${API_BASE}/experiments/compare`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ experiment_ids: selectedIds }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ detail: 'Comparison request failed' }));
+          showNotification(`Comparison Error: ${err.detail || 'Incompatible experiments'}`, 'error');
+          return;
+        }
+
+        const comp = await res.json();
+        renderComparisonModal(comp);
+
+      } catch (err) {
+        console.error('Model comparison error:', err);
+        showNotification(`Failed to compare models: ${err.message}`, 'error');
+      } finally {
+        if (el.btnCompareModels) {
+          el.btnCompareModels.disabled = false;
+          el.btnCompareModels.innerHTML = `
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            Compare Selected Models (<span id="compareCountBadge">${selectedQueueExperiments.size}</span>)
+          `;
+        }
+      }
+    });
+  }
+
+  if (el.btnCloseComparisonModal && el.modelComparisonModal) {
+    el.btnCloseComparisonModal.addEventListener('click', () => {
+      el.modelComparisonModal.style.display = 'none';
+    });
+  }
+
+  function renderComparisonModal(comp) {
+    if (!el.modelComparisonModal || !el.comparisonModalBody) return;
+
+    const best = comp.best_model || {};
+    const metricKeys = Object.keys(comp.metrics_comparison || {});
+
+    let modalHtml = `
+      <!-- Winner Banner -->
+      <div style="border: 1px solid rgba(76, 175, 80, 0.3); background: rgba(76, 175, 80, 0.08); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px;">
+        <div class="flex-between align-center mb-1">
+          <span class="badge" style="background: rgba(76, 175, 80, 0.2); color: #2e7d32; font-weight: 600;">🏆 Top Performer: ${escapeHtml(best.name || 'Model')}</span>
+          <span class="caption text-muted font-mono">Task: ${escapeHtml(comp.task.toUpperCase())}</span>
+        </div>
+        <p style="margin: 6px 0 0; font-size: 13px; color: var(--text-primary);">${escapeHtml(comp.recommendation)}</p>
+      </div>
+
+      <!-- Comparative Matrix Table -->
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px; font-family: var(--font-sans);">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border-subtle); background: var(--bg-surface-elevated);">
+              <th style="padding: 10px 14px; text-align: left; width: 220px;">Configuration & Metric</th>
+              ${comp.experiments.map(exp => `
+                <th style="padding: 10px 14px; text-align: left; ${best.id === exp.id ? 'background: rgba(76, 175, 80, 0.08); font-weight: 700;' : ''}">
+                  <div>${escapeHtml(exp.name)}</div>
+                  <div class="caption font-mono text-muted" style="font-size: 10px;">${escapeHtml(exp.algorithm_id)}</div>
+                </th>
+              `).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Preprocessing & Runtime -->
+            <tr style="background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle);">
+              <td style="padding: 8px 14px; font-weight: 600; color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Runtime Duration</td>
+              ${comp.experiments.map(e => `<td style="padding: 8px 14px; font-family: var(--font-mono);">${e.duration_seconds ? e.duration_seconds.toFixed(2) + 's' : '—'}</td>`).join('')}
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-subtle);">
+              <td style="padding: 8px 14px; font-weight: 600; color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Model Size</td>
+              ${comp.experiments.map(e => `<td style="padding: 8px 14px; font-family: var(--font-mono);">${e.model_size_bytes ? (e.model_size_bytes / 1024).toFixed(1) + ' KB' : '—'}</td>`).join('')}
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-subtle);">
+              <td style="padding: 8px 14px; font-weight: 600; color: var(--text-muted); font-size: 11px; text-transform: uppercase;">Scaling & Encoding</td>
+              ${comp.experiments.map(e => `<td style="padding: 8px 14px;">${escapeHtml(e.preprocessing.scaling_strategy)} / ${escapeHtml(e.preprocessing.encoding_strategy)}</td>`).join('')}
+            </tr>
+
+            <!-- Metrics Comparison Header -->
+            <tr style="background: var(--bg-surface-elevated); border-top: 2px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
+              <td colspan="${comp.experiments.length + 1}" style="padding: 6px 14px; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--deep-olive);">
+                Model Evaluation Metrics
+              </td>
+            </tr>
+
+            ${metricKeys.map(mKey => `
+              <tr style="border-bottom: 1px solid var(--border-subtle);">
+                <td style="padding: 8px 14px; font-weight: 600;">${escapeHtml(mKey.replace(/_/g, ' '))}</td>
+                ${comp.experiments.map(e => {
+                  const val = comp.metrics_comparison[mKey][e.id];
+                  const isTop = best.id === e.id;
+                  return `
+                    <td style="padding: 8px 14px; font-family: var(--font-mono); ${isTop ? 'background: rgba(76, 175, 80, 0.06); font-weight: 600;' : ''}">
+                      ${val != null ? (typeof val === 'number' ? val.toFixed(4) : val) : '—'}
+                    </td>
+                  `;
+                }).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    el.comparisonModalBody.innerHTML = modalHtml;
+    el.modelComparisonModal.style.display = 'flex';
   }
 
   function escapeHtml(str) {

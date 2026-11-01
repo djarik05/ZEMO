@@ -38,9 +38,11 @@ from sklearn.preprocessing import LabelEncoder
 try:
     from core.exceptions import AppValidationError as ValidationError
     from services.ml.pipeline_builder import DynamicPipelineBuilder, TrainingConfig
+    from services.ml.evaluator import ModelEvaluator
 except ImportError:
     from backend.core.exceptions import AppValidationError as ValidationError
     from backend.services.ml.pipeline_builder import DynamicPipelineBuilder, TrainingConfig
+    from backend.services.ml.evaluator import ModelEvaluator
 
 logger = logging.getLogger(__name__)
 
@@ -233,40 +235,56 @@ class MLTrainingEngine:
             y_pred = build_res.pipeline.predict(X_test)
 
             if config.task == "classification":
-                acc = float(accuracy_score(y_test, y_pred))
-                prec = float(precision_score(y_test, y_pred, average="weighted", zero_division=0))
-                rec = float(recall_score(y_test, y_pred, average="weighted", zero_division=0))
-                f1_w = float(f1_score(y_test, y_pred, average="weighted", zero_division=0))
-                f1_m = float(f1_score(y_test, y_pred, average="macro", zero_division=0))
-                conf_mat = confusion_matrix(y_test, y_pred).tolist()
-                clf_report = classification_report(y_test, y_pred, output_dict=True, zero_division=0)
+                metrics = ModelEvaluator.evaluate_classification(
+                    build_res.pipeline, X_test, y_test, target_classes=target_classes
+                )
+                log(
+                    "info",
+                    f"Test Results -> Accuracy: {metrics['accuracy']:.4f}, Weighted F1: {metrics['f1_weighted']:.4f}, Macro F1: {metrics['f1_macro']:.4f}."
+                )
+                if metrics.get("roc_auc") is not None:
+                    log("info", f"ROC-AUC (Weighted/OVR): {metrics['roc_auc']:.4f}")
+                elif metrics.get("roc_auc_note"):
+                    log("info", f"ROC-AUC Note: {metrics['roc_auc_note']}")
 
-                metrics = {
-                    "accuracy": round(acc, 4),
-                    "precision": round(prec, 4),
-                    "recall": round(rec, 4),
-                    "f1": round(f1_w, 4),
-                    "macro_f1": round(f1_m, 4),
-                    "confusion_matrix": conf_mat,
-                    "classification_report": clf_report,
-                }
-                log("info", f"Test Results -> Accuracy: {acc:.4f}, Weighted F1: {f1_w:.4f}, Macro F1: {f1_m:.4f}.")
+                # Feature Importance
+                feat_imp = ModelEvaluator.extract_feature_importance(
+                    build_res.pipeline, X_train, y_train, build_res.feature_columns
+                )
+                metrics["feature_importance"] = feat_imp
+                if feat_imp.get("available"):
+                    top_feats = [f"{item['feature']} ({item['importance']})" for item in feat_imp['importances'][:3]]
+                    log("info", f"Top feature importances ({feat_imp['method']}): {', '.join(top_feats)}")
+
+                # Learning curve
+                lc = ModelEvaluator.compute_learning_curve(build_res.pipeline, X_train, y_train, "classification")
+                if lc:
+                    metrics["learning_curve"] = lc
+                    log("info", f"Computed learning curve across {len(lc['curve_points'])} training increments.")
 
             elif config.task == "regression":
-                mse = float(mean_squared_error(y_test, y_pred))
-                rmse = float(np.sqrt(mse))
-                mae = float(mean_absolute_error(y_test, y_pred))
-                r2 = float(r2_score(y_test, y_pred))
+                metrics = ModelEvaluator.evaluate_regression(build_res.pipeline, X_test, y_test)
+                log(
+                    "info",
+                    f"Test Results -> RMSE: {metrics['rmse']:.4f}, MAE: {metrics['mae']:.4f}, R²: {metrics['r2']:.4f}, Explained Var: {metrics['explained_variance']:.4f}."
+                )
 
-                metrics = {
-                    "rmse": round(rmse, 4),
-                    "mae": round(mae, 4),
-                    "mse": round(mse, 4),
-                    "r2": round(r2, 4),
-                }
-                log("info", f"Test Results -> RMSE: {rmse:.4f}, MAE: {mae:.4f}, R²: {r2:.4f}.")
+                # Feature Importance
+                feat_imp = ModelEvaluator.extract_feature_importance(
+                    build_res.pipeline, X_train, y_train, build_res.feature_columns
+                )
+                metrics["feature_importance"] = feat_imp
+                if feat_imp.get("available"):
+                    top_feats = [f"{item['feature']} ({item['importance']})" for item in feat_imp['importances'][:3]]
+                    log("info", f"Top feature importances ({feat_imp['method']}): {', '.join(top_feats)}")
 
-            # Optional Cross Validation
+                # Learning curve
+                lc = ModelEvaluator.compute_learning_curve(build_res.pipeline, X_train, y_train, "regression")
+                if lc:
+                    metrics["learning_curve"] = lc
+                    log("info", f"Computed learning curve across {len(lc['curve_points'])} training increments.")
+
+            # Optional Cross Validation for supervised tasks
             if config.cv_folds and config.cv_folds >= 2:
                 log("info", f"Running {config.cv_folds}-fold cross validation on training data...")
                 cv_metric = "f1_weighted" if config.task == "classification" else "neg_root_mean_squared_error"
@@ -276,6 +294,7 @@ class MLTrainingEngine:
                 metrics["cv_scores"] = [round(float(s), 4) for s in cv_scores]
                 metrics["cv_mean"] = round(float(np.mean(cv_scores)), 4)
                 metrics["cv_std"] = round(float(np.std(cv_scores)), 4)
+                metrics["cv_mean_score"] = metrics["cv_mean"]  # convenient alias
                 log("info", f"Cross Validation ({config.cv_folds}-fold) -> Mean: {metrics['cv_mean']}, Std: {metrics['cv_std']}.")
 
         elif config.task == "clustering":
@@ -297,40 +316,26 @@ class MLTrainingEngine:
                 labels = build_res.pipeline.predict(X)
 
             if labels is not None:
-                labels_series = pd.Series(labels)
-                unique_labels = [int(x) for x in np.unique(labels)]
-                non_noise_labels = [l for l in unique_labels if l != -1]
-                num_clusters = len(non_noise_labels)
-                noise_points = int((labels == -1).sum()) if -1 in unique_labels else 0
+                metrics = ModelEvaluator.evaluate_clustering(build_res.pipeline, X, labels)
+                log("info", f"Identified {metrics['num_clusters']} clusters across {train_samples} instances.")
+                if metrics.get("silhouette_score") is not None:
+                    log("info", f"Clustering Metrics -> Silhouette: {metrics['silhouette_score']}, Davies-Bouldin: {metrics['davies_bouldin']}, Calinski-Harabasz: {metrics.get('calinski_harabasz')}")
+                elif metrics.get("evaluation_notes"):
+                    log("info", f"Evaluation Note: {metrics['evaluation_notes']}")
 
-                cluster_dist = {str(k): int(v) for k, v in labels_series.value_counts().items()}
-
-                metrics = {
-                    "num_clusters": num_clusters,
-                    "noise_points": noise_points,
-                    "cluster_distribution": cluster_dist,
+                metrics["feature_importance"] = {
+                    "available": False,
+                    "method": "none",
+                    "importances": [],
+                    "explanation": "Unsupervised clustering groups geometric density without target labels; feature importance is not defined.",
                 }
-
-                # Calculate Silhouette Score and Davies-Bouldin if valid cluster count
-                if 1 < num_clusters < len(X):
-                    try:
-                        # Extract transformed numerical features for silhouette evaluation
-                        preprocessor = build_res.pipeline.named_steps["preprocessor"]
-                        X_transformed = preprocessor.transform(X)
-                        if hasattr(X_transformed, "toarray"):
-                            X_transformed = X_transformed.toarray()
-
-                        valid_mask = labels != -1
-                        if valid_mask.sum() > 2 and len(np.unique(labels[valid_mask])) > 1:
-                            sil = float(silhouette_score(X_transformed[valid_mask], labels[valid_mask]))
-                            db = float(davies_bouldin_score(X_transformed[valid_mask], labels[valid_mask]))
-                            metrics["silhouette"] = round(sil, 4)
-                            metrics["davies_bouldin"] = round(db, 4)
-                            log("info", f"Clustering metrics -> Silhouette Score: {sil:.4f}, Davies-Bouldin: {db:.4f}.")
-                    except Exception as e:
-                        log("warning", f"Could not calculate silhouette score: {e}")
-
-                log("info", f"Identified {num_clusters} clusters across {train_samples} instances.")
+            else:
+                metrics = {
+                    "num_clusters": 0,
+                    "noise_points": 0,
+                    "cluster_distribution": {},
+                    "evaluation_notes": "Estimator did not assign cluster labels.",
+                }
 
         # Save fitted pipeline artifact
         log("info", f"Serializing fitted model pipeline to {artifact_path}...")

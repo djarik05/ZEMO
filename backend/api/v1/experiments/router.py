@@ -21,8 +21,11 @@ from core.exceptions import NotFoundError, AppValidationError as ValidationError
 from services.ml.job_manager import TrainingJobManager
 from services.ml.loader import DatasetLoader, get_dataset_loader
 from services.ml.pipeline_builder import TrainingConfig
+from services.ml.evaluator import ExperimentComparator
 from api.v1.experiments.schemas import (
     CancelExperimentResponse,
+    CompareExperimentsRequest,
+    CompareExperimentsResponse,
     ExperimentListResponse,
     ExperimentResponse,
     TrainExperimentRequest,
@@ -173,6 +176,43 @@ async def list_experiments(
     return ExperimentListResponse(total=len(items), experiments=items)
 
 
+@router.post(
+    "/compare",
+    response_model=CompareExperimentsResponse,
+    summary="Compare Multiple Experiments",
+    description="Compares multiple compatible experiments evaluated on equivalent datasets and task settings.",
+)
+async def compare_experiments(
+    payload: CompareExperimentsRequest,
+    session: AsyncSession = Depends(get_db_session),
+) -> CompareExperimentsResponse:
+    if len(payload.experiment_ids) < 2:
+        raise ValidationError("At least two experiment IDs are required for comparison.")
+
+    stmt = select(Experiment).where(Experiment.id.in_(payload.experiment_ids))
+    res = await session.execute(stmt)
+    experiments = list(res.scalars().all())
+
+    found_ids = {e.id for e in experiments}
+    missing_ids = set(payload.experiment_ids) - found_ids
+    if missing_ids:
+        raise NotFoundError(f"Experiments not found: {', '.join(missing_ids)}")
+
+    # Ensure all experiments have finished training
+    not_completed = [e.name for e in experiments if e.status != ExperimentStatus.COMPLETED.value]
+    if not_completed:
+        raise ValidationError(
+            f"Cannot compare experiments that have not completed training: {', '.join(not_completed)}"
+        )
+
+    try:
+        comparison_dict = ExperimentComparator.compare_experiments(experiments)
+    except ValueError as e:
+        raise ValidationError(str(e))
+
+    return CompareExperimentsResponse(**comparison_dict)
+
+
 @router.get(
     "/{experiment_id}",
     response_model=ExperimentResponse,
@@ -193,6 +233,47 @@ async def get_experiment(
     active_job = job_mgr.get_job_state(experiment_id)
 
     return _build_experiment_response(experiment, active_job)
+
+
+@router.get(
+    "/{experiment_id}/evaluation",
+    summary="Get Detailed Model Evaluation & Diagnostics",
+    description="Returns comprehensive model metrics, feature importance, prediction samples, residuals, and learning curves.",
+)
+async def get_experiment_evaluation(
+    experiment_id: str,
+    session: AsyncSession = Depends(get_db_session),
+) -> Dict[str, Any]:
+    stmt = select(Experiment).where(Experiment.id == experiment_id)
+    res = await session.execute(stmt)
+    experiment = res.scalar_one_or_none()
+
+    if not experiment:
+        raise NotFoundError(f"Experiment '{experiment_id}' not found.")
+
+    if experiment.status != ExperimentStatus.COMPLETED.value:
+        raise ValidationError(f"Experiment evaluation is only available for completed runs (current status: '{experiment.status}').")
+
+    metrics = experiment.metrics or {}
+    return {
+        "experiment_id": experiment.id,
+        "name": experiment.name,
+        "task": experiment.task,
+        "algorithm_id": experiment.algorithm_id,
+        "duration_seconds": experiment.duration_seconds,
+        "model_size_bytes": experiment.model_size_bytes,
+        "metrics": metrics,
+        "feature_importance": metrics.get("feature_importance", {}),
+        "learning_curve": metrics.get("learning_curve"),
+        "prediction_points": metrics.get("prediction_points", []),
+        "prediction_samples": metrics.get("prediction_samples", []),
+        "residual_distribution": metrics.get("residual_distribution"),
+        "confusion_matrix": metrics.get("confusion_matrix"),
+        "classification_report": metrics.get("classification_report"),
+        "roc_auc": metrics.get("roc_auc"),
+        "roc_auc_note": metrics.get("roc_auc_note"),
+        "cluster_distribution": metrics.get("cluster_distribution"),
+    }
 
 
 @router.post(

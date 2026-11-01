@@ -67,3 +67,20 @@ class CancelExperimentResponse(BaseModel):
     experiment_id: str
     status: str
     message: str
+
+
+class CompareExperimentsRequest(BaseModel):
+    experiment_ids: List[str] = Field(..., min_length=2, description="List of at least two experiment IDs to compare.")
+
+
+class CompareExperimentsResponse(BaseModel):
+    dataset_id: str
+    task: str
+    compatible: bool
+    primary_metric: str
+    experiments_count: int
+    experiments: List[Dict[str, Any]]
+    best_model: Optional[Dict[str, Any]] = None
+    metrics_comparison: Dict[str, Dict[str, Any]]
+    recommendation: str
+

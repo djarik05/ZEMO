@@ -1383,14 +1383,20 @@
 
         <!-- C. Training Queue -->
         <div class="subsection reveal reveal-delay-3">
-          <h3 class="subsection-title">Training Queue</h3>
+          <div class="flex-between align-center mb-2">
+            <h3 class="subsection-title" style="margin-bottom: 0;">Training Queue & Experiments</h3>
+            <button class="btn btn-secondary btn-sm" id="btnCompareModels" style="font-size: 11px; padding: 5px 12px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+              Compare Selected Models (<span id="compareCountBadge">0</span>)
+            </button>
+          </div>
           <div class="demo-notice">
-            <strong>Execution Queue:</strong> Added experiments will be scheduled and tracked here.
+            <strong>Execution Queue:</strong> Added experiments are tracked and executed here. Select 2+ completed models and click "Compare Selected Models" to inspect side-by-side performance.
           </div>
 
           <div class="queue-list" id="queueList">
             <div class="empty-queue-placeholder">
-              <p class="text-muted caption" style="margin: 0; padding: 20px; text-align: center;">No experiments queued or running. Configure an experiment above and click "Add to Queue".</p>
+              <p class="text-muted caption" style="margin: 0; padding: 20px; text-align: center;">No experiments queued or running. Configure an experiment above and click "Train Model (Live ML Engine)".</p>
             </div>
           </div>
         </div>
@@ -1491,8 +1497,27 @@
               <span class="caption text-muted">Will render live interactive confusion matrix and residual diagnostics when connected to backend training worker</span>
             </div>
 
+            <!-- Feature Importance Container -->
+            <div id="featureImportanceContainer" class="mt-4 hidden" style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px; background: var(--bg-surface-elevated);">
+              <div class="flex-between align-center mb-3">
+                <span class="caption font-mono" style="font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Feature Importance Attribution</span>
+                <span class="badge" id="featureImportanceMethodBadge" style="font-size: 10px; background: rgba(76, 175, 80, 0.15); color: #2e7d32;">Tree Gini / MSE</span>
+              </div>
+              <p class="caption text-muted mb-3" id="featureImportanceExplanation" style="margin-top: 0; font-size: 11px;">Calculated directly from estimator node purity splits.</p>
+              <div id="featureImportanceBarsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            </div>
+
+            <!-- Detailed Diagnostics & Classification Report / Residuals Container -->
+            <div id="evaluationDiagnosticsContainer" class="mt-4 hidden" style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px; background: var(--bg-surface-elevated);">
+              <div class="flex-between align-center mb-2">
+                <span class="caption font-mono" style="font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Detailed Evaluation & Predictions</span>
+                <span class="badge font-mono" id="evalDetailSecondaryBadge" style="font-size: 10px;">Classification Report</span>
+              </div>
+              <div id="evaluationDiagnosticsContent" style="font-size: 12px; overflow-x: auto;"></div>
+            </div>
+
             <div class="demo-notice mt-4" style="margin-bottom: 0;">
-              <strong>Notice:</strong> This evaluation preview is an illustrative demonstration. Real model training, evaluation metrics, and weights will be computed when connected to an execution cluster.
+              <strong>Real ML Evaluation:</strong> Every metric, confusion matrix cell, feature importance weight, and diagnostic score is computed from actual predictions and cross-validation on this dataset.
             </div>
           </div>
         </div>
@@ -1515,6 +1540,22 @@
         <div class="prototype-notice hidden" id="prototypeNotice">
           <p>Frontend prototype: Your experiment configuration is ready for future backend integration.</p>
           <p class="caption text-muted">No model training has started. This interface demonstrates the configuration workflow.</p>
+        </div>
+
+        <!-- Model Comparison Modal -->
+        <div class="modal-overlay hidden" id="modelComparisonModal" style="position: fixed; inset: 0; background: rgba(18, 20, 18, 0.7); z-index: 99999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(6px); padding: 20px;">
+          <div class="modal-container" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); max-width: 1000px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.25); overflow: hidden;">
+            <div class="modal-header flex-between align-center" style="padding: 16px 24px; border-bottom: 1px solid var(--border-subtle); background: var(--bg-surface-elevated);">
+              <div>
+                <h3 class="heading-sm" style="margin: 0;">Multi-Model Benchmark Comparison</h3>
+                <span class="caption text-muted" id="comparisonSubtitle">Comparing trained models evaluated on identical test datasets</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" id="btnCloseComparisonModal" style="font-size: 18px; padding: 4px 8px; line-height: 1;">&times;</button>
+            </div>
+            <div class="modal-body" id="comparisonModalBody" style="padding: 24px; overflow-y: auto; flex: 1;">
+              <!-- Dynamic content injected by app.js -->
+            </div>
+          </div>
         </div>
 
       </div>
