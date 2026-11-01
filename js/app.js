@@ -35,8 +35,11 @@
         targetColumn: '',
         missingHandling: 'drop',
         encoding: 'auto',
+        scaling: 'standard',
+        outlierTreatment: 'none',
         split: '80-20',
       },
+
     },
     selectedModel: 'random-forest',
     modelCategory: 'traditional',
@@ -195,9 +198,12 @@
     summaryQuality: document.getElementById('summaryQuality'),
     summaryTarget: document.getElementById('summaryTarget'),
     summaryEncoding: document.getElementById('summaryEncoding'),
+    summaryScaling: document.getElementById('summaryScaling'),
+    summaryOutliers: document.getElementById('summaryOutliers'),
     summarySplit: document.getElementById('summarySplit'),
     btnResetRestrictions: document.getElementById('btnResetRestrictions'),
     btnContinueOutput: document.getElementById('btnContinueOutput'),
+
 
     // Output Section
     outputEmpty: document.getElementById('outputEmpty'),
@@ -230,6 +236,19 @@
     featureTableBody: document.getElementById('featureTableBody'),
     pipelineEncodingVal: document.getElementById('pipelineEncodingVal'),
     pipelineSplitVal: document.getElementById('pipelineSplitVal'),
+    preprocessingPreviewContainer: document.getElementById('preprocessingPreviewContainer'),
+    previewLeakageBadge: document.getElementById('previewLeakageBadge'),
+    previewFeaturesBadge: document.getElementById('previewFeaturesBadge'),
+    previewInCols: document.getElementById('previewInCols'),
+    previewOutCols: document.getElementById('previewOutCols'),
+    previewTrainSplit: document.getElementById('previewTrainSplit'),
+    previewTestSplit: document.getElementById('previewTestSplit'),
+    previewWarningsBanner: document.getElementById('previewWarningsBanner'),
+    previewWarningsContent: document.getElementById('previewWarningsContent'),
+    previewOperationsList: document.getElementById('previewOperationsList'),
+    transformedSampleHead: document.getElementById('transformedSampleHead'),
+    transformedSampleBody: document.getElementById('transformedSampleBody'),
+
 
     // Zemo Core Intelligence Elements
     coreRequirementInput: document.getElementById('coreRequirementInput'),
@@ -1018,12 +1037,19 @@
     if (el.summaryTarget) el.summaryTarget.textContent = target;
 
     // Encoding & Split
-    const encMap = { auto: 'Automatic', label: 'Label Encoding', onehot: 'One-Hot' };
+    const encMap = { auto: 'Automatic', label: 'Ordinal', onehot: 'One-Hot' };
     if (el.summaryEncoding) el.summaryEncoding.textContent = encMap[state.restrictions.constraints.encoding] || 'Automatic';
+
+    const scaleMap = { standard: 'StandardScaler', minmax: 'MinMaxScaler', robust: 'RobustScaler', none: 'No Scaling' };
+    if (el.summaryScaling) el.summaryScaling.textContent = scaleMap[state.restrictions.constraints.scaling] || 'StandardScaler';
+
+    const outlierMap = { none: 'Keep As-Is', clip: 'Clip (Winsorize)', drop: 'Drop Rows' };
+    if (el.summaryOutliers) el.summaryOutliers.textContent = outlierMap[state.restrictions.constraints.outlierTreatment] || 'Keep As-Is';
 
     const splitMap = { '70-30': '70 / 30', '80-20': '80 / 20', '80-10-10': '80 / 10 / 10' };
     if (el.summarySplit) el.summarySplit.textContent = splitMap[state.restrictions.constraints.split] || '80 / 20';
   }
+
 
   // ============================================================
   // 7. OUTPUT SECTION & VISUALIZATIONS
@@ -1526,7 +1552,18 @@
       const badgeClass = status === 'include' ? 'badge-include' : status === 'exclude' ? 'badge-exclude' : 'badge-review';
       const statusLabel = isTarget ? 'Target Variable' : status.toUpperCase();
 
-      const encodingLabel = type === 'numeric' ? 'Pass-Through' : state.restrictions.constraints.encoding === 'onehot' ? 'One-Hot' : 'Label';
+      let pipelineTransform = 'Pass-Through';
+      if (isTarget) {
+        pipelineTransform = type === 'numeric' ? 'Continuous Target' : 'LabelEncoder (Fitted on Train)';
+      } else if (status === 'exclude') {
+        pipelineTransform = 'Excluded';
+      } else if (type === 'numeric') {
+        const sc = state.restrictions.constraints.scaling || 'standard';
+        pipelineTransform = sc === 'minmax' ? 'MinMaxScaler' : sc === 'robust' ? 'RobustScaler' : sc === 'none' ? 'None' : 'StandardScaler';
+      } else {
+        const enc = state.restrictions.constraints.encoding || 'auto';
+        pipelineTransform = enc === 'onehot' ? 'OneHotEncoder' : enc === 'label' ? 'OrdinalEncoder' : 'Auto (OneHot/Ordinal)';
+      }
 
       html += `
         <tr>
@@ -1536,14 +1573,144 @@
           </td>
           <td><span class="data-type-badge ${type}">${type}</span></td>
           <td><span class="badge ${badgeClass}">${statusLabel}</span></td>
-          <td><span class="mono">${encodingLabel}</span></td>
-          <td><span class="caption text-muted">${status === 'exclude' ? 'Excluded from training' : 'Clean & Verified'}</span></td>
+          <td><span class="mono">${pipelineTransform}</span></td>
+          <td><span class="caption text-muted">${status === 'exclude' ? 'Excluded from training pipeline' : isTarget ? 'Dependent response variable' : 'Active Feature'}</span></td>
         </tr>
       `;
     });
 
     el.featureTableBody.innerHTML = html;
+    fetchAndRenderPreprocessingPreview();
   }
+
+  async function fetchAndRenderPreprocessingPreview() {
+    if (!state.dataset || !state.dataset.id) return;
+    const ds = state.dataset;
+
+    const excluded = Object.entries(state.restrictions.columns)
+      .filter(([col, status]) => status === 'exclude')
+      .map(([col]) => col);
+
+    const missingMap = {
+      drop: 'drop',
+      mean: 'mean',
+      median: 'median',
+      keep: 'keep',
+    };
+
+    const encMap = {
+      auto: 'auto',
+      onehot: 'onehot',
+      label: 'ordinal',
+      ordinal: 'ordinal',
+    };
+
+    const payload = {
+      target_column: state.restrictions.constraints.targetColumn || null,
+      excluded_columns: excluded,
+      type_overrides: state.dataset.types || {},
+      missing_numeric_strategy: missingMap[state.restrictions.constraints.missingHandling] || 'mean',
+      missing_categorical_strategy: state.restrictions.constraints.missingHandling === 'drop' ? 'drop' : 'most_frequent',
+      encoding_strategy: encMap[state.restrictions.constraints.encoding] || 'auto',
+      scaling_strategy: state.restrictions.constraints.scaling || 'standard',
+      outlier_strategy: state.restrictions.constraints.outlierTreatment || 'none',
+      handle_duplicates: state.restrictions.quality.duplicates !== false,
+      train_test_split_ratio: state.restrictions.constraints.split === '70-30' ? 0.7 : 0.8,
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/datasets/${ds.id}/preprocess/preview`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        console.warn('Preprocessing preview fetch returned status', res.status);
+        return;
+      }
+
+      const preview = await res.json();
+      renderPreprocessingPreviewUI(preview);
+    } catch (err) {
+      console.error('Failed to fetch preprocessing preview:', err);
+    }
+  }
+
+  function renderPreprocessingPreviewUI(preview) {
+    if (!preview) return;
+
+    if (el.previewInCols) el.previewInCols.textContent = preview.feature_names_in ? preview.feature_names_in.length : 0;
+    if (el.previewOutCols) el.previewOutCols.textContent = preview.output_feature_count || 0;
+    if (el.previewFeaturesBadge) el.previewFeaturesBadge.textContent = `Features: ${preview.feature_names_in ? preview.feature_names_in.length : 0} → ${preview.output_feature_count || 0}`;
+    if (el.previewTrainSplit && preview.train_shape) el.previewTrainSplit.textContent = `${preview.train_shape[0]} rows × ${preview.train_shape[1]} cols`;
+    if (el.previewTestSplit && preview.test_shape) el.previewTestSplit.textContent = `${preview.test_shape[0]} rows × ${preview.test_shape[1]} cols`;
+
+    // Warnings Banner
+    if (el.previewWarningsBanner && el.previewWarningsContent) {
+      if (preview.warnings && preview.warnings.length > 0) {
+        el.previewWarningsBanner.classList.remove('hidden');
+        el.previewWarningsContent.innerHTML = preview.warnings
+          .map((w) => `<div style="margin-bottom:4px;">${escapeHtml(w)}</div>`)
+          .join('');
+      } else {
+        el.previewWarningsBanner.classList.add('hidden');
+      }
+    }
+
+    // Operations Applied list
+    if (el.previewOperationsList && preview.operations_applied) {
+      el.previewOperationsList.innerHTML = preview.operations_applied.map((op) => `
+        <div class="operation-item">
+          <div class="operation-left">
+            <span class="operation-badge">${escapeHtml(op.step_name)}</span>
+            <span class="operation-desc">${escapeHtml(op.description)}</span>
+          </div>
+          <div class="operation-cols">${op.target_columns && op.target_columns.length > 0 ? escapeHtml(op.target_columns.slice(0, 3).join(', ') + (op.target_columns.length > 3 ? ` (+${op.target_columns.length - 3} more)` : '')) : 'All Features'}</div>
+        </div>
+      `).join('');
+    }
+
+    // Transformed Feature Matrix Sample (first 5 rows)
+    if (el.transformedSampleHead && el.transformedSampleBody && preview.sample_preview && preview.sample_preview.length > 0) {
+      const allCols = preview.feature_names_out || [];
+      const visibleCols = allCols.slice(0, 10);
+      const isTruncated = allCols.length > 10;
+
+      let headHtml = '<tr><th style="width:50px;">#</th>';
+      visibleCols.forEach((col) => {
+        headHtml += `<th title="${escapeHtml(col)}">${escapeHtml(col)}</th>`;
+      });
+      if (isTruncated) headHtml += `<th>... +${allCols.length - 10} more</th>`;
+      if (preview.target_column) headHtml += `<th style="color:var(--accent);">Target (${escapeHtml(preview.target_column)})</th>`;
+      headHtml += '</tr>';
+      el.transformedSampleHead.innerHTML = headHtml;
+
+      let bodyHtml = '';
+      preview.sample_preview.slice(0, 5).forEach((row, idx) => {
+        bodyHtml += `<tr><td class="font-mono text-muted">${idx + 1}</td>`;
+        visibleCols.forEach((col) => {
+          const val = row[col] !== undefined ? row[col] : '-';
+          bodyHtml += `<td class="font-mono">${escapeHtml(String(val))}</td>`;
+        });
+        if (isTruncated) bodyHtml += '<td class="text-muted">...</td>';
+        if (preview.target_preview && preview.target_preview[idx] !== undefined) {
+          bodyHtml += `<td class="font-mono text-accent"><strong>${escapeHtml(String(preview.target_preview[idx]))}</strong></td>`;
+        }
+        bodyHtml += '</tr>';
+      });
+      el.transformedSampleBody.innerHTML = bodyHtml;
+    }
+
+    // Update pipeline badges
+    if (el.pipelineEncodingVal) {
+      el.pipelineEncodingVal.textContent = `${state.restrictions.constraints.encoding === 'onehot' ? 'One-Hot' : state.restrictions.constraints.encoding === 'label' ? 'Ordinal' : 'Automatic'} Encoding (${preview.output_feature_count} output features).`;
+    }
+    if (el.pipelineSplitVal && preview.train_shape && preview.test_shape) {
+      el.pipelineSplitVal.textContent = `${state.restrictions.constraints.split} Split: ${preview.train_shape[0]} Train rows / ${preview.test_shape[0]} Test rows.`;
+    }
+  }
+
 
   // ============================================================
   // 8. MODEL SELECTION & HYPERPARAMETERS

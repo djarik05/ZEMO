@@ -162,3 +162,17 @@ class VisualizationResponse(BaseModel):
 
 class ColumnOverrideRequest(BaseModel):
     columns: dict[str, str]
+
+
+try:
+    from services.ml.preprocessor import (
+        OperationSummary,
+        PreprocessingConfig,
+        PreprocessingPreviewResponse,
+    )
+except ImportError:
+    from backend.services.ml.preprocessor import (
+        OperationSummary,
+        PreprocessingConfig,
+        PreprocessingPreviewResponse,
+    )

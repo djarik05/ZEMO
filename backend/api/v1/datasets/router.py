@@ -29,8 +29,15 @@ from .schemas import (
     DatasetAnalysisResponse,
     VisualizationResponse,
     ColumnOverrideRequest,
+    PreprocessingConfig,
+    PreprocessingPreviewResponse,
 )
-from services.ml import get_dataset_loader, get_dataset_analyzer, get_visualization_engine
+from services.ml import (
+    get_dataset_loader,
+    get_dataset_analyzer,
+    get_visualization_engine,
+    PreprocessingPipelineBuilder,
+)
 from .scan_schemas import (
     ScanCreateRequest,
     ScanResponse,
@@ -633,3 +640,122 @@ async def override_column_types(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except ValidationError as e:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+
+
+@router.post(
+    "/{dataset_id}/preprocess/preview",
+    response_model=PreprocessingPreviewResponse,
+    summary="Preview preprocessing transformations on a dataset",
+)
+async def preview_preprocessing(
+    dataset_id: str,
+    config: PreprocessingConfig,
+    version_id: Optional[str] = Query(None, description="Specific version ID (defaults to latest)"),
+):
+    loader = get_dataset_loader()
+    builder = PreprocessingPipelineBuilder()
+
+    try:
+        df, version = await loader.load_by_dataset_id(dataset_id, version_id)
+        # Inherit any saved type overrides if not provided in config
+        if not config.type_overrides and version.schema_metadata:
+            saved_overrides = version.schema_metadata.get("type_overrides", {})
+            config.type_overrides = dict(saved_overrides)
+
+        preview_data = builder.preview(df=df, config=config)
+        return preview_data
+    except NotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValidationError as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.post(
+    "/{dataset_id}/preprocess/validate",
+    summary="Validate preprocessing configuration against dataset",
+)
+async def validate_preprocessing(
+    dataset_id: str,
+    config: PreprocessingConfig,
+    version_id: Optional[str] = Query(None, description="Specific version ID (defaults to latest)"),
+):
+    loader = get_dataset_loader()
+    analyzer = get_dataset_analyzer()
+    builder = PreprocessingPipelineBuilder(analyzer=analyzer)
+
+    try:
+        df, version = await loader.load_by_dataset_id(dataset_id, version_id)
+        if not config.type_overrides and version.schema_metadata:
+            config.type_overrides = dict(version.schema_metadata.get("type_overrides", {}))
+
+        analysis = analyzer.analyze_dataset(df, type_overrides=config.type_overrides)
+        column_types = {col["name"]: col["inferred_type"] for col in analysis["columns"]}
+
+
+        warnings = builder.validate_config(df, config, column_types)
+        return {
+            "valid": True,
+            "warnings": warnings,
+            "detected_types": column_types,
+        }
+    except NotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValidationError as e:
+        return {
+            "valid": False,
+            "error": str(e),
+            "warnings": [],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.post(
+    "/{dataset_id}/preprocess/config",
+    summary="Save preprocessing configuration for a dataset version",
+)
+async def save_preprocessing_config(
+    dataset_id: str,
+    config: PreprocessingConfig,
+    version_id: Optional[str] = Query(None, description="Specific version ID (defaults to latest)"),
+):
+    from core.database.config import get_db_session
+    from core.database.models.dataset_version import DatasetVersion
+
+    loader = get_dataset_loader()
+    try:
+        _, version = await loader.load_by_dataset_id(dataset_id, version_id)
+        async for session in get_db_session():
+            v = await session.get(DatasetVersion, version.id)
+            if v:
+                existing_meta = dict(v.schema_metadata or {})
+                existing_meta["preprocessing_config"] = config.model_dump()
+                v.schema_metadata = existing_meta
+                await session.commit()
+                break
+
+        return {"success": True, "message": "Preprocessing configuration saved successfully"}
+    except NotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.get(
+    "/{dataset_id}/preprocess/config",
+    summary="Get saved preprocessing configuration for a dataset version",
+)
+async def get_preprocessing_config(
+    dataset_id: str,
+    version_id: Optional[str] = Query(None, description="Specific version ID (defaults to latest)"),
+):
+    loader = get_dataset_loader()
+    try:
+        _, version = await loader.load_by_dataset_id(dataset_id, version_id)
+        meta = version.schema_metadata or {}
+        saved_config = meta.get("preprocessing_config")
+        return {"dataset_id": dataset_id, "version_id": version.id, "config": saved_config}
+    except NotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

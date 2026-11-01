@@ -495,6 +495,67 @@
             </div>
 
             <div class="form-group mt-6">
+              <label class="form-label">Numerical Feature Scaling</label>
+              <div class="radio-group" data-radio-group="scaling">
+                <div class="radio-option selected" data-value="standard">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">StandardScaler</div>
+                    <div class="radio-desc">Mean = 0, Std = 1 (Z-Score)</div>
+                  </div>
+                </div>
+                <div class="radio-option" data-value="minmax">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">MinMaxScaler</div>
+                    <div class="radio-desc">Bound to range [0, 1]</div>
+                  </div>
+                </div>
+                <div class="radio-option" data-value="robust">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">RobustScaler</div>
+                    <div class="radio-desc">Median & IQR (Outlier resilient)</div>
+                  </div>
+                </div>
+                <div class="radio-option" data-value="none">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">No Scaling</div>
+                    <div class="radio-desc">Pass features through unchanged</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group mt-6">
+              <label class="form-label">Outlier Treatment</label>
+              <div class="radio-group" data-radio-group="outlierTreatment">
+                <div class="radio-option selected" data-value="none">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">Keep As-Is</div>
+                    <div class="radio-desc">Retain extreme values unaltered</div>
+                  </div>
+                </div>
+                <div class="radio-option" data-value="clip">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">Clip Outliers (Winsorize)</div>
+                    <div class="radio-desc">Clamp to [Q1 - 1.5·IQR, Q3 + 1.5·IQR]</div>
+                  </div>
+                </div>
+                <div class="radio-option" data-value="drop">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">Drop Outlier Rows</div>
+                    <div class="radio-desc">Exclude statistical outlier samples</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group mt-6">
               <label class="form-label">Dataset Split</label>
               <div class="radio-group" data-radio-group="split">
                 <div class="radio-option" data-value="70-30">
@@ -554,9 +615,18 @@
               <span class="summary-value" id="summaryEncoding">Automatic</span>
             </div>
             <div class="summary-row">
+              <span class="summary-label">Scaling Method</span>
+              <span class="summary-value" id="summaryScaling">StandardScaler</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Outlier Strategy</span>
+              <span class="summary-value" id="summaryOutliers">Keep As-Is</span>
+            </div>
+            <div class="summary-row">
               <span class="summary-label">Split Ratio</span>
               <span class="summary-value" id="summarySplit">80 / 20</span>
             </div>
+
 
             <div class="section-actions">
               <button class="btn btn-ghost" id="btnResetRestrictions">
@@ -837,7 +907,67 @@
                 </tbody>
               </table>
             </div>
+
+            <!-- Dynamic Preprocessing Execution Preview -->
+            <div class="preprocessing-preview-card mt-6" id="preprocessingPreviewContainer">
+              <div class="flex-between align-center mb-4">
+                <div>
+                  <h4 class="heading-sm">Preprocessing Execution & Transformation Preview</h4>
+                  <p class="caption text-muted">Constructed dynamically using Scikit-learn ColumnTransformer & Pipeline. Preprocessor is fitted strictly on training data to prevent leakage.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="badge badge-include" id="previewLeakageBadge">Leakage Prevention: Active</span>
+                  <span class="badge badge-accent" id="previewFeaturesBadge">Features: 0 &rarr; 0</span>
+                </div>
+              </div>
+
+              <!-- Stat indicators -->
+              <div class="grid-4 gap-3 mb-4">
+                <div class="result-metric-card">
+                  <span class="result-metric-label">Input Columns</span>
+                  <span class="result-metric-val font-mono" id="previewInCols">0</span>
+                </div>
+                <div class="result-metric-card">
+                  <span class="result-metric-label">Transformed Features</span>
+                  <span class="result-metric-val font-mono text-accent" id="previewOutCols">0</span>
+                </div>
+                <div class="result-metric-card">
+                  <span class="result-metric-label">Train Partition</span>
+                  <span class="result-metric-val font-mono" id="previewTrainSplit">-</span>
+                </div>
+                <div class="result-metric-card">
+                  <span class="result-metric-label">Test Partition</span>
+                  <span class="result-metric-val font-mono" id="previewTestSplit">-</span>
+                </div>
+              </div>
+
+              <!-- Warning banner (if any) -->
+              <div id="previewWarningsBanner" class="hidden mb-4" style="background: rgba(255, 179, 71, 0.1); border: 1px solid var(--warning); border-radius: 4px; padding: 12px 16px;">
+                <div style="display: flex; align-items: flex-start; gap: 8px;">
+                  <span style="color: var(--warning); font-size: 16px;">⚠️</span>
+                  <div id="previewWarningsContent" class="caption text-secondary"></div>
+                </div>
+              </div>
+
+              <!-- Operations Applied List -->
+              <div class="operations-applied-box mb-4">
+                <div class="caption text-secondary uppercase tracking-wider mb-2 font-semibold">Configured Preprocessing Transformations:</div>
+                <div id="previewOperationsList" class="operations-list">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <!-- Transformed Feature Matrix Sample -->
+              <div class="caption text-secondary uppercase tracking-wider mb-2 font-semibold">Engineered Feature Matrix Sample (First 5 Rows):</div>
+              <div class="data-table-wrapper" style="max-height: 280px; overflow-x: auto;">
+                <table class="data-table" id="transformedSampleTable">
+                  <thead id="transformedSampleHead"></thead>
+                  <tbody id="transformedSampleBody"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
+
 
           <!-- D. Workflow Diagram -->
           <div class="subsection reveal reveal-delay-3">
