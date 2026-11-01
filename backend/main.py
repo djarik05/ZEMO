@@ -50,12 +50,14 @@ def create_app() -> FastAPI:
     from api.v1.integrations.router import router as integrations_router
     from api.v1.algorithms.router import router as algorithms_router
     from api.v1.experiments.router import router as experiments_router
+    from api.v1.chatbot.router import router as chatbot_router
 
     app.include_router(health_router, prefix=settings.api_prefix)
     app.include_router(datasets_router, prefix=settings.api_prefix)
     app.include_router(integrations_router, prefix=settings.api_prefix)
     app.include_router(algorithms_router, prefix=settings.api_prefix)
     app.include_router(experiments_router, prefix=f"{settings.api_prefix}/experiments")
+    app.include_router(chatbot_router, prefix=f"{settings.api_prefix}/chatbot")
 
     # Mount frontend static files and root web app
     from pathlib import Path

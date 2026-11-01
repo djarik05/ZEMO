@@ -90,10 +90,21 @@ async def app_exception_handler(request: Request, exc: AppException) -> JSONResp
     )
 
 
+def _sanitize_errors(errors: list) -> list:
+    sanitized = []
+    for err in errors:
+        e = dict(err)
+        if "ctx" in e and isinstance(e["ctx"], dict):
+            e["ctx"] = {k: str(v) for k, v in e["ctx"].items()}
+        sanitized.append(e)
+    return sanitized
+
+
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+    clean_errors = _sanitize_errors(exc.errors())
     logger.warning(
         "validation_error",
-        errors=exc.errors(),
+        errors=clean_errors,
         path=str(request.url.path),
     )
     return create_error_response(
@@ -101,14 +112,15 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         status.HTTP_422_UNPROCESSABLE_ENTITY,
         "VALIDATION_ERROR",
         "Request validation failed",
-        {"errors": exc.errors()},
+        {"errors": clean_errors},
     )
 
 
 async def pydantic_validation_exception_handler(request: Request, exc: PydanticValidationError) -> JSONResponse:
+    clean_errors = _sanitize_errors(exc.errors())
     logger.warning(
         "pydantic_validation_error",
-        errors=exc.errors(),
+        errors=clean_errors,
         path=str(request.url.path),
     )
     return create_error_response(
@@ -116,7 +128,7 @@ async def pydantic_validation_exception_handler(request: Request, exc: PydanticV
         status.HTTP_422_UNPROCESSABLE_ENTITY,
         "VALIDATION_ERROR",
         "Data validation failed",
-        {"errors": exc.errors()},
+        {"errors": clean_errors},
     )
 
 

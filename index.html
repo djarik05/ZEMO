@@ -2520,6 +2520,92 @@
     </div>
   </footer>
 
+  <!-- ============================================================
+       PHASE 8: ZEMO AI ASSISTANT (FLOATING CHATBOT)
+       ============================================================ -->
+  <!-- Floating Launcher Button -->
+  <button class="zemo-floating-trigger" id="zemoFloatingChatBtn" aria-label="Open Zemo AI Assistant" title="Open Zemo AI Assistant">
+    <div class="zemo-floating-pulse"></div>
+    <div class="zemo-floating-badge">AI</div>
+    <svg class="zemo-floating-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+  </button>
+
+  <!-- Floating Chat Window (Liquid Glass Popup) -->
+  <div class="zemo-chat-widget" id="zemoChatWidget" role="dialog" aria-label="Zemo AI Assistant Window">
+    <!-- Header -->
+    <div class="zemo-chat-header">
+      <div class="zemo-chat-header-info">
+        <div class="zemo-chat-avatar">
+          Z
+          <div class="zemo-chat-status-dot" title="Gemini 2.5 Active"></div>
+        </div>
+        <div class="zemo-chat-title-group">
+          <h4>Zemo AI <span class="zemo-chat-title-badge">Gemini-Powered</span></h4>
+          <div class="zemo-chat-dataset-badge" id="zemoChatDatasetBadge" title="No active dataset">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <span id="zemoChatDatasetName">General ML Tutor</span>
+          </div>
+        </div>
+      </div>
+      <div class="zemo-chat-header-actions">
+        <button class="zemo-chat-icon-btn" id="btnZemoChatClear" title="Clear Conversation" aria-label="Clear Conversation">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+        </button>
+        <button class="zemo-chat-icon-btn" id="btnZemoChatClose" title="Minimize Chat" aria-label="Minimize Chat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Prompt Chips -->
+    <div class="zemo-chat-chips-bar" id="zemoChatChipsBar">
+      <button class="zemo-prompt-chip" data-prompt="What can I do with my dataset?">💡 Dataset Plan</button>
+      <button class="zemo-prompt-chip" data-prompt="Which column should I select as my target?">🎯 Target Column</button>
+      <button class="zemo-prompt-chip" data-prompt="My dataset has missing values. What should I do?">⚙️ Missing Values</button>
+      <button class="zemo-prompt-chip" data-prompt="What is One-Hot Encoding?">📚 One-Hot Encoding</button>
+      <button class="zemo-prompt-chip" data-prompt="Why use StandardScaler vs MinMaxScaler?">⚖️ Scaling Methods</button>
+    </div>
+
+    <!-- Message Stream -->
+    <div class="zemo-chat-messages" id="zemoChatMessages">
+      <div class="zemo-msg assistant">
+        <div class="zemo-msg-avatar">Z</div>
+        <div class="zemo-msg-bubble">
+          <p><strong>Hi there! I'm Zemo AI</strong>, your personal machine learning mentor.</p>
+          <p>Whether you're exploring ML for the first time or wondering how to preprocess your dataset, choose an algorithm, or understand model evaluation scores, I'm here to help in simple, plain English.</p>
+          <p>Upload a dataset to get tailored suggestions, or ask me any ML question below!</p>
+          <span class="zemo-msg-time">Just now</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div class="zemo-typing-indicator" id="zemoTypingIndicator">
+      <div class="zemo-msg-avatar">Z</div>
+      <div class="zemo-typing-dots">
+        <div class="zemo-typing-dot"></div>
+        <div class="zemo-typing-dot"></div>
+        <div class="zemo-typing-dot"></div>
+      </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="zemo-chat-input-bar">
+      <div class="zemo-chat-input-row">
+        <textarea class="zemo-chat-textarea" id="zemoChatInput" placeholder="Ask Zemo AI anything... (Enter to send, Shift+Enter for newline)" rows="1"></textarea>
+        <button class="zemo-chat-send-btn" id="btnZemoChatSend" title="Send Message" aria-label="Send Message">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+      <p class="zemo-chat-disclaimer">Grounded in your active dataset telemetry. Never fabricates statistics.</p>
+    </div>
+  </div>
+
   <!-- Notification -->
   <div class="notification" id="notification">
     <span id="notificationText"></span>

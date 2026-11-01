@@ -8,7 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env", "../.env"),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
@@ -133,6 +133,16 @@ class Settings(BaseSettings):
     blocked_integration_networks: List[str] = Field(
         default=["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7", "fe80::/10"],
         description="Blocked CIDR networks for SSRF protection",
+    )
+
+    # Gemini AI Chatbot
+    gemini_api_key: str = Field(
+        default="",
+        description="Google Gemini API key for Zemo AI assistant",
+    )
+    gemini_model: str = Field(
+        default="gemini-2.5-flash",
+        description="Gemini model name for chat assistance",
     )
 
     @field_validator("environment")

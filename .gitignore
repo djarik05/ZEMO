@@ -58,6 +58,8 @@ backend/data/*.sqlite*
 # Uploaded Datasets & User Data
 backend/data/uploads/*
 !backend/data/uploads/.gitkeep
+backend/data/experiments/*
+!backend/data/experiments/.gitkeep
 
 # Node.js
 node_modules/

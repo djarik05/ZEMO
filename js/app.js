@@ -867,6 +867,9 @@
     if (typeof validateScratchTask === 'function') {
       validateScratchTask();
     }
+    if (typeof updateChatbotDatasetBadge === 'function') {
+      updateChatbotDatasetBadge();
+    }
 
     updateStepIndicators(1);
     showNotification('Dataset removed.', 'info');
@@ -891,6 +894,10 @@
     if (el.fileSize) el.fileSize.textContent = formatBytes(ds.size);
     if (el.fileRows) el.fileRows.textContent = ds.rows.length.toLocaleString();
     if (el.fileCols) el.fileCols.textContent = ds.headers.length.toString();
+
+    if (typeof updateChatbotDatasetBadge === 'function') {
+      updateChatbotDatasetBadge();
+    }
 
     // Render table
     renderPreviewTable();
@@ -4866,15 +4873,275 @@
       return;
     }
 
-    // General fallback
-    setTimeout(() => {
-      addAssistantMessage(
-        `I understand you're asking about: "${prompt}".\n\n` +
-        `• To configure **Pre-trained Adaptation**, select Mode A above or ask me to "Help me fine-tune".\n` +
-        `• To train a model from **Scratch with zero pretrained weights**, select Mode B above or ask me to "Build a model from scratch".\n` +
-        `• You can also click any of the suggested prompt chips above for instant guidance.`
-      );
-    }, 350);
+    // Live Gemini AI Fallback for studio chat
+    const activeDsId = state.dataset && state.dataset.id ? state.dataset.id : null;
+    fetch('/api/v1/chatbot/message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: prompt,
+        conversation_id: zemoChatState.conversationId,
+        dataset_id: activeDsId
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.reply) {
+          addAssistantMessage(data.reply);
+        } else {
+          addAssistantMessage(`I received your query: "${prompt}". Ask me any further questions here or in the floating Zemo AI Assistant at bottom-right!`);
+        }
+      })
+      .catch(() => {
+        addAssistantMessage(`I received your question: "${prompt}". Check the floating Zemo AI Assistant at the bottom-right corner for interactive guidance!`);
+      });
+  }
+
+  // ============================================================
+  // PHASE 8: ZEMO AI ASSISTANT (FLOATING CHATBOT ENGINE)
+  // ============================================================
+  const zemoChatState = {
+    conversationId: 'zemo_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36),
+    isProcessing: false,
+    history: []
+  };
+
+  function updateChatbotDatasetBadge() {
+    const badgeEl = document.getElementById('zemoChatDatasetName');
+    const badgeContainer = document.getElementById('zemoChatDatasetBadge');
+    if (!badgeEl) return;
+
+    if (state.dataset && state.dataset.name) {
+      const name = state.dataset.name;
+      badgeEl.textContent = name.length > 22 ? name.substring(0, 20) + '…' : name;
+      if (badgeContainer) {
+        const rowCount = state.dataset.rows ? state.dataset.rows.length : 0;
+        badgeContainer.setAttribute('title', `Active Context: ${name} (${rowCount} rows)`);
+      }
+    } else {
+      badgeEl.textContent = 'General ML Tutor';
+      if (badgeContainer) {
+        badgeContainer.setAttribute('title', 'No active dataset. Answering general Machine Learning questions.');
+      }
+    }
+  }
+
+  function formatChatMarkdown(text) {
+    if (!text) return '';
+    let html = escapeHtml(text);
+
+    // Code blocks ```language ... ```
+    html = html.replace(/```([a-zA-Z0-9_\-\.]*)\n([\s\S]*?)```/g, (match, lang, code) => {
+      return `<pre class="chat-code-block" style="background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 6px; overflow-x: auto; margin: 6px 0; border: 1px solid rgba(255,255,255,0.1);"><code class="font-mono" style="color: #A3E635; font-size: 11px;">${code.trim()}</code></pre>`;
+    });
+
+    // Inline code `code`
+    html = html.replace(/`([^`]+)`/g, '<code class="font-mono">$1</code>');
+
+    // Bold **text**
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+    // Italic *text*
+    html = html.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
+
+    // Markdown headers ### Title
+    html = html.replace(/^### (.*$)/gim, '<h5 style="margin: 8px 0 3px 0; font-size: 13px; color: #fff; font-weight: 600;">$1</h5>');
+    html = html.replace(/^## (.*$)/gim, '<h4 style="margin: 10px 0 4px 0; font-size: 14px; color: #fff; font-weight: 600;">$1</h4>');
+
+    // Numbered lists 1. Item
+    html = html.replace(/^\d+\.\s+(.*$)/gim, '<li style="margin-left: 14px;">$1</li>');
+
+    // Bullet lists - or *
+    html = html.replace(/^[-*•]\s+(.*$)/gim, '<li style="margin-left: 14px;">$1</li>');
+
+    // Paragraph linebreaks
+    html = html.replace(/\n\n+/g, '</p><p>');
+    html = html.replace(/\n/g, '<br>');
+
+    return `<p>${html}</p>`;
+  }
+
+  function setupFloatingZemoAssistant() {
+    const triggerBtn = document.getElementById('zemoFloatingChatBtn');
+    const widget = document.getElementById('zemoChatWidget');
+    const closeBtn = document.getElementById('btnZemoChatClose');
+    const clearBtn = document.getElementById('btnZemoChatClear');
+    const chipsBar = document.getElementById('zemoChatChipsBar');
+    const messagesEl = document.getElementById('zemoChatMessages');
+    const typingEl = document.getElementById('zemoTypingIndicator');
+    const inputEl = document.getElementById('zemoChatInput');
+    const sendBtn = document.getElementById('btnZemoChatSend');
+
+    if (!triggerBtn || !widget || !inputEl || !sendBtn) return;
+
+    // Toggle chat widget visibility
+    function toggleChat(open) {
+      const willOpen = typeof open === 'boolean' ? open : !widget.classList.contains('is-open');
+      if (willOpen) {
+        widget.classList.add('is-open');
+        triggerBtn.classList.add('is-active');
+        updateChatbotDatasetBadge();
+        setTimeout(() => {
+          inputEl.focus();
+        }, 150);
+      } else {
+        widget.classList.remove('is-open');
+        triggerBtn.classList.remove('is-active');
+      }
+    }
+
+    triggerBtn.addEventListener('click', () => toggleChat());
+    if (closeBtn) closeBtn.addEventListener('click', () => toggleChat(false));
+
+    // Auto-expand textarea
+    inputEl.addEventListener('input', () => {
+      inputEl.style.height = 'auto';
+      inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+    });
+
+    // Enter to submit, Shift+Enter for newline
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        submitMessage();
+      }
+    });
+
+    sendBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      submitMessage();
+    });
+
+    // Quick prompt chips
+    if (chipsBar) {
+      chipsBar.querySelectorAll('.zemo-prompt-chip').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          const prompt = chip.getAttribute('data-prompt');
+          if (prompt) {
+            inputEl.value = prompt;
+            submitMessage();
+          }
+        });
+      });
+    }
+
+    // Clear conversation
+    if (clearBtn) {
+      clearBtn.addEventListener('click', async () => {
+        try {
+          await fetch('/api/v1/chatbot/clear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ conversation_id: zemoChatState.conversationId })
+          });
+        } catch (err) {
+          console.warn('Chat clear failed:', err);
+        }
+
+        // Reset frontend stream to greeting
+        messagesEl.innerHTML = `
+          <div class="zemo-msg assistant">
+            <div class="zemo-msg-avatar">Z</div>
+            <div class="zemo-msg-bubble">
+              <p><strong>Conversation refreshed.</strong> I'm ready for your next machine learning questions or dataset analysis!</p>
+              <span class="zemo-msg-time">Just now</span>
+            </div>
+          </div>
+        `;
+        showNotification('Zemo AI conversation history cleared.', 'info');
+      });
+    }
+
+    // Submit user message
+    async function submitMessage() {
+      const text = inputEl.value.trim();
+      if (!text || zemoChatState.isProcessing) return;
+
+      zemoChatState.isProcessing = true;
+      inputEl.value = '';
+      inputEl.style.height = 'auto';
+      sendBtn.disabled = true;
+
+      // Append user bubble
+      appendUserBubble(text);
+
+      // Show typing indicator
+      if (typingEl) {
+        typingEl.classList.add('is-visible');
+        messagesEl.appendChild(typingEl);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      const activeDatasetId = state.dataset && state.dataset.id ? state.dataset.id : null;
+
+      try {
+        const response = await fetch('/api/v1/chatbot/message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: text,
+            conversation_id: zemoChatState.conversationId,
+            dataset_id: activeDatasetId
+          })
+        });
+
+        if (typingEl) typingEl.classList.remove('is-visible');
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          const errMsg = errData.detail || `Server error (${response.status})`;
+          appendAssistantBubble(`⚠️ **Assistant Note**: ${errMsg}. Please try again or rephrase your question.`);
+        } else {
+          const data = await response.json();
+          appendAssistantBubble(data.reply, data.dataset_context_used);
+        }
+      } catch (networkErr) {
+        if (typingEl) typingEl.classList.remove('is-visible');
+        appendAssistantBubble('⚠️ **Connection Error**: Unable to reach Zemo AI service. Please ensure the backend server is active and try again.');
+      } finally {
+        zemoChatState.isProcessing = false;
+        sendBtn.disabled = false;
+        inputEl.focus();
+      }
+    }
+
+    function appendUserBubble(text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'zemo-msg user';
+      msgDiv.innerHTML = `
+        <div class="zemo-msg-avatar">U</div>
+        <div class="zemo-msg-bubble">
+          <p>${escapeHtml(text).replace(/\n/g, '<br>')}</p>
+          <span class="zemo-msg-time">Just now</span>
+        </div>
+      `;
+      messagesEl.appendChild(msgDiv);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function appendAssistantBubble(replyText, datasetContextUsed) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'zemo-msg assistant';
+
+      let contextBadgeHtml = '';
+      if (datasetContextUsed && state.dataset && state.dataset.name) {
+        contextBadgeHtml = `<div style="font-size: 10px; color: var(--brand-sage-light); margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          Grounded in active dataset (${escapeHtml(state.dataset.name)})
+        </div>`;
+      }
+
+      msgDiv.innerHTML = `
+        <div class="zemo-msg-avatar">Z</div>
+        <div class="zemo-msg-bubble">
+          ${contextBadgeHtml}
+          ${formatChatMarkdown(replyText)}
+          <span class="zemo-msg-time">Just now</span>
+        </div>
+      `;
+      messagesEl.appendChild(msgDiv);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
   }
 
   // ============================================================
@@ -4887,6 +5154,7 @@
     setupOutputControls();
     setupTrainingControls();
     setupAiTrainingControls();
+    setupFloatingZemoAssistant();
 
     // Select initial model
     selectModel('random-forest');

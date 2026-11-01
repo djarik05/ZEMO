@@ -4536,4 +4536,543 @@ ul, ol {
   color: var(--text-muted);
 }
 
+/* ============================================================
+   PHASE 8: ZEMO AI ASSISTANT (FLOATING CHATBOT WIDGET)
+   Modern Liquid-Glass Aesthetics, Responsive, Animated Pop-up
+   ============================================================ */
+
+/* Floating Launch Button */
+.zemo-floating-trigger {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(77, 88, 55, 0.95), rgba(98, 111, 71, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 16px rgba(158, 172, 149, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 9999;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, background 0.25s ease;
+  outline: none;
+}
+
+.zemo-floating-trigger:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55), 0 0 24px rgba(158, 172, 149, 0.5);
+}
+
+.zemo-floating-trigger:active {
+  transform: scale(0.96);
+}
+
+/* Pulse Glow Ring */
+.zemo-floating-pulse {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(158, 172, 149, 0.6);
+  animation: zemoPulseRing 2.6s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes zemoPulseRing {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+.zemo-floating-icon {
+  width: 26px;
+  height: 26px;
+  color: #F7F6F2;
+  transition: transform 0.3s ease;
+}
+
+.zemo-floating-trigger.is-active .zemo-floating-icon {
+  transform: rotate(90deg);
+}
+
+/* Floating Notification / Tooltip Badge */
+.zemo-floating-badge {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1.5px solid #171716;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  text-transform: uppercase;
+  animation: zemoBadgeBounce 3s ease-in-out infinite;
+}
+
+@keyframes zemoBadgeBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* Chat Widget Container (Liquid-Glass Popup) */
+.zemo-chat-widget {
+  position: fixed;
+  bottom: 92px;
+  right: 24px;
+  width: 390px;
+  max-width: calc(100vw - 32px);
+  height: 580px;
+  max-height: calc(100vh - 110px);
+  background: rgba(26, 26, 24, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.92) translateY(24px);
+  transform-origin: bottom right;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
+}
+
+.zemo-chat-widget.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1) translateY(0);
+}
+
+/* Chat Header */
+.zemo-chat-header {
+  padding: 16px 18px;
+  background: rgba(36, 36, 33, 0.65);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.zemo-chat-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.zemo-chat-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--brand-olive), var(--brand-olive-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #F7F6F2;
+  font-weight: 700;
+  font-size: 15px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.zemo-chat-status-dot {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--success);
+  border: 2px solid #20201E;
+}
+
+.zemo-chat-title-group h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zemo-chat-title-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(158, 172, 149, 0.2);
+  color: var(--brand-sage-light);
+  font-weight: 500;
+}
+
+.zemo-chat-dataset-badge {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  max-width: 190px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.zemo-chat-dataset-badge svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.zemo-chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zemo-chat-icon-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.zemo-chat-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+/* Prompt Chips Bar */
+.zemo-chat-chips-bar {
+  padding: 8px 14px;
+  background: rgba(22, 22, 20, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+
+.zemo-chat-chips-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.zemo-prompt-chip {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.zemo-prompt-chip:hover {
+  background: rgba(158, 172, 149, 0.22);
+  border-color: rgba(158, 172, 149, 0.4);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* Chat Messages Scroll Container */
+.zemo-chat-messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scroll-behavior: smooth;
+}
+
+/* Message Bubble */
+.zemo-msg {
+  display: flex;
+  gap: 10px;
+  max-width: 88%;
+  animation: zemoFadeInUp 0.25s ease-out;
+}
+
+@keyframes zemoFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.zemo-msg.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.zemo-msg.assistant {
+  align-self: flex-start;
+}
+
+.zemo-msg-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.zemo-msg.assistant .zemo-msg-avatar {
+  background: var(--brand-olive);
+  color: #F7F6F2;
+}
+
+.zemo-msg.user .zemo-msg-avatar {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+}
+
+.zemo-msg-bubble {
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.zemo-msg.assistant .zemo-msg-bubble {
+  background: rgba(45, 45, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border-top-left-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.zemo-msg.user .zemo-msg-bubble {
+  background: linear-gradient(135deg, rgba(77, 88, 55, 0.9), rgba(62, 71, 45, 0.95));
+  border: 1px solid rgba(158, 172, 149, 0.35);
+  color: #F7F6F2;
+  border-top-right-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.zemo-msg-bubble p {
+  margin: 0 0 8px 0;
+}
+
+.zemo-msg-bubble p:last-child {
+  margin-bottom: 0;
+}
+
+.zemo-msg-bubble strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.zemo-msg-bubble em {
+  font-style: italic;
+  color: var(--brand-sage-light);
+}
+
+.zemo-msg-bubble code {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 2px 5px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #A3E635;
+}
+
+.zemo-msg-bubble ul, .zemo-msg-bubble ol {
+  margin: 4px 0 8px 18px;
+  padding: 0;
+}
+
+.zemo-msg-bubble li {
+  margin-bottom: 4px;
+}
+
+.zemo-msg-time {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: block;
+}
+
+/* Typing Indicator */
+.zemo-typing-indicator {
+  display: none;
+  align-self: flex-start;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 8px 0;
+  animation: zemoFadeInUp 0.2s ease-out;
+}
+
+.zemo-typing-indicator.is-visible {
+  display: flex;
+}
+
+.zemo-typing-dots {
+  background: rgba(45, 45, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  border-top-left-radius: 4px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.zemo-typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand-sage);
+  animation: zemoBlink 1.4s infinite ease-in-out both;
+}
+
+.zemo-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.zemo-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+.zemo-typing-dot:nth-child(3) { animation-delay: 0s; }
+
+@keyframes zemoBlink {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Chat Input Bar */
+.zemo-chat-input-bar {
+  padding: 12px 14px;
+  background: rgba(30, 30, 28, 0.75);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zemo-chat-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.zemo-chat-textarea {
+  flex: 1;
+  background: rgba(18, 18, 16, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  resize: none;
+  min-height: 42px;
+  max-height: 120px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.zemo-chat-textarea:focus {
+  border-color: var(--brand-olive-light);
+  box-shadow: 0 0 0 2px rgba(158, 172, 149, 0.25);
+}
+
+.zemo-chat-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.zemo-chat-send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--brand-olive), var(--brand-olive-light));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.zemo-chat-send-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, var(--brand-olive-light), var(--brand-sage-dark));
+}
+
+.zemo-chat-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.zemo-chat-disclaimer {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 520px) {
+  .zemo-chat-widget {
+    right: 12px;
+    left: 12px;
+    width: auto;
+    bottom: 84px;
+    height: calc(100vh - 100px);
+  }
+
+  .zemo-floating-trigger {
+    bottom: 16px;
+    right: 16px;
+    width: 52px;
+    height: 52px;
+  }
+}
+
 

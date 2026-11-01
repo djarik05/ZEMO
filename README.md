@@ -107,3 +107,22 @@ Then visit `http://localhost:3000` in your browser.
 ### Option 2: Direct File Open
 Simply double-click or open `index.html` in any modern web browser.
 
+---
+
+## Phase 8 — Zemo AI Assistant (Gemini-Powered Chatbot)
+
+Zemo includes an intelligent, beginner-friendly AI assistant powered by Google Gemini (`gemini-2.5-flash`), integrated directly into the platform through a floating liquid-glass widget at the bottom-right corner of the screen.
+
+### Capabilities:
+- **Dataset-Aware Intelligence**: Retrieves compact factual summaries of active datasets (rows, columns, numeric/categorical types, missing values, target candidates, recent model metrics) and grounds recommendations in real data without hallucinating statistics.
+- **Beginner-Friendly ML Tutor**: Explains machine learning concepts (One-Hot Encoding, StandardScaler vs MinMaxScaler, imputation, overfitting, ROC-AUC, F1-score) using everyday analogies and plain English.
+- **Workflow Mentorship**: Guides users through dataset inspection, preprocessing selection, model training, evaluation analysis, and model export.
+- **Multi-Turn Conversational Memory**: Preserves context across follow-up queries (e.g. *"Which scaling method should I use?"* followed by *"Why not MinMaxScaler?"*).
+- **Security & Privacy**: The Gemini API key remains strictly on the backend and is never exposed in frontend code, client requests, responses, or logs.
+
+### Chatbot Endpoints:
+- `POST /api/v1/chatbot/message` — Send user message with optional conversation ID and dataset ID.
+- `POST /api/v1/chatbot/clear` — Clear conversation history for a given conversation ID.
+- `GET /api/v1/chatbot/status` — Health check verifying Gemini client configuration and active model.
+
+
