@@ -1,4 +1,13 @@
 [
+  "tests/test_algorithm_registry.py::test_algorithm_compatibility",
+  "tests/test_algorithm_registry.py::test_algorithm_registry_api_endpoints",
+  "tests/test_algorithm_registry.py::test_alias_resolution_by_task",
+  "tests/test_algorithm_registry.py::test_all_classification_algorithms_instantiate",
+  "tests/test_algorithm_registry.py::test_all_clustering_algorithms_instantiate",
+  "tests/test_algorithm_registry.py::test_all_regression_algorithms_instantiate",
+  "tests/test_algorithm_registry.py::test_hyperparameter_configuration_and_custom_values",
+  "tests/test_algorithm_registry.py::test_hyperparameter_validation_rejects_invalid_values",
+  "tests/test_algorithm_registry.py::test_registry_contains_all_18_algorithms",
   "tests/test_dataset_analysis.py::test_analyzer_column_detection",
   "tests/test_dataset_analysis.py::test_analyzer_type_override",
   "tests/test_dataset_analysis.py::test_dataset_analysis_api_endpoints",

@@ -77,6 +77,7 @@ class ModelIntegration(Base):
         Index("ix_model_integrations_status_enabled", "status", "enabled"),
         Index("ix_model_integrations_provider_category", "provider_category"),
         Index("ix_model_integrations_created_at", "created_at"),
+        {"extend_existing": True},
     )
 
     def __repr__(self) -> str:
@@ -127,6 +128,7 @@ class AgentIntegration(Base):
         Index("ix_agent_integrations_status_enabled", "status", "enabled"),
         Index("ix_agent_integrations_framework", "framework"),
         Index("ix_agent_integrations_created_at", "created_at"),
+        {"extend_existing": True},
     )
 
     def __repr__(self) -> str:
@@ -150,6 +152,7 @@ class DatasetAccessGrant(Base):
     __table_args__ = (
         Index("ix_dataset_access_grants_integration", "integration_type", "integration_id"),
         Index("ix_dataset_access_grants_dataset", "dataset_id", "dataset_version_id"),
+        {"extend_existing": True},
     )
 
     def __repr__(self) -> str:
@@ -196,6 +199,7 @@ class Provider(Base):
         Index("ix_providers_type_enabled", "provider_type", "enabled"),
         Index("ix_providers_status", "status"),
         Index("ix_providers_created_at", "created_at"),
+        {"extend_existing": True},
     )
 
     def __repr__(self) -> str:
@@ -246,6 +250,7 @@ class ModelCapabilityInfo(Base):
     __table_args__ = (
         Index("ix_model_capabilities_provider_model", "provider_id", "model_identifier", unique=True),
         Index("ix_model_capabilities_deprecated", "is_deprecated"),
+        {"extend_existing": True},
     )
 
     def __repr__(self) -> str:

@@ -42,6 +42,13 @@
 
     },
     selectedModel: 'random-forest',
+    algorithmConfig: {
+      id: 'random_forest_classifier',
+      task: 'classification',
+      hyperparameters: {},
+      valid: true,
+      errors: [],
+    },
     modelCategory: 'traditional',
     activeVizTab: 'distribution',
     queue: [],
@@ -135,20 +142,52 @@
     },
   };
 
-  // Model Metadata
+  // Model Metadata (18 Machine Learning Algorithms Registry)
   const MODEL_METADATA = {
-    'linear-regression': { name: 'Linear Regression', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'linearParams' },
-    'logistic-regression': { name: 'Logistic Regression', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'accuracy', paramGroup: 'linearParams' },
-    'decision-tree': { name: 'Decision Tree', type: 'both', category: 'traditional', tasks: ['classification', 'regression'], defaultMetric: 'f1', paramGroup: 'treeParams' },
-    'random-forest': { name: 'Random Forest', type: 'both', category: 'traditional', tasks: ['classification', 'regression'], defaultMetric: 'f1', paramGroup: 'treeParams' },
-    'gradient-boosting': { name: 'Gradient Boosting', type: 'both', category: 'traditional', tasks: ['classification', 'regression'], defaultMetric: 'f1', paramGroup: 'treeParams' },
-    'svm': { name: 'Support Vector Machine', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'accuracy', paramGroup: 'svmParams' },
-    'knn': { name: 'K-Nearest Neighbors', type: 'both', category: 'traditional', tasks: ['classification', 'regression'], defaultMetric: 'accuracy', paramGroup: 'knnParams' },
-    'kmeans': { name: 'K-Means Clustering', type: 'clustering', category: 'traditional', tasks: ['clustering'], defaultMetric: 'silhouette', paramGroup: 'knnParams' },
-    'isolation-forest': { name: 'Isolation Forest', type: 'clustering', category: 'traditional', tasks: ['clustering'], defaultMetric: 'anomaly_score', paramGroup: 'treeParams' },
-    'mlp': { name: 'Multilayer Perceptron', type: 'both', category: 'deep', tasks: ['classification', 'regression'], defaultMetric: 'accuracy', paramGroup: 'nnParams' },
-    'ffnn': { name: 'Feedforward Neural Network', type: 'both', category: 'deep', tasks: ['classification', 'regression'], defaultMetric: 'accuracy', paramGroup: 'nnParams' },
-    'autoencoder': { name: 'Deep Autoencoder', type: 'clustering', category: 'deep', tasks: ['clustering'], defaultMetric: 'recon_loss', paramGroup: 'nnParams' },
+    // Classification (7)
+    'random-forest': { name: 'Random Forest Classifier', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'f1', paramGroup: 'treeParams', algoId: 'random_forest_classifier' },
+    'random_forest_classifier': { name: 'Random Forest Classifier', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'f1', paramGroup: 'treeParams', algoId: 'random_forest_classifier' },
+    'decision-tree': { name: 'Decision Tree Classifier', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'f1', paramGroup: 'treeParams', algoId: 'decision_tree_classifier' },
+    'decision_tree_classifier': { name: 'Decision Tree Classifier', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'f1', paramGroup: 'treeParams', algoId: 'decision_tree_classifier' },
+    'gradient-boosting': { name: 'Gradient Boosting Classifier', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'f1', paramGroup: 'treeParams', algoId: 'gradient_boosting_classifier' },
+    'gradient_boosting_classifier': { name: 'Gradient Boosting Classifier', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'f1', paramGroup: 'treeParams', algoId: 'gradient_boosting_classifier' },
+    'logistic-regression': { name: 'Logistic Regression', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'accuracy', paramGroup: 'linearParams', algoId: 'logistic_regression' },
+    'logistic_regression': { name: 'Logistic Regression', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'accuracy', paramGroup: 'linearParams', algoId: 'logistic_regression' },
+    'svm': { name: 'Support Vector Classifier (SVC)', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'accuracy', paramGroup: 'svmParams', algoId: 'svc' },
+    'svc': { name: 'Support Vector Classifier (SVC)', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'accuracy', paramGroup: 'svmParams', algoId: 'svc' },
+    'knn': { name: 'K-Nearest Neighbors Classifier', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'accuracy', paramGroup: 'knnParams', algoId: 'knn_classifier' },
+    'knn_classifier': { name: 'K-Nearest Neighbors Classifier', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'accuracy', paramGroup: 'knnParams', algoId: 'knn_classifier' },
+    'naive-bayes': { name: 'Gaussian Naive Bayes', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'accuracy', paramGroup: 'linearParams', algoId: 'gaussian_nb' },
+    'gaussian_nb': { name: 'Gaussian Naive Bayes', type: 'classification', category: 'traditional', tasks: ['classification'], defaultMetric: 'accuracy', paramGroup: 'linearParams', algoId: 'gaussian_nb' },
+
+    // Regression (8)
+    'linear-regression': { name: 'Linear Regression', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'linearParams', algoId: 'linear_regression' },
+    'linear_regression': { name: 'Linear Regression', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'linearParams', algoId: 'linear_regression' },
+    'ridge': { name: 'Ridge Regression (L2)', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'linearParams', algoId: 'ridge_regression' },
+    'ridge_regression': { name: 'Ridge Regression (L2)', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'linearParams', algoId: 'ridge_regression' },
+    'lasso': { name: 'Lasso Regression (L1)', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'linearParams', algoId: 'lasso_regression' },
+    'lasso_regression': { name: 'Lasso Regression (L1)', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'linearParams', algoId: 'lasso_regression' },
+    'decision-tree-regressor': { name: 'Decision Tree Regressor', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'treeParams', algoId: 'decision_tree_regressor' },
+    'decision_tree_regressor': { name: 'Decision Tree Regressor', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'treeParams', algoId: 'decision_tree_regressor' },
+    'random-forest-regressor': { name: 'Random Forest Regressor', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'treeParams', algoId: 'random_forest_regressor' },
+    'random_forest_regressor': { name: 'Random Forest Regressor', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'treeParams', algoId: 'random_forest_regressor' },
+    'knn-regressor': { name: 'K-Nearest Neighbors Regressor', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'knnParams', algoId: 'knn_regressor' },
+    'knn_regressor': { name: 'K-Nearest Neighbors Regressor', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'knnParams', algoId: 'knn_regressor' },
+    'svr': { name: 'Support Vector Regressor (SVR)', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'svmParams', algoId: 'svr' },
+    'gradient-boosting-regressor': { name: 'Gradient Boosting Regressor', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'treeParams', algoId: 'gradient_boosting_regressor' },
+    'gradient_boosting_regressor': { name: 'Gradient Boosting Regressor', type: 'regression', category: 'traditional', tasks: ['regression'], defaultMetric: 'rmse', paramGroup: 'treeParams', algoId: 'gradient_boosting_regressor' },
+
+    // Clustering (3)
+    'kmeans': { name: 'K-Means Clustering', type: 'clustering', category: 'traditional', tasks: ['clustering'], defaultMetric: 'silhouette', paramGroup: 'knnParams', algoId: 'kmeans' },
+    'dbscan': { name: 'DBSCAN Clustering', type: 'clustering', category: 'traditional', tasks: ['clustering'], defaultMetric: 'silhouette', paramGroup: 'knnParams', algoId: 'dbscan' },
+    'agglomerative': { name: 'Agglomerative Clustering', type: 'clustering', category: 'traditional', tasks: ['clustering'], defaultMetric: 'silhouette', paramGroup: 'knnParams', algoId: 'agglomerative_clustering' },
+    'agglomerative_clustering': { name: 'Agglomerative Clustering', type: 'clustering', category: 'traditional', tasks: ['clustering'], defaultMetric: 'silhouette', paramGroup: 'knnParams', algoId: 'agglomerative_clustering' },
+
+    // Deep Learning & Anomaly Detection models
+    'isolation-forest': { name: 'Isolation Forest', type: 'clustering', category: 'traditional', tasks: ['clustering'], defaultMetric: 'anomaly_score', paramGroup: 'treeParams', algoId: 'kmeans' },
+    'mlp': { name: 'Multilayer Perceptron', type: 'both', category: 'deep', tasks: ['classification', 'regression'], defaultMetric: 'accuracy', paramGroup: 'nnParams', algoId: 'random_forest_classifier' },
+    'ffnn': { name: 'Feedforward Neural Network', type: 'both', category: 'deep', tasks: ['classification', 'regression'], defaultMetric: 'accuracy', paramGroup: 'nnParams', algoId: 'random_forest_classifier' },
+    'autoencoder': { name: 'Deep Autoencoder', type: 'clustering', category: 'deep', tasks: ['clustering'], defaultMetric: 'recon_loss', paramGroup: 'nnParams', algoId: 'kmeans' },
   };
 
   // ============================================================
@@ -276,6 +315,10 @@
     expSeed: document.getElementById('expSeed'),
     expMetric: document.getElementById('expMetric'),
     hyperparamPanel: document.getElementById('hyperparamPanel'),
+    dynamicHyperparamFields: document.getElementById('dynamicHyperparamFields'),
+    dynamicHyperparamErrors: document.getElementById('dynamicHyperparamErrors'),
+    dynamicAlgoDesc: document.getElementById('dynamicAlgoDesc'),
+    hyperparamStatusBadge: document.getElementById('hyperparamStatusBadge'),
     paramGroups: {
       treeParams: document.getElementById('treeParams'),
       nnParams: document.getElementById('nnParams'),
@@ -283,6 +326,7 @@
       knnParams: document.getElementById('knnParams'),
       svmParams: document.getElementById('svmParams'),
     },
+
     // Sliders
     sliderEstimators: document.getElementById('sliderEstimators'),
     valEstimators: document.getElementById('valEstimators'),
@@ -1713,12 +1757,20 @@
 
 
   // ============================================================
-  // 8. MODEL SELECTION & HYPERPARAMETERS
+  // 8. MODEL SELECTION & HYPERPARAMETERS (ALGORITHM REGISTRY)
   // ============================================================
-  function selectModel(modelKey) {
+  let hpValidationDebounceTimer = null;
+
+  async function selectModel(modelKey) {
     state.selectedModel = modelKey;
-    const meta = MODEL_METADATA[modelKey];
-    if (!meta) return;
+    const meta = MODEL_METADATA[modelKey] || {
+      name: modelKey,
+      type: 'classification',
+      tasks: ['classification'],
+      defaultMetric: 'f1',
+      paramGroup: 'treeParams',
+      algoId: modelKey,
+    };
 
     // Update active model cards
     el.modelCards.forEach((card) => {
@@ -1730,17 +1782,290 @@
     });
 
     // Update select in experiment config form
-    if (el.expModel) {
+    if (el.expModel && el.expModel.value !== modelKey) {
       el.expModel.value = modelKey;
     }
 
     // Update evaluation metrics based on model type
     updateMetricsOptions(meta.type, meta.defaultMetric);
 
-    // Switch visible hyperparameter panel
-    switchHyperparamPanel(meta.paramGroup);
+    // Switch visible hyperparameter panel (hide legacy panels)
+    switchHyperparamPanel(null);
 
-    showNotification(`Selected model: ${meta.name}`, 'info');
+    // Handle clustering specifics (Unsupervised: target variable optional)
+    handleClusteringWorkflowUI(meta.type);
+
+    // Load registry algorithm schema & dynamic hyperparameter form
+    await loadRegistryAlgorithm(meta.algoId || modelKey, meta.type);
+
+    showNotification(`Selected algorithm: ${meta.name}`, 'info');
+  }
+
+  function handleClusteringWorkflowUI(modelType) {
+    const isClustering = modelType === 'clustering';
+    if (isClustering) {
+      if (el.summaryTarget) {
+        el.summaryTarget.innerHTML = '<span class="badge badge-include">Unsupervised (No Target Required)</span>';
+      }
+      if (el.expTarget) {
+        let noneOption = el.expTarget.querySelector('option[value=""]');
+        if (!noneOption) {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = 'None — Unsupervised Clustering';
+          el.expTarget.insertBefore(opt, el.expTarget.firstChild);
+        }
+        el.expTarget.value = '';
+      }
+      if (el.expMetric) {
+        el.expMetric.value = 'silhouette';
+      }
+    } else {
+      if (state.restrictions.constraints.targetColumn && el.summaryTarget) {
+        el.summaryTarget.textContent = state.restrictions.constraints.targetColumn;
+      }
+    }
+  }
+
+  async function loadRegistryAlgorithm(modelKey, taskHint) {
+    if (!el.dynamicHyperparamFields) return;
+
+    if (el.hyperparamStatusBadge) {
+      el.hyperparamStatusBadge.textContent = 'Loading Registry...';
+      el.hyperparamStatusBadge.className = 'badge badge-review font-mono';
+    }
+
+    try {
+      const taskParam = (taskHint === 'classification' || taskHint === 'regression' || taskHint === 'clustering')
+        ? `?task=${taskHint}`
+        : '';
+      const response = await fetch(`${API_BASE}/algorithms/${encodeURIComponent(modelKey)}${taskParam}`);
+      
+      if (!response.ok) {
+        throw new Error(`Registry endpoint error: HTTP ${response.status}`);
+      }
+
+      const algoData = await response.json();
+      state.algorithmConfig = {
+        id: algoData.id,
+        display_name: algoData.display_name,
+        task: algoData.task,
+        hyperparameters: { ...algoData.default_hyperparameters },
+        valid: true,
+        errors: [],
+      };
+
+      if (el.dynamicAlgoDesc) {
+        el.dynamicAlgoDesc.innerHTML = `<strong>${escapeHtml(algoData.display_name)}</strong> (${escapeHtml(algoData.task)}): ${escapeHtml(algoData.description)}`;
+      }
+
+      renderDynamicHyperparameters(algoData);
+
+      if (el.hyperparamStatusBadge) {
+        el.hyperparamStatusBadge.textContent = 'Registry Validated';
+        el.hyperparamStatusBadge.className = 'badge badge-include font-mono';
+      }
+      if (el.dynamicHyperparamErrors) {
+        el.dynamicHyperparamErrors.classList.add('hidden');
+        el.dynamicHyperparamErrors.innerHTML = '';
+      }
+    } catch (err) {
+      console.warn('Could not load algorithm from registry API, using defaults:', err);
+      if (el.hyperparamStatusBadge) {
+        el.hyperparamStatusBadge.textContent = 'Local Fallback';
+        el.hyperparamStatusBadge.className = 'badge badge-sensitive font-mono';
+      }
+      const meta = MODEL_METADATA[modelKey];
+      if (meta && meta.paramGroup) {
+        switchHyperparamPanel(meta.paramGroup);
+      }
+    }
+  }
+
+  function renderDynamicHyperparameters(algoData) {
+    if (!el.dynamicHyperparamFields) return;
+    el.dynamicHyperparamFields.innerHTML = '';
+
+    const specs = algoData.hyperparameters || {};
+    const keys = Object.keys(specs);
+
+    if (keys.length === 0) {
+      el.dynamicHyperparamFields.innerHTML = '<p class="caption text-muted">No configurable hyperparameters for this algorithm.</p>';
+      return;
+    }
+
+    keys.forEach((paramName) => {
+      const spec = specs[paramName];
+      const fieldDiv = document.createElement('div');
+      fieldDiv.className = 'form-group';
+      fieldDiv.style.marginBottom = '12px';
+
+      const labelDiv = document.createElement('div');
+      labelDiv.className = 'flex-between align-center mb-1';
+      labelDiv.innerHTML = `
+        <label class="form-label" style="margin-bottom:0; font-weight:600;">${escapeHtml(spec.name)}</label>
+        <span class="caption text-muted font-mono" style="font-size:11px;">${escapeHtml(spec.param_type)}${spec.allow_none ? ' | null' : ''}</span>
+      `;
+      fieldDiv.appendChild(labelDiv);
+
+      let inputEl;
+
+      if (spec.options && spec.options.length > 0) {
+        inputEl = document.createElement('select');
+        inputEl.className = 'form-select dynamic-hp-input';
+        inputEl.dataset.param = spec.name;
+        inputEl.dataset.type = spec.param_type;
+
+        if (spec.allow_none) {
+          const noneOpt = document.createElement('option');
+          noneOpt.value = '__none__';
+          noneOpt.textContent = 'None';
+          if (spec.default === null) noneOpt.selected = true;
+          inputEl.appendChild(noneOpt);
+        }
+
+        spec.options.forEach((opt) => {
+          const optEl = document.createElement('option');
+          optEl.value = String(opt);
+          optEl.textContent = String(opt);
+          if (spec.default === opt) optEl.selected = true;
+          inputEl.appendChild(optEl);
+        });
+      } else if (spec.param_type === 'bool') {
+        inputEl = document.createElement('select');
+        inputEl.className = 'form-select dynamic-hp-input';
+        inputEl.dataset.param = spec.name;
+        inputEl.dataset.type = 'bool';
+
+        const trueOpt = document.createElement('option');
+        trueOpt.value = 'true';
+        trueOpt.textContent = 'True';
+        if (spec.default === true) trueOpt.selected = true;
+
+        const falseOpt = document.createElement('option');
+        falseOpt.value = 'false';
+        falseOpt.textContent = 'False';
+        if (spec.default === false) falseOpt.selected = true;
+
+        inputEl.appendChild(trueOpt);
+        inputEl.appendChild(falseOpt);
+      } else if (spec.param_type === 'int' || spec.param_type === 'float') {
+        inputEl = document.createElement('input');
+        inputEl.type = 'number';
+        inputEl.className = 'form-input dynamic-hp-input';
+        inputEl.dataset.param = spec.name;
+        inputEl.dataset.type = spec.param_type;
+        inputEl.dataset.allowNone = spec.allow_none ? 'true' : 'false';
+
+        if (spec.default !== null && spec.default !== undefined) {
+          inputEl.value = spec.default;
+        }
+        if (spec.min_value !== null && spec.min_value !== undefined) {
+          inputEl.min = spec.min_value;
+        }
+        if (spec.max_value !== null && spec.max_value !== undefined) {
+          inputEl.max = spec.max_value;
+        }
+        inputEl.step = spec.param_type === 'float' ? '0.001' : '1';
+        if (spec.allow_none) {
+          inputEl.placeholder = 'Leave blank for None';
+        }
+      } else {
+        inputEl = document.createElement('input');
+        inputEl.type = 'text';
+        inputEl.className = 'form-input dynamic-hp-input';
+        inputEl.dataset.param = spec.name;
+        inputEl.dataset.type = 'str';
+        inputEl.value = spec.default !== null && spec.default !== undefined ? String(spec.default) : '';
+      }
+
+      // Input change listener for live validation
+      inputEl.addEventListener('input', scheduleHyperparameterValidation);
+      inputEl.addEventListener('change', scheduleHyperparameterValidation);
+
+      fieldDiv.appendChild(inputEl);
+
+      if (spec.description) {
+        const hint = document.createElement('p');
+        hint.className = 'form-hint';
+        hint.style.marginTop = '4px';
+        hint.style.fontSize = '11px';
+        hint.textContent = spec.description;
+        fieldDiv.appendChild(hint);
+      }
+
+      el.dynamicHyperparamFields.appendChild(fieldDiv);
+    });
+  }
+
+  function scheduleHyperparameterValidation() {
+    clearTimeout(hpValidationDebounceTimer);
+    hpValidationDebounceTimer = setTimeout(validateCurrentHyperparameters, 300);
+  }
+
+  async function validateCurrentHyperparameters() {
+    if (!state.algorithmConfig || !state.algorithmConfig.id) return;
+
+    const inputs = el.dynamicHyperparamFields ? el.dynamicHyperparamFields.querySelectorAll('.dynamic-hp-input') : [];
+    const params = {};
+
+    inputs.forEach((inp) => {
+      const pName = inp.dataset.param;
+      const pType = inp.dataset.type;
+      const allowNone = inp.dataset.allowNone === 'true';
+      const val = inp.value;
+
+      if (val === '__none__' || (val === '' && allowNone)) {
+        params[pName] = null;
+      } else if (pType === 'int') {
+        params[pName] = val === '' ? null : parseInt(val, 10);
+      } else if (pType === 'float') {
+        params[pName] = val === '' ? null : parseFloat(val);
+      } else if (pType === 'bool') {
+        params[pName] = val === 'true';
+      } else {
+        params[pName] = val;
+      }
+    });
+
+    try {
+      const resp = await fetch(`${API_BASE}/algorithms/${encodeURIComponent(state.algorithmConfig.id)}/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hyperparameters: params,
+          task: state.algorithmConfig.task,
+        }),
+      });
+
+      if (!resp.ok) return;
+
+      const data = await resp.json();
+      state.algorithmConfig.valid = data.valid;
+      state.algorithmConfig.errors = data.errors || [];
+      if (data.valid) {
+        state.algorithmConfig.hyperparameters = data.sanitized_hyperparameters;
+        if (el.hyperparamStatusBadge) {
+          el.hyperparamStatusBadge.textContent = 'Registry Validated';
+          el.hyperparamStatusBadge.className = 'badge badge-include font-mono';
+        }
+        if (el.dynamicHyperparamErrors) {
+          el.dynamicHyperparamErrors.classList.add('hidden');
+          el.dynamicHyperparamErrors.innerHTML = '';
+        }
+      } else {
+        if (el.hyperparamStatusBadge) {
+          el.hyperparamStatusBadge.textContent = 'Validation Errors';
+          el.hyperparamStatusBadge.className = 'badge badge-sensitive font-mono';
+        }
+        if (el.dynamicHyperparamErrors) {
+          el.dynamicHyperparamErrors.classList.remove('hidden');
+          el.dynamicHyperparamErrors.innerHTML = `<strong>Hyperparameter Validation Errors:</strong><ul style="margin:4px 0 0 16px; padding:0;">${data.errors.map((e) => `<li>${escapeHtml(e)}</li>`).join('')}</ul>`;
+        }
+      }
+    } catch (e) {
+      console.warn('Hyperparameter validation request failed:', e);
+    }
   }
 
   function updateMetricsOptions(modelType, defaultMetric) {
@@ -1761,6 +2086,10 @@
         <option value="mse">MSE (Mean Squared Error)</option>
         <option value="r2">R² Score</option>
       `;
+    } else if (modelType === 'clustering') {
+      options = `
+        <option value="silhouette" selected>Silhouette Coefficient</option>
+      `;
     } else {
       // Both
       options = `
@@ -1768,6 +2097,7 @@
         <option value="accuracy">Accuracy (Classification)</option>
         <option value="rmse">RMSE (Regression)</option>
         <option value="r2">R² Score (Regression)</option>
+        <option value="silhouette">Silhouette Coefficient (Clustering)</option>
       `;
     }
 
@@ -1780,7 +2110,7 @@
   function switchHyperparamPanel(activeGroupKey) {
     Object.entries(el.paramGroups).forEach(([key, element]) => {
       if (element) {
-        if (key === activeGroupKey) {
+        if (key && key === activeGroupKey) {
           element.classList.remove('hidden');
         } else {
           element.classList.add('hidden');
@@ -2313,19 +2643,56 @@
       });
     }
 
-    // Validate Config button
+    // Validate Config button (Live Registry Validation & Compatibility Verification)
     if (el.btnValidateConfig) {
-      el.btnValidateConfig.addEventListener('click', () => {
+      el.btnValidateConfig.addEventListener('click', async () => {
         if (!state.dataset) {
           showNotification('Validation warning: No dataset uploaded yet.', 'warning');
           return;
         }
-        if (!state.restrictions.constraints.targetColumn) {
-          showNotification('Validation warning: Please select a target variable.', 'warning');
+
+        const task = state.algorithmConfig ? state.algorithmConfig.task : 'classification';
+        const isClustering = task === 'clustering';
+
+        if (!isClustering && !state.restrictions.constraints.targetColumn) {
+          showNotification('Validation warning: Please select a target variable for supervised learning.', 'warning');
           return;
         }
 
-        showNotification('Configuration verified: All parameters are structurally valid.', 'success');
+        // Validate hyperparameters first
+        await validateCurrentHyperparameters();
+
+        if (state.algorithmConfig && !state.algorithmConfig.valid) {
+          showNotification(`Invalid hyperparameters: ${state.algorithmConfig.errors[0] || 'Check configuration'}`, 'warning');
+          return;
+        }
+
+        // Compatibility check
+        if (state.algorithmConfig && state.algorithmConfig.id) {
+          try {
+            const targetCol = state.restrictions.constraints.targetColumn;
+            const targetType = targetCol && state.dataset.types ? state.dataset.types[targetCol] : null;
+            const compatResp = await fetch(`${API_BASE}/algorithms/${encodeURIComponent(state.algorithmConfig.id)}/compatibility`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                task: state.algorithmConfig.task,
+                target_type: targetType,
+              }),
+            });
+            if (compatResp.ok) {
+              const compatData = await compatResp.json();
+              if (!compatData.compatible) {
+                showNotification(`Compatibility Warning: ${compatData.errors.join('; ')}`, 'warning');
+                return;
+              }
+            }
+          } catch (e) {
+            console.warn('Compatibility check failed:', e);
+          }
+        }
+
+        showNotification(`Configuration verified: ${state.algorithmConfig ? state.algorithmConfig.display_name : 'Algorithm'} hyperparameters and compatibility checks passed.`, 'success');
       });
     }
 

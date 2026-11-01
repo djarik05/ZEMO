@@ -14,6 +14,12 @@ from .preprocessor import (
     PreprocessingPreviewResponse,
     SafeLogTransformer,
 )
+from .registry import (
+    AlgorithmInfo,
+    AlgorithmRegistry,
+    HyperparameterSpec,
+    get_algorithm_registry,
+)
 from .visualizer import VisualizationEngine, get_visualization_engine
 
 __all__ = [
@@ -30,6 +36,11 @@ __all__ = [
     "OperationSummary",
     "OutlierClipper",
     "SafeLogTransformer",
+    "AlgorithmRegistry",
+    "get_algorithm_registry",
+    "AlgorithmInfo",
+    "HyperparameterSpec",
 ]
+
 
 

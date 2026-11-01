@@ -5,11 +5,6 @@ import os
 # Set test environment before any imports
 os.environ["ENVIRONMENT"] = "test"
 
-# Clear any cached modules that might have imported integration models
-modules_to_clear = [k for k in sys.modules.keys() if k.startswith('core.database.models.integration')]
-for mod in modules_to_clear:
-    del sys.modules[mod]
-
 from httpx import AsyncClient, ASGITransport
 from unittest.mock import AsyncMock, patch, MagicMock
 from fastapi import FastAPI

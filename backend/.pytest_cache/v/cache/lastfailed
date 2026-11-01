@@ -14,6 +14,10 @@
   "tests/test_providers.py::TestProviderRegistryService::test_create_provider_service": true,
   "tests/test_providers.py::TestProviderRegistryService::test_list_providers_service": true,
   "test_db.py": true,
+  "tests/test_providers.py::TestProviderAPI::test_create_provider": true,
+  "tests/test_providers.py::TestProviderAPI::test_create_provider_invalid_type": true,
+  "tests/test_providers.py::TestProviderAPI::test_create_provider_missing_credential": true,
+  "tests/test_providers.py::TestProviderAPI::test_get_provider_not_found": true,
   "tests/test_providers.py::TestProviderAPI": true,
   "tests/test_providers.py::TestProviderRegistryService": true
 }

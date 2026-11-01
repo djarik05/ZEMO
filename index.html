@@ -1164,23 +1164,37 @@
               <div class="form-group">
                 <label class="form-label" for="expModel">Selected Model</label>
                 <select class="form-select" id="expModel">
-                  <option value="">Select model...</option>
-                  <option value="linear-regression">Linear Regression</option>
-                  <option value="logistic-regression">Logistic Regression</option>
-                  <option value="decision-tree">Decision Tree</option>
-                  <option value="random-forest" selected>Random Forest</option>
-                  <option value="svm">Support Vector Machine</option>
-                  <option value="knn">K-Nearest Neighbors</option>
-                  <option value="gradient-boosting">Gradient Boosting</option>
-                  <option value="mlp">Multilayer Perceptron</option>
-                  <option value="ffnn">Feedforward Neural Network</option>
+                  <optgroup label="Classification">
+                    <option value="random-forest" selected>Random Forest Classifier</option>
+                    <option value="decision-tree">Decision Tree Classifier</option>
+                    <option value="gradient-boosting">Gradient Boosting Classifier</option>
+                    <option value="logistic-regression">Logistic Regression</option>
+                    <option value="svm">Support Vector Classifier (SVC)</option>
+                    <option value="knn">K-Nearest Neighbors Classifier</option>
+                    <option value="naive-bayes">Gaussian Naive Bayes</option>
+                  </optgroup>
+                  <optgroup label="Regression">
+                    <option value="linear-regression">Linear Regression</option>
+                    <option value="ridge">Ridge Regression (L2)</option>
+                    <option value="lasso">Lasso Regression (L1)</option>
+                    <option value="random-forest-regressor">Random Forest Regressor</option>
+                    <option value="decision-tree-regressor">Decision Tree Regressor</option>
+                    <option value="gradient-boosting-regressor">Gradient Boosting Regressor</option>
+                    <option value="svr">Support Vector Regressor (SVR)</option>
+                    <option value="knn-regressor">K-Nearest Neighbors Regressor</option>
+                  </optgroup>
+                  <optgroup label="Clustering (Unsupervised)">
+                    <option value="kmeans">K-Means Clustering</option>
+                    <option value="dbscan">DBSCAN Clustering</option>
+                    <option value="agglomerative">Agglomerative Hierarchical Clustering</option>
+                  </optgroup>
                 </select>
               </div>
               <div class="form-group">
                 <label class="form-label" for="expEncoding">Feature Encoding</label>
                 <select class="form-select" id="expEncoding">
                   <option value="auto" selected>Automatic Selection</option>
-                  <option value="label">Label Encoding</option>
+                  <option value="label">Label / Ordinal Encoding</option>
                   <option value="onehot">One-Hot Encoding</option>
                 </select>
               </div>
@@ -1207,6 +1221,7 @@
                   <option value="mse">MSE</option>
                   <option value="rmse">RMSE</option>
                   <option value="r2">R²</option>
+                  <option value="silhouette">Silhouette Score</option>
                 </select>
               </div>
             </div>
@@ -1215,11 +1230,22 @@
 
         <!-- B. Hyperparameter Panel -->
         <div class="subsection reveal reveal-delay-2">
-          <h3 class="subsection-title">Hyperparameters</h3>
+          <div class="flex-between align-center mb-2">
+            <h3 class="subsection-title" style="margin-bottom:0;">Hyperparameter Configuration</h3>
+            <span class="badge badge-include font-mono" id="hyperparamStatusBadge">Registry Validated</span>
+          </div>
+          <p class="caption text-muted mb-4" id="dynamicAlgoDesc">Configure verified algorithm hyperparameters loaded dynamically from the Algorithm Registry.</p>
           <div class="restriction-panel" id="hyperparamPanel">
 
-            <!-- Tree-based params -->
-            <div id="treeParams">
+            <!-- Dynamic Registry Parameters Container -->
+            <div id="dynamicHyperparamFields" class="grid-2 gap-4">
+              <!-- Dynamically populated from /api/v1/algorithms/{id} -->
+            </div>
+            <div id="dynamicHyperparamErrors" class="hidden mt-3" style="background: rgba(255, 179, 71, 0.1); border: 1px solid var(--warning); border-radius: 4px; padding: 10px 14px; color: var(--warning); font-size: 12px;"></div>
+
+            <!-- Legacy fallback containers (hidden by default) -->
+            <div id="treeParams" class="hidden">
+
               <div class="form-group">
                 <div class="slider-header">
                   <label class="form-label">Number of Estimators</label>
