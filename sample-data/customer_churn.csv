@@ -1,0 +1,16 @@
+customer_id,tenure_months,contract_type,monthly_charges,total_charges,tech_support,paperless_billing,churn
+C-7590,1,Month-to-month,29.85,29.85,No,Yes,No
+C-5575,34,One year,56.95,1889.50,No,No,No
+C-3668,2,Month-to-month,53.85,108.15,Yes,Yes,Yes
+C-7795,45,One year,42.30,1840.75,Yes,No,No
+C-9237,2,Month-to-month,70.70,151.65,No,Yes,Yes
+C-9305,8,Month-to-month,99.65,820.50,No,Yes,Yes
+C-1452,22,Month-to-month,89.10,1949.40,No,Yes,Yes
+C-6713,10,Month-to-month,29.75,301.90,No,No,No
+C-7892,28,Two year,104.80,3046.05,Yes,Yes,Yes
+C-6388,62,One year,56.15,3487.95,Yes,No,No
+C-1029,14,Month-to-month,45.20,632.80,No,Yes,No
+C-4921,48,Two year,85.50,4104.00,Yes,Yes,No
+C-8812,6,Month-to-month,75.10,450.60,No,Yes,Yes
+C-3390,36,One year,64.30,2314.80,Yes,No,No
+C-2109,19,Month-to-month,92.40,1755.60,No,Yes,Yes

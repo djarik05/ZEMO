@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zemo — AI/ML Model Training Platform</title>
+  <meta name="description" content="Premium AI/ML model training and experimentation platform. Configure, train, and evaluate machine learning models with precision.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23FF603D'/><text x='16' y='22' text-anchor='middle' fill='%23171716' font-family='serif' font-size='20' font-weight='bold'>Z</text></svg>">
+</head>
+<body>
+
+  <!-- ============================================================
+       HEADER
+       ============================================================ -->
+  <header class="header" id="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="#" class="logo">Zemo<span class="logo-dot"></span></a>
+      </div>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="#upload" class="nav-link active" data-section="upload">Upload</a>
+        <a href="#restrictions" class="nav-link" data-section="restrictions">Restrictions</a>
+        <a href="#output" class="nav-link" data-section="output">Output</a>
+        <a href="#training" class="nav-link" data-section="training">Training</a>
+        <a href="#ai-training" class="nav-link" data-section="ai-training">AI Training</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="theme-toggle-btn" id="themeToggle" title="Toggle Brand Theme (Calm Organic / Dark Editorial)">
+          <span class="theme-dot"></span>
+          <span id="themeToggleLabel">Calm Organic</span>
+        </button>
+        <div class="workspace-selector" id="workspaceSelector">
+          <span class="workspace-dot"></span>
+          <span>Workspace</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+        <div class="status-indicator">
+          <span class="status-dot"></span>
+          <span>Ready</span>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btnNewExperiment">New Experiment</button>
+      </div>
+
+      <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Nav Overlay -->
+  <div class="mobile-nav-overlay" id="mobileNav">
+    <a href="#upload" class="nav-link active" data-section="upload">Upload</a>
+    <a href="#restrictions" class="nav-link" data-section="restrictions">Restrictions</a>
+    <a href="#output" class="nav-link" data-section="output">Output</a>
+    <a href="#training" class="nav-link" data-section="training">Training</a>
+    <a href="#ai-training" class="nav-link" data-section="ai-training">AI Training</a>
+  </div>
+
+  <main>
+
+    <!-- ============================================================
+         SECTION 1: DATASET UPLOAD
+         ============================================================ -->
+    <section class="section" id="upload">
+      <div class="container">
+
+        <div class="section-intro reveal">
+          <span class="section-label">DATA INPUT / 01</span>
+          <h1 class="heading-xl">Start with your data.</h1>
+          <p class="supporting-text">Upload a dataset and prepare it for controlled machine learning experiments. Select a file to begin exploring its structure.</p>
+        </div>
+
+        <!-- Step Indicator -->
+        <div class="step-indicator reveal reveal-delay-1">
+          <div class="step active" data-step="1">
+            <span class="step-number">01</span>
+            <span class="step-name">Upload</span>
+          </div>
+          <span class="step-line"></span>
+          <div class="step" data-step="2">
+            <span class="step-number">02</span>
+            <span class="step-name">Restrictions</span>
+          </div>
+          <span class="step-line"></span>
+          <div class="step" data-step="3">
+            <span class="step-number">03</span>
+            <span class="step-name">Output</span>
+          </div>
+          <span class="step-line"></span>
+          <div class="step" data-step="4">
+            <span class="step-number">04</span>
+            <span class="step-name">Training</span>
+          </div>
+          <span class="step-line"></span>
+          <div class="step" data-step="5" id="stepIndicatorAiTraining">
+            <span class="step-number">05</span>
+            <span class="step-name">AI Training</span>
+          </div>
+        </div>
+
+        <!-- Upload Content -->
+        <div class="content-cols reveal reveal-delay-2">
+          <!-- Left: Upload Zone -->
+          <div>
+            <div class="upload-zone" id="uploadZone">
+              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <h3>Drop your dataset here</h3>
+              <p class="body-sm">or <span class="browse-link" id="browseLink">browse files</span> from your device</p>
+              <input type="file" id="fileInput" accept=".csv,.xlsx,.json,.jsonl,.parquet" class="sr-only" aria-label="Select dataset file">
+              <div class="format-badges">
+                <span class="format-badge">CSV</span>
+                <span class="format-badge">XLSX</span>
+                <span class="format-badge">JSON</span>
+                <span class="format-badge">JSONL</span>
+                <span class="format-badge">Parquet</span>
+              </div>
+              <p class="file-size-note">Maximum file size: 50 MB</p>
+            </div>
+
+            <!-- Dataset Preview Table -->
+            <div id="datasetPreview" class="hidden">
+              <div class="dataset-preview-header">
+                <div>
+                  <span class="caption text-muted" style="text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px;">Active Dataset Explorer</span>
+                  <h3 class="heading-sm" style="margin-top: 2px;">Local Data Preview</h3>
+                </div>
+                <div class="preview-header-actions">
+                  <button class="btn btn-secondary btn-sm" id="btnChangeDataset" type="button">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    Upload Another File
+                  </button>
+                </div>
+              </div>
+              <div class="data-table-wrapper">
+                <table class="data-table" id="previewTable">
+                  <thead id="previewTableHead"></thead>
+                  <tbody id="previewTableBody"></tbody>
+                </table>
+                <div class="table-caption" id="tableCaption">Showing first rows from local preview</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Dataset Info / Empty State -->
+          <div>
+            <!-- Empty state -->
+            <div id="uploadEmpty">
+              <div class="empty-state">
+                <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="3" y1="9" x2="21" y2="9"></line>
+                  <line x1="9" y1="21" x2="9" y2="9"></line>
+                </svg>
+                <h3>No dataset selected</h3>
+                <p>Upload a CSV, XLSX, JSON, JSONL, or Parquet file to see a preview of your data and begin configuring your experiment.</p>
+              </div>
+            </div>
+
+            <!-- File Info Panel (hidden until file selected) -->
+            <div id="datasetInfo" class="hidden">
+              <div class="file-info-panel">
+                <div class="file-info-header">
+                  <div>
+                    <h3 class="heading-sm" id="fileName">—</h3>
+                    <p class="caption text-muted" id="fileType">—</p>
+                  </div>
+                  <span class="upload-status success" id="uploadStatus">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Selected
+                  </span>
+                </div>
+
+                <div class="file-info-grid">
+                  <div class="file-stat">
+                    <span class="file-stat-label">File Size</span>
+                    <span class="file-stat-value" id="fileSize">—</span>
+                  </div>
+                  <div class="file-stat">
+                    <span class="file-stat-label">Rows</span>
+                    <span class="file-stat-value" id="fileRows">—</span>
+                  </div>
+                  <div class="file-stat">
+                    <span class="file-stat-label">Columns</span>
+                    <span class="file-stat-value" id="fileCols">—</span>
+                  </div>
+                  <div class="file-stat">
+                    <span class="file-stat-label">Status</span>
+                    <span class="file-stat-value text-accent" id="fileStatus">Ready</span>
+                  </div>
+                </div>
+
+                <div class="engine-readiness-pill">
+                  <span class="status-dot"></span>
+                  <span>Zemo Analysis Engine: Ingestion Staging Ready · Schema Sync Active</span>
+                </div>
+
+                <div id="columnList" class="mt-6"></div>
+
+                <div class="section-actions">
+                  <button class="btn btn-primary" id="btnContinueRestrictions">Continue to Restrictions</button>
+                  <button class="btn btn-ghost" id="btnRemoveDataset">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    Remove dataset
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ============================================================
+         SECTION 2: RESTRICTIONS
+         ============================================================ -->
+    <section class="section" id="restrictions">
+      <div class="container">
+
+        <div class="section-intro reveal">
+          <span class="section-label">DATA GOVERNANCE / 02</span>
+          <h1 class="heading-xl">Define what stays out.</h1>
+          <p class="supporting-text">Set the boundaries for your experiment before preparing the dataset for training. Configure column access, sensitive data handling, and training preferences.</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="restrictionsEmpty" class="reveal reveal-delay-1">
+          <div class="empty-state">
+            <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <h3>No dataset loaded</h3>
+            <p>Upload a dataset in the Upload section first. Restriction controls will appear here once your data is ready.</p>
+            <button class="btn btn-secondary mt-6" onclick="document.getElementById('upload').scrollIntoView({behavior:'smooth'})">Go to Upload</button>
+          </div>
+        </div>
+
+        <!-- Restrictions Content (hidden until dataset loaded) -->
+        <div id="restrictionsContent" class="hidden">
+
+          <!-- A. Column Restrictions -->
+          <div class="restriction-panel reveal">
+            <div class="restriction-header">
+              <h3>Column Restrictions</h3>
+              <span class="restriction-count" id="colRestrictionCount">0 columns</span>
+            </div>
+            <div id="columnRestrictions">
+              <!-- Populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- B. Sensitive Data -->
+          <div class="restriction-panel reveal reveal-delay-1">
+            <div class="restriction-header">
+              <h3>Sensitive Data Detection</h3>
+              <span class="restriction-count" id="sensitiveCount">0 active</span>
+            </div>
+            <div class="grid-2 gap-4">
+              <!-- Email -->
+              <div class="sensitive-card">
+                <div class="sensitive-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                </div>
+                <div class="sensitive-info">
+                  <div class="sensitive-name">Email Addresses</div>
+                  <div class="sensitive-desc">Detect and mask email patterns</div>
+                </div>
+                <div class="toggle" id="toggleEmail" data-sensitive="email" role="switch" aria-label="Toggle email detection" tabindex="0">
+                  <div class="toggle-knob"></div>
+                </div>
+              </div>
+
+              <!-- Phone -->
+              <div class="sensitive-card">
+                <div class="sensitive-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                </div>
+                <div class="sensitive-info">
+                  <div class="sensitive-name">Phone Numbers</div>
+                  <div class="sensitive-desc">Detect phone number formats</div>
+                </div>
+                <div class="toggle" id="togglePhone" data-sensitive="phone" role="switch" aria-label="Toggle phone detection" tabindex="0">
+                  <div class="toggle-knob"></div>
+                </div>
+              </div>
+
+              <!-- Names -->
+              <div class="sensitive-card">
+                <div class="sensitive-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <div class="sensitive-info">
+                  <div class="sensitive-name">Personal Names</div>
+                  <div class="sensitive-desc">Flag potential name columns</div>
+                </div>
+                <div class="toggle" id="toggleNames" data-sensitive="names" role="switch" aria-label="Toggle name detection" tabindex="0">
+                  <div class="toggle-knob"></div>
+                </div>
+              </div>
+
+              <!-- Personal IDs -->
+              <div class="sensitive-card">
+                <div class="sensitive-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                </div>
+                <div class="sensitive-info">
+                  <div class="sensitive-name">Personal IDs</div>
+                  <div class="sensitive-desc">SSN, passport, ID numbers</div>
+                </div>
+                <div class="toggle" id="togglePersonalIds" data-sensitive="personalIds" role="switch" aria-label="Toggle personal ID detection" tabindex="0">
+                  <div class="toggle-knob"></div>
+                </div>
+              </div>
+
+              <!-- Financial -->
+              <div class="sensitive-card">
+                <div class="sensitive-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                </div>
+                <div class="sensitive-info">
+                  <div class="sensitive-name">Financial Data</div>
+                  <div class="sensitive-desc">Credit cards, bank accounts</div>
+                </div>
+                <div class="toggle" id="toggleFinancial" data-sensitive="financial" role="switch" aria-label="Toggle financial data detection" tabindex="0">
+                  <div class="toggle-knob"></div>
+                </div>
+              </div>
+
+              <!-- Custom -->
+              <div class="sensitive-card">
+                <div class="sensitive-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </div>
+                <div class="sensitive-info">
+                  <div class="sensitive-name">Custom Fields</div>
+                  <div class="sensitive-desc">User-defined sensitive patterns</div>
+                </div>
+                <div class="toggle" id="toggleCustom" data-sensitive="custom" role="switch" aria-label="Toggle custom field detection" tabindex="0">
+                  <div class="toggle-knob"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- C. Data Quality -->
+          <div class="restriction-panel reveal reveal-delay-2">
+            <div class="restriction-header">
+              <h3>Data Quality Rules</h3>
+              <span class="restriction-count" id="qualityCount">0 active</span>
+            </div>
+            <div class="restriction-row">
+              <div class="column-info">
+                <span class="column-name">Remove Missing Values</span>
+                <span class="column-type">Drop rows with null/empty cells</span>
+              </div>
+              <div class="toggle" data-quality="missingValues" role="switch" aria-label="Toggle remove missing values" tabindex="0">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="restriction-row">
+              <div class="column-info">
+                <span class="column-name">Remove Duplicate Records</span>
+                <span class="column-type">Deduplicate identical rows</span>
+              </div>
+              <div class="toggle" data-quality="duplicates" role="switch" aria-label="Toggle remove duplicates" tabindex="0">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="restriction-row">
+              <div class="column-info">
+                <span class="column-name">Flag Invalid Values</span>
+                <span class="column-type">Mark type-mismatched entries</span>
+              </div>
+              <div class="toggle" data-quality="invalidValues" role="switch" aria-label="Toggle flag invalid values" tabindex="0">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="restriction-row">
+              <div class="column-info">
+                <span class="column-name">Review Outliers</span>
+                <span class="column-type">Flag statistical outliers for review</span>
+              </div>
+              <div class="toggle" data-quality="outliers" role="switch" aria-label="Toggle review outliers" tabindex="0">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="restriction-row">
+              <div class="column-info">
+                <span class="column-name">Flag High-Cardinality Columns</span>
+                <span class="column-type">Columns with excessive unique values</span>
+              </div>
+              <div class="toggle" data-quality="highCardinality" role="switch" aria-label="Toggle flag high cardinality" tabindex="0">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- D. Training Constraints -->
+          <div class="restriction-panel reveal reveal-delay-3">
+            <div class="restriction-header">
+              <h3>Training Constraints</h3>
+            </div>
+
+            <div class="grid-2 gap-6">
+              <div class="form-group">
+                <label class="form-label" for="targetColumn">Target Column</label>
+                <select class="form-select" id="targetColumn">
+                  <option value="">Select target variable...</option>
+                </select>
+                <p class="form-hint">The column your model will predict</p>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="excludedFeatures">Excluded Features</label>
+                <div id="excludedFeatures" class="form-input" style="min-height: 44px; cursor: default;">
+                  <span class="text-muted caption">Columns marked as excluded will appear here</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group mt-6">
+              <label class="form-label">Missing Value Handling</label>
+              <div class="radio-group" data-radio-group="missingHandling">
+                <div class="radio-option selected" data-value="drop">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">Drop Rows</div>
+                    <div class="radio-desc">Remove rows with missing values</div>
+                  </div>
+                </div>
+                <div class="radio-option" data-value="mean">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">Fill Mean/Mode</div>
+                    <div class="radio-desc">Replace with column average</div>
+                  </div>
+                </div>
+                <div class="radio-option" data-value="median">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">Fill Median</div>
+                    <div class="radio-desc">Replace with column median</div>
+                  </div>
+                </div>
+                <div class="radio-option" data-value="keep">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">Keep As-Is</div>
+                    <div class="radio-desc">Pass through unchanged</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group mt-6">
+              <label class="form-label">Categorical Encoding</label>
+              <div class="radio-group" data-radio-group="encoding">
+                <div class="radio-option" data-value="label">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">Label Encoding</div>
+                    <div class="radio-desc">Assign integer labels to categories</div>
+                  </div>
+                </div>
+                <div class="radio-option" data-value="onehot">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">One-Hot Encoding</div>
+                    <div class="radio-desc">Create binary columns per category</div>
+                  </div>
+                </div>
+                <div class="radio-option selected" data-value="auto">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">Automatic Selection</div>
+                    <div class="radio-desc">Choose based on cardinality</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group mt-6">
+              <label class="form-label">Dataset Split</label>
+              <div class="radio-group" data-radio-group="split">
+                <div class="radio-option" data-value="70-30">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">70 / 30</div>
+                    <div class="radio-desc">70% training · 30% testing</div>
+                  </div>
+                </div>
+                <div class="radio-option selected" data-value="80-20">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">80 / 20</div>
+                    <div class="radio-desc">80% training · 20% testing</div>
+                  </div>
+                </div>
+                <div class="radio-option" data-value="80-10-10">
+                  <span class="radio-dot"></span>
+                  <div>
+                    <div class="radio-label">80 / 10 / 10</div>
+                    <div class="radio-desc">80% train · 10% val · 10% test</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- E. Restriction Summary -->
+          <div class="restriction-summary reveal reveal-delay-4" id="restrictionSummary">
+            <h4 class="summary-title">Configuration Summary</h4>
+            <div class="summary-row">
+              <span class="summary-label">Included Columns</span>
+              <span class="summary-value" id="summaryIncluded">0</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Excluded Columns</span>
+              <span class="summary-value" id="summaryExcluded">0</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Review Columns</span>
+              <span class="summary-value" id="summaryReview">0</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Sensitive Data Rules</span>
+              <span class="summary-value" id="summarySensitive">0 active</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Quality Rules</span>
+              <span class="summary-value" id="summaryQuality">0 active</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Target Column</span>
+              <span class="summary-value" id="summaryTarget">Not selected</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Encoding Method</span>
+              <span class="summary-value" id="summaryEncoding">Automatic</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Split Ratio</span>
+              <span class="summary-value" id="summarySplit">80 / 20</span>
+            </div>
+
+            <div class="section-actions">
+              <button class="btn btn-ghost" id="btnResetRestrictions">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                Reset All
+              </button>
+              <button class="btn btn-primary" id="btnContinueOutput">Continue to Output</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ============================================================
+         SECTION 3: OUTPUT
+         ============================================================ -->
+    <section class="section" id="output">
+      <div class="container">
+
+        <div class="section-intro reveal">
+          <span class="section-label">EXPERIMENT PREVIEW / 03</span>
+          <h1 class="heading-xl">See the data differently.</h1>
+          <p class="supporting-text">Explore the structure of your dataset and review the configuration before starting a training experiment.</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="outputEmpty" class="reveal reveal-delay-1">
+          <div class="empty-state">
+            <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            <h3>No experiment configured</h3>
+            <p>Upload a dataset and configure restrictions first. The output preview will appear once your experiment is set up.</p>
+            <button class="btn btn-secondary mt-6" onclick="document.getElementById('upload').scrollIntoView({behavior:'smooth'})">Go to Upload</button>
+          </div>
+        </div>
+
+        <!-- Output Content (hidden until dataset loaded) -->
+        <div id="outputContent" class="hidden">
+
+          <!-- 1. ZEMO CORE INTELLIGENCE: DEDICATED META-MODEL INTERFACE -->
+          <div class="core-intelligence-panel reveal">
+            <span class="core-badge">Zemo Core Intelligence · Deep Learning Meta-Model v3.4</span>
+            <h3 class="heading-md">Autonomous Experiment Planning</h3>
+            <p class="body-text" style="max-width: 820px; margin-top: 8px;">
+              Zemo's proprietary Deep Learning Core Model acts as the autonomous planning intelligence. It interprets your natural language experiment objectives, dataset properties, and data governance boundaries to synthesize optimized training blueprints for downstream models.
+            </p>
+
+            <div class="core-disclaimer-box">
+              <strong>Architectural Separation:</strong> Zemo Core Intelligence is the orchestration and planning meta-model. It is completely distinct from the candidate user models (such as Random Forest, Gradient Boosting, or Feedforward Neural Networks) that will be trained on your dataset.
+            </div>
+
+            <!-- Workflow Relationship Visual -->
+            <div class="caption text-muted uppercase tracking-wider" style="letter-spacing: 0.1em; font-size: 10px; margin-bottom: 4px;">Orchestration Architecture</div>
+            <div class="core-workflow-graph">
+              <div class="core-graph-node">
+                <span class="core-node-type">Input Data</span>
+                <span class="core-node-name">Dataset & Restrictions</span>
+              </div>
+              <div class="core-graph-connector">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </div>
+              <div class="core-graph-node highlight-core">
+                <span class="core-node-type">Planning Intelligence</span>
+                <span class="core-node-name">Zemo Core Model</span>
+              </div>
+              <div class="core-graph-connector">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </div>
+              <div class="core-graph-node">
+                <span class="core-node-type">Synthesized Output</span>
+                <span class="core-node-name">Training Blueprint</span>
+              </div>
+              <div class="core-graph-connector">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </div>
+              <div class="core-graph-node">
+                <span class="core-node-type">Execution Target</span>
+                <span class="core-node-name">Downstream Models</span>
+              </div>
+            </div>
+
+            <!-- Requirement Input Area -->
+            <div class="requirement-input-area">
+              <label class="form-label" for="coreRequirementInput">Natural Language Experiment Requirements</label>
+              <textarea class="requirement-textarea" id="coreRequirementInput" placeholder="Specify your experiment priorities or optimization requirements (e.g., 'Optimize for high precision on churned customers while remaining resilient to outliers in tenure and keeping model lightweight for real-time inference')."></textarea>
+              
+              <div class="requirement-presets">
+                <span class="preset-label">Presets:</span>
+                <button class="preset-pill" data-preset="classification-precision">High Precision Classification</button>
+                <button class="preset-pill" data-preset="regression-robust">Outlier-Resilient Regression</button>
+                <button class="preset-pill" data-preset="edge-lightweight">Low-Latency Edge Model</button>
+                <button class="preset-pill" data-preset="tree-interpretable">Interpretable Tree Ensemble</button>
+                <button class="preset-pill" data-preset="balanced-f1">Balanced F1 Optimization</button>
+              </div>
+
+              <div class="mt-4 flex-between">
+                <button class="btn btn-primary btn-sm" id="btnSynthesizePlan">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                  Synthesize Training Plan via Core Intelligence
+                </button>
+                <span class="caption text-muted">Core Model Status: Standby</span>
+              </div>
+            </div>
+
+            <!-- Training Plan Preview Box -->
+            <div class="training-plan-preview" id="trainingPlanPreview">
+              <div class="plan-header">
+                <div>
+                  <h4>Core Synthesized Training Plan</h4>
+                  <span class="caption text-muted">Generated by Zemo Deep Learning Meta-Model</span>
+                </div>
+                <span class="badge badge-include">Optimized Blueprint Ready</span>
+              </div>
+
+              <div class="plan-grid">
+                <div class="plan-spec">
+                  <span class="plan-spec-label">Recommended Model</span>
+                  <span class="plan-spec-val" id="planModelVal">Gradient Boosting Ensemble</span>
+                </div>
+                <div class="plan-spec">
+                  <span class="plan-spec-label">Target Metric</span>
+                  <span class="plan-spec-val" id="planMetricVal">F1 Score (Macro Averaged)</span>
+                </div>
+                <div class="plan-spec">
+                  <span class="plan-spec-label">Feature Engineering</span>
+                  <span class="plan-spec-val" id="planFeatureVal">Variance Filter + Target Encoding</span>
+                </div>
+                <div class="plan-spec">
+                  <span class="plan-spec-label">Validation Strategy</span>
+                  <span class="plan-spec-val">Stratified 5-Fold Cross Validation</span>
+                </div>
+                <div class="plan-spec">
+                  <span class="plan-spec-label">Hyperparameter Search</span>
+                  <span class="plan-spec-val">Bayesian Optimization (50 trials)</span>
+                </div>
+                <div class="plan-spec">
+                  <span class="plan-spec-label">Resource Blueprint</span>
+                  <span class="plan-spec-val">Lightweight CPU / Accelerated Node</span>
+                </div>
+              </div>
+
+              <div class="flex-between">
+                <button class="btn btn-secondary btn-sm" id="btnApplyPlanToLab">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  Apply Blueprint to Model Lab
+                </button>
+                <span class="caption text-muted">Applies recommended model and settings to Section 04</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- A. Metrics Grid -->
+          <div class="metrics-grid reveal">
+            <div class="metric-card">
+              <div class="metric-value" id="metricRows">—</div>
+              <div class="metric-label">Total Rows</div>
+              <div class="metric-note" id="metricRowsNote"><span class="data-badge-real">Local Preview Data</span></div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="metricCols">—</div>
+              <div class="metric-label">Total Columns</div>
+              <div class="metric-note" id="metricColsNote"><span class="data-badge-real">Local Preview Data</span></div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value accent" id="metricNumeric">—</div>
+              <div class="metric-label">Numeric Columns</div>
+              <div class="metric-note" id="metricNumericNote"><span class="data-badge-real">Type Inferred</span></div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="metricCategorical">—</div>
+              <div class="metric-label">Categorical Columns</div>
+              <div class="metric-note" id="metricCategoricalNote"><span class="data-badge-real">Type Inferred</span></div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="metricMissing">—</div>
+              <div class="metric-label">Missing Values</div>
+              <div class="metric-note" id="metricMissingNote"><span class="data-badge-real">Sample Verified</span></div>
+            </div>
+          </div>
+
+          <!-- B. Visualization Area -->
+          <div class="viz-container reveal reveal-delay-1">
+            <div class="viz-tabs">
+              <button class="viz-tab active" data-viz="distribution">Distribution <span class="data-badge-real" style="margin-left:4px;">Actual</span></button>
+              <button class="viz-tab" data-viz="categories">Categories <span class="data-badge-real" style="margin-left:4px;">Actual</span></button>
+              <button class="viz-tab" data-viz="missing">Missing Values <span class="data-badge-real" style="margin-left:4px;">Actual</span></button>
+              <button class="viz-tab" data-viz="correlations">Correlations <span class="illustrative-badge" style="margin-left:4px;">Placeholder</span></button>
+            </div>
+
+            <div class="viz-panel active" id="vizDistribution">
+              <div class="bar-chart" id="distributionChart">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+            <div class="viz-panel" id="vizCategories">
+              <div class="h-bar-chart" id="categoryChart">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+            <div class="viz-panel" id="vizMissing">
+              <div class="missing-chart" id="missingChart">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+            <div class="viz-panel" id="vizCorrelations">
+              <div class="empty-state" style="padding: 40px 0;">
+                <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <h3>Correlation Matrix</h3>
+                <p>Full bivariate correlation requires backend vector computation. This placeholder illustrates planned heatmap topology.</p>
+                <span class="illustrative-badge mt-4">Illustrative placeholder</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- C. Feature Pipeline & Overview -->
+          <div class="subsection reveal reveal-delay-2">
+            <h3 class="subsection-title">Feature Pipeline & Governance Specification</h3>
+            
+            <div class="feature-pipeline-card">
+              <div class="grid-2 gap-4">
+                <div class="pipeline-item">
+                  <span class="pipeline-dot"></span>
+                  <div>
+                    <strong class="body-sm text-primary">Feature Extraction & Scaling:</strong>
+                    <p class="caption text-muted">Standard scaling (Z-score normalization) applied to continuous numeric features; categorical tokens mapped via selected encoder.</p>
+                  </div>
+                </div>
+                <div class="pipeline-item">
+                  <span class="pipeline-dot"></span>
+                  <div>
+                    <strong class="body-sm text-primary">Feature Selection & Thresholds:</strong>
+                    <p class="caption text-muted">Near-zero variance filters (<0.01) and high-cardinality flags active. Explicitly excluded columns removed prior to vectorization.</p>
+                  </div>
+                </div>
+                <div class="pipeline-item">
+                  <span class="pipeline-dot"></span>
+                  <div>
+                    <strong class="body-sm text-primary">Categorical Encoding Method:</strong>
+                    <p class="caption text-muted" id="pipelineEncodingVal">Automatic Selection based on column cardinality threshold.</p>
+                  </div>
+                </div>
+                <div class="pipeline-item">
+                  <span class="pipeline-dot"></span>
+                  <div>
+                    <strong class="body-sm text-primary">Train / Test Split Ratio:</strong>
+                    <p class="caption text-muted" id="pipelineSplitVal">80% Training (stratified) · 20% Testing hold-out partition.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="data-table-wrapper">
+              <table class="data-table" id="featureTable">
+                <thead>
+                  <tr>
+                    <th>Feature</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Encoding</th>
+                    <th>Restrictions</th>
+                  </tr>
+                </thead>
+                <tbody id="featureTableBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- D. Workflow Diagram -->
+          <div class="subsection reveal reveal-delay-3">
+            <h3 class="subsection-title">Processing Workflow</h3>
+            <p class="body-sm mb-6">Visual representation of the planned processing sequence. No steps have been executed.</p>
+            <div class="workflow" id="workflowDiagram">
+              <div class="workflow-step active">
+                <div class="workflow-step-number">01</div>
+                <div class="workflow-step-name">Dataset</div>
+                <div class="workflow-step-status">Loaded</div>
+              </div>
+              <div class="workflow-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </div>
+              <div class="workflow-step">
+                <div class="workflow-step-number">02</div>
+                <div class="workflow-step-name">Restriction Rules</div>
+                <div class="workflow-step-status">Configured</div>
+              </div>
+              <div class="workflow-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </div>
+              <div class="workflow-step">
+                <div class="workflow-step-number">03</div>
+                <div class="workflow-step-name">Feature Selection</div>
+                <div class="workflow-step-status">Pending</div>
+              </div>
+              <div class="workflow-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </div>
+              <div class="workflow-step">
+                <div class="workflow-step-number">04</div>
+                <div class="workflow-step-name">Feature Encoding</div>
+                <div class="workflow-step-status">Pending</div>
+              </div>
+              <div class="workflow-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </div>
+              <div class="workflow-step">
+                <div class="workflow-step-number">05</div>
+                <div class="workflow-step-name">Train/Test Split</div>
+                <div class="workflow-step-status">Pending</div>
+              </div>
+              <div class="workflow-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </div>
+              <div class="workflow-step">
+                <div class="workflow-step-number">06</div>
+                <div class="workflow-step-name">Model Training</div>
+                <div class="workflow-step-status">Pending</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- E. Model Selection (Organized by Task and Category) -->
+          <div class="subsection reveal reveal-delay-4">
+            <h3 class="subsection-title">Downstream Model Selection</h3>
+            <p class="body-sm mb-4">Choose the machine learning or deep learning architecture for your target training experiment. Organized by Task and Model Family.</p>
+
+            <!-- Task Filters -->
+            <div class="task-filters">
+              <span class="task-filter-title">Filter By Task:</span>
+              <button class="task-pill active" data-task-filter="all">All Tasks</button>
+              <button class="task-pill" data-task-filter="classification">Classification</button>
+              <button class="task-pill" data-task-filter="regression">Regression</button>
+              <button class="task-pill" data-task-filter="clustering">Clustering & Anomaly</button>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="model-category-tabs">
+              <button class="model-tab active" data-model-category="all">All Architectures</button>
+              <button class="model-tab" data-model-category="traditional">Traditional ML</button>
+              <button class="model-tab" data-model-category="deep">Deep Learning</button>
+            </div>
+
+            <div id="modelGridContainer" class="model-grid">
+              <!-- Traditional ML Models -->
+              <div class="model-card" data-model="linear-regression" data-category="traditional" data-task="regression">
+                <div class="model-name">Linear Regression</div>
+                <div class="model-desc">Continuous target estimation with linear parameter mapping</div>
+                <span class="model-tag">Regression · Traditional</span>
+              </div>
+              <div class="model-card" data-model="logistic-regression" data-category="traditional" data-task="classification">
+                <div class="model-name">Logistic Regression</div>
+                <div class="model-desc">Sigmoidal probability mapping for discrete categorical targets</div>
+                <span class="model-tag">Classification · Traditional</span>
+              </div>
+              <div class="model-card" data-model="decision-tree" data-category="traditional" data-task="classification regression">
+                <div class="model-name">Decision Tree</div>
+                <div class="model-desc">Hierarchical split partitions with high visual interpretability</div>
+                <span class="model-tag">Class / Reg · Traditional</span>
+              </div>
+              <div class="model-card selected" data-model="random-forest" data-category="traditional" data-task="classification regression">
+                <div class="model-name">Random Forest</div>
+                <div class="model-desc">Bagged ensemble of decorrelated trees for robust generalization</div>
+                <span class="model-tag">Class / Reg · Traditional</span>
+              </div>
+              <div class="model-card" data-model="gradient-boosting" data-category="traditional" data-task="classification regression">
+                <div class="model-name">Gradient Boosting</div>
+                <div class="model-desc">Sequential additive gradient learning for competitive tabular accuracy</div>
+                <span class="model-tag">Class / Reg · Traditional</span>
+              </div>
+              <div class="model-card" data-model="svm" data-category="traditional" data-task="classification">
+                <div class="model-name">Support Vector Machine</div>
+                <div class="model-desc">Maximum-margin hyperplane separation with kernel embeddings</div>
+                <span class="model-tag">Classification · Traditional</span>
+              </div>
+              <div class="model-card" data-model="knn" data-category="traditional" data-task="classification regression">
+                <div class="model-name">K-Nearest Neighbors</div>
+                <div class="model-desc">Instance-based non-parametric metric neighborhood prediction</div>
+                <span class="model-tag">Class / Reg · Traditional</span>
+              </div>
+              <div class="model-card" data-model="kmeans" data-category="traditional" data-task="clustering">
+                <div class="model-name">K-Means Clustering</div>
+                <div class="model-desc">Unsupervised centroid-based partitioning for segmentation</div>
+                <span class="model-tag">Clustering · Traditional</span>
+              </div>
+              <div class="model-card" data-model="isolation-forest" data-category="traditional" data-task="clustering">
+                <div class="model-name">Isolation Forest</div>
+                <div class="model-desc">Tree isolation ensemble for unsupervised outlier & anomaly detection</div>
+                <span class="model-tag">Anomaly · Traditional</span>
+              </div>
+
+              <!-- Deep Learning Architectures -->
+              <div class="model-card" data-model="mlp" data-category="deep" data-task="classification regression">
+                <div class="model-name">Multilayer Perceptron</div>
+                <div class="model-desc">Dense feedforward layers with ReLU/GELU activations and dropout</div>
+                <span class="model-tag">Deep Learning · Neural</span>
+              </div>
+              <div class="model-card" data-model="ffnn" data-category="deep" data-task="classification regression">
+                <div class="model-name">Feedforward Neural Network</div>
+                <div class="model-desc">Deep sequential architecture with residual skip connections</div>
+                <span class="model-tag">Deep Learning · Neural</span>
+              </div>
+              <div class="model-card" data-model="autoencoder" data-category="deep" data-task="clustering">
+                <div class="model-name">Deep Autoencoder</div>
+                <div class="model-desc">Encoder-decoder bottleneck network for reconstruction anomaly scoring</div>
+                <span class="model-tag">Anomaly / Unsupervised · Deep</span>
+              </div>
+            </div>
+
+            <div class="compatibility-note">
+              Model compatibility will be validated when backend is connected. Selection is for experiment configuration only.
+            </div>
+          </div>
+
+          <!-- F. Output Actions -->
+          <div class="section-actions reveal">
+            <button class="btn btn-ghost" onclick="document.getElementById('restrictions').scrollIntoView({behavior:'smooth'})">Review Restrictions</button>
+            <button class="btn btn-secondary" id="btnDownloadPreview">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Download Preview
+            </button>
+            <button class="btn btn-primary" id="btnContinueTraining">Continue to Training</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- ============================================================
+         SECTION 4: TRAINING
+         ============================================================ -->
+    <section class="section" id="training">
+      <div class="container">
+
+        <div class="section-intro reveal">
+          <span class="section-label">MODEL LAB / 04</span>
+          <h1 class="heading-xl">Your next model starts here.</h1>
+          <p class="supporting-text">Configure an experiment, review its settings, and prepare it for execution. This is a frontend prototype — no training will be performed.</p>
+        </div>
+
+        <!-- A. Experiment Configuration -->
+        <div class="subsection reveal reveal-delay-1">
+          <h3 class="subsection-title">Experiment Configuration</h3>
+          <div class="restriction-panel">
+            <div class="config-form">
+              <div class="form-group">
+                <label class="form-label" for="expName">Experiment Name</label>
+                <input type="text" class="form-input" id="expName" placeholder="e.g., my-classification-v1" value="">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="expDataset">Dataset</label>
+                <input type="text" class="form-input" id="expDataset" readonly placeholder="No dataset loaded" value="">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="expTarget">Target Variable</label>
+                <select class="form-select" id="expTarget">
+                  <option value="">Select target...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="expModel">Selected Model</label>
+                <select class="form-select" id="expModel">
+                  <option value="">Select model...</option>
+                  <option value="linear-regression">Linear Regression</option>
+                  <option value="logistic-regression">Logistic Regression</option>
+                  <option value="decision-tree">Decision Tree</option>
+                  <option value="random-forest" selected>Random Forest</option>
+                  <option value="svm">Support Vector Machine</option>
+                  <option value="knn">K-Nearest Neighbors</option>
+                  <option value="gradient-boosting">Gradient Boosting</option>
+                  <option value="mlp">Multilayer Perceptron</option>
+                  <option value="ffnn">Feedforward Neural Network</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="expEncoding">Feature Encoding</label>
+                <select class="form-select" id="expEncoding">
+                  <option value="auto" selected>Automatic Selection</option>
+                  <option value="label">Label Encoding</option>
+                  <option value="onehot">One-Hot Encoding</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="expSplit">Train/Test Split</label>
+                <select class="form-select" id="expSplit">
+                  <option value="70-30">70% Training / 30% Testing</option>
+                  <option value="80-20" selected>80% Training / 20% Testing</option>
+                  <option value="80-10-10">80% Train / 10% Val / 10% Test</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="expSeed">Random Seed</label>
+                <input type="number" class="form-input" id="expSeed" value="42" min="0" max="99999">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="expMetric">Evaluation Metric</label>
+                <select class="form-select" id="expMetric">
+                  <option value="accuracy">Accuracy</option>
+                  <option value="precision">Precision</option>
+                  <option value="recall">Recall</option>
+                  <option value="f1" selected>F1 Score</option>
+                  <option value="mae">MAE</option>
+                  <option value="mse">MSE</option>
+                  <option value="rmse">RMSE</option>
+                  <option value="r2">R²</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- B. Hyperparameter Panel -->
+        <div class="subsection reveal reveal-delay-2">
+          <h3 class="subsection-title">Hyperparameters</h3>
+          <div class="restriction-panel" id="hyperparamPanel">
+
+            <!-- Tree-based params -->
+            <div id="treeParams">
+              <div class="form-group">
+                <div class="slider-header">
+                  <label class="form-label">Number of Estimators</label>
+                  <span class="slider-value" id="valEstimators">100</span>
+                </div>
+                <input type="range" class="slider" id="sliderEstimators" min="10" max="500" value="100" step="10">
+                <p class="form-hint">Number of trees in the ensemble</p>
+              </div>
+              <div class="form-group mt-6">
+                <div class="slider-header">
+                  <label class="form-label">Maximum Depth</label>
+                  <span class="slider-value" id="valMaxDepth">10</span>
+                </div>
+                <input type="range" class="slider" id="sliderMaxDepth" min="1" max="50" value="10">
+                <p class="form-hint">Maximum depth of each tree</p>
+              </div>
+              <div class="form-group mt-6">
+                <div class="slider-header">
+                  <label class="form-label">Min Samples Split</label>
+                  <span class="slider-value" id="valMinSamples">2</span>
+                </div>
+                <input type="range" class="slider" id="sliderMinSamples" min="2" max="20" value="2">
+                <p class="form-hint">Minimum samples required to split a node</p>
+              </div>
+            </div>
+
+            <!-- Neural Network params (hidden) -->
+            <div id="nnParams" class="hidden">
+              <div class="form-group">
+                <div class="slider-header">
+                  <label class="form-label">Number of Layers</label>
+                  <span class="slider-value" id="valLayers">3</span>
+                </div>
+                <input type="range" class="slider" id="sliderLayers" min="1" max="10" value="3">
+              </div>
+              <div class="form-group mt-6">
+                <div class="slider-header">
+                  <label class="form-label">Hidden Units</label>
+                  <span class="slider-value" id="valHiddenUnits">128</span>
+                </div>
+                <input type="range" class="slider" id="sliderHiddenUnits" min="16" max="512" value="128" step="16">
+              </div>
+              <div class="form-group mt-6">
+                <label class="form-label" for="nnLearningRate">Learning Rate</label>
+                <input type="number" class="form-input" id="nnLearningRate" value="0.001" min="0.0001" max="1" step="0.0001">
+              </div>
+              <div class="form-group mt-6">
+                <label class="form-label" for="nnBatchSize">Batch Size</label>
+                <select class="form-select" id="nnBatchSize">
+                  <option value="16">16</option>
+                  <option value="32" selected>32</option>
+                  <option value="64">64</option>
+                  <option value="128">128</option>
+                  <option value="256">256</option>
+                </select>
+              </div>
+              <div class="form-group mt-6">
+                <div class="slider-header">
+                  <label class="form-label">Epochs</label>
+                  <span class="slider-value" id="valEpochs">50</span>
+                </div>
+                <input type="range" class="slider" id="sliderEpochs" min="1" max="200" value="50">
+              </div>
+            </div>
+
+            <!-- Linear model params (hidden) -->
+            <div id="linearParams" class="hidden">
+              <div class="form-group">
+                <label class="form-label" for="linearRegularization">Regularization</label>
+                <select class="form-select" id="linearRegularization">
+                  <option value="none">None</option>
+                  <option value="l1">L1 (Lasso)</option>
+                  <option value="l2" selected>L2 (Ridge)</option>
+                  <option value="elasticnet">Elastic Net</option>
+                </select>
+              </div>
+              <div class="form-group mt-6">
+                <label class="form-label" for="linearAlpha">Alpha</label>
+                <input type="number" class="form-input" id="linearAlpha" value="1.0" min="0.001" max="100" step="0.1">
+                <p class="form-hint">Regularization strength</p>
+              </div>
+            </div>
+
+            <!-- KNN params (hidden) -->
+            <div id="knnParams" class="hidden">
+              <div class="form-group">
+                <div class="slider-header">
+                  <label class="form-label">Number of Neighbors</label>
+                  <span class="slider-value" id="valNeighbors">5</span>
+                </div>
+                <input type="range" class="slider" id="sliderNeighbors" min="1" max="50" value="5">
+              </div>
+              <div class="form-group mt-6">
+                <label class="form-label" for="knnWeight">Weight Function</label>
+                <select class="form-select" id="knnWeight">
+                  <option value="uniform" selected>Uniform</option>
+                  <option value="distance">Distance</option>
+                </select>
+              </div>
+              <div class="form-group mt-6">
+                <label class="form-label" for="knnMetric">Distance Metric</label>
+                <select class="form-select" id="knnMetric">
+                  <option value="euclidean" selected>Euclidean</option>
+                  <option value="manhattan">Manhattan</option>
+                  <option value="minkowski">Minkowski</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- SVM params (hidden) -->
+            <div id="svmParams" class="hidden">
+              <div class="form-group">
+                <label class="form-label" for="svmKernel">Kernel</label>
+                <select class="form-select" id="svmKernel">
+                  <option value="linear">Linear</option>
+                  <option value="rbf" selected>RBF</option>
+                  <option value="polynomial">Polynomial</option>
+                </select>
+              </div>
+              <div class="form-group mt-6">
+                <label class="form-label" for="svmC">C (Regularization)</label>
+                <input type="number" class="form-input" id="svmC" value="1.0" min="0.01" max="100" step="0.1">
+              </div>
+              <div class="form-group mt-6">
+                <label class="form-label" for="svmGamma">Gamma</label>
+                <select class="form-select" id="svmGamma">
+                  <option value="scale" selected>Scale</option>
+                  <option value="auto">Auto</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- C. Training Queue -->
+        <div class="subsection reveal reveal-delay-3">
+          <h3 class="subsection-title">Training Queue</h3>
+          <div class="demo-notice">
+            <strong>Execution Queue:</strong> Added experiments will be scheduled and tracked here.
+          </div>
+
+          <div class="queue-list" id="queueList">
+            <div class="empty-queue-placeholder">
+              <p class="text-muted caption" style="margin: 0; padding: 20px; text-align: center;">No experiments queued or running. Configure an experiment above and click "Add to Queue".</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- D. Training Progress Preview -->
+        <div class="subsection reveal reveal-delay-4">
+          <h3 class="subsection-title">Training Progress</h3>
+          <div class="restriction-panel">
+            <div class="flex-between mb-4">
+              <div>
+                <div class="caption text-muted">Currently training</div>
+                <div class="heading-sm" id="activeTrainingJobName">No active training run</div>
+              </div>
+              <span class="queue-status draft" id="activeTrainingJobStatus">Idle</span>
+            </div>
+
+            <div class="progress-container">
+              <div class="progress-bar" style="width: 0%;" id="trainingProgressBar"></div>
+            </div>
+
+            <div class="progress-stats">
+              <div class="progress-stat">
+                <span class="progress-stat-label">Stage</span>
+                <span class="progress-stat-value" id="trainingStatStage">—</span>
+              </div>
+              <div class="progress-stat">
+                <span class="progress-stat-label">Progress</span>
+                <span class="progress-stat-value" id="trainingStatProgress">0%</span>
+              </div>
+              <div class="progress-stat">
+                <span class="progress-stat-label">Elapsed</span>
+                <span class="progress-stat-value" id="trainingStatElapsed">--:--:--</span>
+              </div>
+              <div class="progress-stat">
+                <span class="progress-stat-label">Remaining</span>
+                <span class="progress-stat-value" id="trainingStatRemaining">--:--:--</span>
+              </div>
+            </div>
+
+            <div class="demo-notice mt-6">Active job telemetry and metrics stream live during execution.</div>
+
+            <div class="training-log mt-6" id="trainingLog">
+              <div class="log-entry">
+                <span class="log-timestamp">[--:--:--]</span>
+                <span class="log-level info">IDLE</span>
+                <span class="log-message">Awaiting training dispatch. Configure an experiment to begin.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- E. Experiment Results & Evaluation Metrics (Demonstration Placeholder) -->
+        <div class="subsection reveal reveal-delay-5">
+          <div class="flex-between mb-4">
+            <h3 class="subsection-title" style="margin-bottom: 0;">Experiment Results & Evaluation (Demonstration)</h3>
+            <span class="illustrative-badge">Demonstration Output Placeholder</span>
+          </div>
+
+          <div class="results-placeholder-panel" id="resultsPlaceholderPanel">
+            <div class="flex-between">
+              <div>
+                <span class="caption text-muted" style="text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px;">Active Benchmark Overview</span>
+                <div class="heading-sm" id="resultExperimentName">No experiment evaluated yet</div>
+              </div>
+              <span class="badge" id="resultExperimentBadge" style="background: rgba(158,172,149,0.15); color: var(--deep-olive);">Awaiting Benchmark</span>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="results-metrics-grid">
+              <div class="result-metric-card">
+                <span class="result-metric-label" id="resultMetricLabel1">Validation Loss</span>
+                <div class="result-metric-val" id="resultMetricVal1">—</div>
+              </div>
+              <div class="result-metric-card">
+                <span class="result-metric-label" id="resultMetricLabel2">Target Metric (F1 / RMSE)</span>
+                <div class="result-metric-val" id="resultMetricVal2">—</div>
+              </div>
+              <div class="result-metric-card">
+                <span class="result-metric-label" id="resultMetricLabel3">Inference Latency</span>
+                <div class="result-metric-val" id="resultMetricVal3">—</div>
+              </div>
+              <div class="result-metric-card">
+                <span class="result-metric-label" id="resultMetricLabel4">Generalization Delta</span>
+                <div class="result-metric-val" id="resultMetricVal4">—</div>
+              </div>
+            </div>
+
+            <!-- Visual Confusion Matrix / Residual Error Distribution Placeholder -->
+            <div class="visual-matrix-placeholder">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <span>Residual Error / Confusion Matrix Topology Placeholder</span>
+              <span class="caption text-muted">Will render live interactive confusion matrix and residual diagnostics when connected to backend training worker</span>
+            </div>
+
+            <div class="demo-notice mt-4" style="margin-bottom: 0;">
+              <strong>Notice:</strong> This evaluation preview is an illustrative demonstration. Real model training, evaluation metrics, and weights will be computed when connected to an execution cluster.
+            </div>
+          </div>
+        </div>
+
+        <!-- F. Primary Actions -->
+        <div class="section-actions reveal">
+          <button class="btn btn-ghost" id="btnSaveDraft">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            Save Draft
+          </button>
+          <button class="btn btn-secondary" id="btnValidateConfig">Validate Configuration</button>
+          <button class="btn btn-primary" id="btnAddToQueue">Add to Queue</button>
+        </div>
+
+        <!-- Prototype Notice -->
+        <div class="prototype-notice hidden" id="prototypeNotice">
+          <p>Frontend prototype: Your experiment configuration is ready for future backend integration.</p>
+          <p class="caption text-muted">No model training has started. This interface demonstrates the configuration workflow.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 5: AI TRAINING (DUAL-MODE STUDIO + CHATBOX)
+         ============================================================ -->
+    <section class="section ai-training-section" id="ai-training">
+      <div class="container">
+
+        <!-- Intro Header -->
+        <div class="section-intro reveal">
+          <div class="section-intro-badges">
+            <span class="section-label">AI TRAINING / 05</span>
+            <span class="badge badge-brand-organic">Calm Organic Studio</span>
+            <span class="badge badge-demo-tag">PROTOTYPE [DEMO]</span>
+          </div>
+          <h1 class="heading-xl">Dual-Mode AI Training & Assistant</h1>
+          <p class="supporting-text">Fine-tune verified pre-trained backbones or train isolated task-specific architectures from scratch with strict provenance, governance checks, and conversational assistance.</p>
+        </div>
+
+        <!-- Mode Selection Header Cards -->
+        <div class="ai-mode-selection-grid reveal reveal-delay-1">
+          <!-- Mode A Card -->
+          <div class="ai-mode-card active" id="modeCardPretrained" data-mode="pretrained">
+            <div class="ai-mode-card-header">
+              <div class="ai-mode-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+              </div>
+              <span class="ai-mode-badge badge-transfer">Mode A • Transfer Learning</span>
+            </div>
+            <h3 class="ai-mode-title">Pre-trained Model Adaptation</h3>
+            <p class="ai-mode-desc">Select a supported model checkpoint from the verified registry. Adapt with Classification-Head training (freeze backbone), LoRA, or Full Fine-Tuning. Never claims unsupported models can be fine-tuned.</p>
+            <div class="ai-mode-tags">
+              <span class="ai-tag">Verified Checkpoints</span>
+              <span class="ai-tag">Low VRAM Adaptation</span>
+              <span class="ai-tag">Head-Only / LoRA / Full FT</span>
+            </div>
+            <div class="ai-mode-active-indicator">
+              <span class="mode-radio-dot"></span> Active Selection
+            </div>
+          </div>
+
+          <!-- Mode B Card -->
+          <div class="ai-mode-card" id="modeCardScratch" data-mode="scratch">
+            <div class="ai-mode-card-header">
+              <div class="ai-mode-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M3 12h3m12 0h3M12 3v3m0 12v3m-6.36-15.36l2.12 2.12m8.48 8.48l2.12 2.12m-12.72 0l2.12-2.12m8.48-8.48l2.12-2.12"/>
+                </svg>
+              </div>
+              <span class="ai-mode-badge badge-scratch">Mode B • Cold Start Isolation</span>
+            </div>
+            <h3 class="ai-mode-title">Train from Scratch</h3>
+            <p class="ai-mode-desc">Initialize fresh weights randomly (Glorot / He). 100% isolated to your dataset. Zero pre-trained weights or external checkpoints loaded. Custom task-specific neural architectures.</p>
+            <div class="ai-mode-tags">
+              <span class="ai-tag">Random Weights Initialization</span>
+              <span class="ai-tag">Zero Checkpoint Injections</span>
+              <span class="ai-tag">Task-Specific NN Only</span>
+            </div>
+            <div class="ai-mode-active-indicator">
+              <span class="mode-radio-dot"></span> Active Selection
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Studio Split Layout: Configuration Panels (Left) + Training Assistant Chatbox (Right) -->
+        <div class="ai-studio-grid reveal reveal-delay-2">
+
+          <!-- Left Column: Active Mode Form & Governance & Hardware -->
+          <div class="ai-studio-config-col">
+
+            <!-- Scrollable Panels Container -->
+            <div class="ai-studio-panels-container">
+
+              <!-- MODE A PANEL: PRE-TRAINED TRAINING -->
+              <div class="ai-mode-panel active" id="panelPretrained">
+                <div class="panel-header-with-badge">
+                  <div>
+                    <span class="caption text-muted">CONFIGURATION PIPELINE</span>
+                    <h3 class="subsection-title">Pre-trained Adaptation Settings</h3>
+                  </div>
+                  <span class="badge badge-sage">Model Registry v2.4</span>
+                </div>
+
+                <!-- 1. Model Registry Selection -->
+                <div class="form-group mb-4">
+                  <div class="flex-between">
+                    <label class="form-label" for="ptModelSelect">Select Pre-Trained Model from Registry</label>
+                    <span class="caption text-muted" id="ptRegistryStatus">6 Models Verified</span>
+                  </div>
+                  <select class="form-select" id="ptModelSelect">
+                    <optgroup label="Supported Text & Sequence Models">
+                      <option value="distilbert-base" selected>DistilBERT-Base-Uncased (66.4M params) — Text Classification / Sentiment [v1.2.0]</option>
+                      <option value="roberta-base">RoBERTa-Base (125M params) — Sequence / NLI / Topic [v2.1.0]</option>
+                      <option value="bert-mini">BERT-Mini (11.3M params) — Ultra-Lightweight Sequence Classifier [v1.0.0]</option>
+                      <option value="t5-small">T5-Small (60M params) — Conditional Seq2Seq Adaptation [v1.1.0]</option>
+                    </optgroup>
+                    <optgroup label="Supported Vision & Feature Extractors">
+                      <option value="mobilenet-v3-small">MobileNet-V3-Small (2.5M params) — Efficient Edge Feature Classifier [v1.4.0]</option>
+                      <option value="resnet-50">ResNet-50-v2 (25.6M params) — Deep Feature Embeddings [v1.0.2]</option>
+                    </optgroup>
+                    <optgroup label="Unsupported Models (Policy & Hardware Limits)">
+                      <option value="llama-3-70b" data-unsupported="true">Llama-3-70B-Instruct [UNSUPPORTED — Requires Distributed Cluster]</option>
+                      <option value="gpt-4-closed" data-unsupported="true">GPT-4-Turbo [UNSUPPORTED — Closed Weights / Blackbox API]</option>
+                    </optgroup>
+                  </select>
+                  <!-- Unsupported Model Alert -->
+                  <div class="model-compatibility-alert hidden" id="unsupportedModelAlert">
+                    <div class="alert-icon">⚠️</div>
+                    <div class="alert-body">
+                      <strong>Unsupported Model Notice:</strong>
+                      <p id="unsupportedModelText">This model cannot be fine-tuned. Zemo enforces strict honesty: weights are either inaccessible or require multi-node H100 distributed clusters exceeding single-worker capacity. Fine-tuning dispatch is blocked.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Model Metadata Card -->
+                <div class="model-meta-card" id="ptModelMetaCard">
+                  <div class="meta-row">
+                    <span class="meta-label">Architecture Family</span>
+                    <span class="meta-val" id="ptMetaFamily">Transformer (Distilled BERT)</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">Parameters</span>
+                    <span class="meta-val" id="ptMetaParams">66,362,880 (66.4M)</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">Parent Checkpoint</span>
+                    <span class="meta-val font-mono" id="ptMetaCheckpoint">hf:distilbert-base-uncased@8f3a12</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">Compatibility Status</span>
+                    <span class="badge badge-success" id="ptMetaStatus">Verified for Fine-Tuning</span>
+                  </div>
+                </div>
+
+                <!-- 2. Approved Dataset Selection -->
+                <div class="form-group mt-4">
+                  <div class="flex-between">
+                    <label class="form-label" for="ptDatasetSelect">Select Approved Dataset</label>
+                    <span class="caption text-muted">Governance Enforced</span>
+                  </div>
+                  <select class="form-select" id="ptDatasetSelect">
+                    <option value="current" selected>Active Uploaded Dataset (Synchronized from Upload)</option>
+                    <option value="customer-sentiment">Customer Sentiment Reviews (Approved • 10,000 samples • Text/Labels)</option>
+                    <option value="product-feedback">Product Feedback Corpus (Approved • 25,000 samples • Multiclass)</option>
+                    <option value="customer-churn-approved">Customer Churn Records (Approved • 7,043 samples • Tabular)</option>
+                    <option value="housing-sample-approved">Housing Features (Approved • 4,821 samples • Tabular)</option>
+                    <option value="unvetted-scraping-dump">Raw Scraping Dump (FLAGGED • Fails PII Governance Scan)</option>
+                  </select>
+                  <div class="dataset-approval-bar" id="ptDatasetApprovalBar">
+                    <div class="status-indicator">
+                      <span class="status-dot"></span>
+                      <span id="ptDatasetApprovalText">Awaiting Local Dataset Upload</span>
+                    </div>
+                    <span class="caption font-mono" id="ptDatasetRowsBadge">No Dataset Loaded</span>
+                  </div>
+                </div>
+
+                <!-- 3. Adaptation Method -->
+                <div class="form-group mt-4">
+                  <label class="form-label">Supported Adaptation Method</label>
+                  <div class="adaptation-methods-grid">
+                    <label class="method-option-card">
+                      <input type="radio" name="ptMethod" value="head" checked>
+                      <div class="method-card-content">
+                        <div class="method-card-title">Classification-Head Training</div>
+                        <div class="method-card-desc">Freeze backbone layers ($W_{backbone}$ frozen). Train only top classification head. Fast, low memory, prevents catastrophic forgetting.</div>
+                        <div class="method-card-stat">VRAM: ~2.1 GB • Fast</div>
+                      </div>
+                    </label>
+                    <label class="method-option-card">
+                      <input type="radio" name="ptMethod" value="full">
+                      <div class="method-card-content">
+                        <div class="method-card-title">Full Fine-Tuning</div>
+                        <div class="method-card-desc">Unfreeze all transformer layers. Train with lower learning rate ($2\times 10^{-5}$) and linear warmup. Maximum domain adaptation.</div>
+                        <div class="method-card-stat">VRAM: ~7.8 GB • Deep</div>
+                      </div>
+                    </label>
+                    <label class="method-option-card">
+                      <input type="radio" name="ptMethod" value="lora">
+                      <div class="method-card-content">
+                        <div class="method-card-title">LoRA / PEFT (Low-Rank Adapters)</div>
+                        <div class="method-card-desc">Inject trainable rank decomposition matrices ($r=16$) into attention projections. Efficient parameter updates.</div>
+                        <div class="method-card-stat">VRAM: ~3.8 GB • Efficient</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 4. Hyperparameters -->
+                <div class="hyperparams-grid mt-4">
+                  <div class="form-group">
+                    <div class="slider-header">
+                      <label class="form-label" for="ptEpochs">Epochs</label>
+                      <span class="slider-value font-mono" id="valPtEpochs">3</span>
+                    </div>
+                    <input type="range" class="slider" id="ptEpochs" min="1" max="15" value="3" step="1">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="ptLR">Learning Rate</label>
+                    <input type="text" class="form-input font-mono" id="ptLR" value="0.00002" placeholder="e.g., 2e-5">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="ptBatchSize">Batch Size</label>
+                    <select class="form-select font-mono" id="ptBatchSize">
+                      <option value="8">8</option>
+                      <option value="16" selected>16 (Recommended)</option>
+                      <option value="32">32</option>
+                      <option value="64">64</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="ptValSplit">Validation Split</label>
+                    <select class="form-select font-mono" id="ptValSplit">
+                      <option value="10">10% Validation</option>
+                      <option value="15">15% Validation</option>
+                      <option value="20" selected>20% Validation</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Estimated Resource Requirements -->
+                <div class="resource-estimate-box mt-4">
+                  <div class="flex-between">
+                    <span class="resource-box-title">Hardware & Resource Estimates</span>
+                    <span class="caption text-muted">NVIDIA T4 / A10G Profile</span>
+                  </div>
+                  <div class="resource-stats-row">
+                    <div class="resource-item">
+                      <span class="resource-label">GPU VRAM</span>
+                      <span class="resource-val" id="ptEstVRAM">3.8 GB</span>
+                    </div>
+                    <div class="resource-item">
+                      <span class="resource-label">Host RAM</span>
+                      <span class="resource-val">8.0 GB</span>
+                    </div>
+                    <div class="resource-item">
+                      <span class="resource-label">Est. Time</span>
+                      <span class="resource-val" id="ptEstTime">~7m 30s</span>
+                    </div>
+                    <div class="resource-item">
+                      <span class="resource-label">Compute Units</span>
+                      <span class="resource-val">~0.12 units</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              <!-- /MODE A PANEL -->
+
+
+              <!-- MODE B PANEL: TRAIN FROM SCRATCH -->
+              <div class="ai-mode-panel hidden" id="panelScratch">
+                <div class="panel-header-with-badge">
+                  <div>
+                    <span class="caption text-muted">COLD-START ISOLATED PIPELINE</span>
+                    <h3 class="subsection-title">Train from Scratch Settings</h3>
+                  </div>
+                  <span class="badge badge-scratch">Random Weights $W_0$</span>
+                </div>
+
+                <!-- Cold Start Isolation Declaration Banner (Compact) -->
+                <div class="scratch-isolation-banner-compact">
+                  <div class="isolation-compact-icon">🔒</div>
+                  <div class="isolation-compact-body">
+                    <strong>Strict Cold Start Verification:</strong>
+                    <span>Random weights ($W_0 \sim \mathcal{U}$). Zero pretrained checkpoints or external corpora loaded.</span>
+                  </div>
+                  <span class="badge badge-success badge-xs">100% Isolated</span>
+                </div>
+
+                <!-- Educational Distinction Accordion -->
+                <details class="llm-distinction-accordion mt-3">
+                  <summary class="distinction-summary">
+                    <div class="distinction-summary-title">
+                      <span class="distinction-icon">💡</span>
+                      <span>Scope Distinction: Small Task-Specific NN vs. Foundation LLM</span>
+                    </div>
+                    <span class="distinction-summary-badge">View Architecture Comparison ▾</span>
+                  </summary>
+                  <div class="distinction-body mt-3">
+                    <div class="distinction-col">
+                      <span class="distinction-tag tag-supported">Zemo Scratch Mode (Supported)</span>
+                      <p class="distinction-title">Task-Specific Neural Model</p>
+                      <ul class="distinction-list">
+                        <li>Size: ~50K to ~5M parameters</li>
+                        <li>Dataset: Your isolated domain dataset (1K - 100K rows)</li>
+                        <li>Compute: Feasible on single GPU or multi-core CPU</li>
+                        <li>Target: High precision classification, regression, tabular modeling</li>
+                      </ul>
+                    </div>
+                    <div class="distinction-col">
+                      <span class="distinction-tag tag-unsupported">Cluster Scale (Not in-browser)</span>
+                      <p class="distinction-title">Foundation LLM from Scratch</p>
+                      <ul class="distinction-list">
+                        <li>Size: 7 Billion to 70+ Billion parameters</li>
+                        <li>Dataset: Trillions of web tokens (petabytes)</li>
+                        <li>Compute: Thousands of H100 GPUs for months</li>
+                        <li>Cost: Millions of dollars in cluster compute</li>
+                      </ul>
+                    </div>
+                  </div>
+                </details>
+
+                <!-- 1. Supported Architecture & 2. Model Size Side-by-Side in 2 Columns -->
+                <div class="grid-2col mt-4">
+                  <div class="form-group">
+                    <label class="form-label" for="scratchArchSelect">Supported Neural Architecture</label>
+                    <select class="form-select" id="scratchArchSelect">
+                      <option value="mlp" selected>Deep Multi-Layer Perceptron (Dense Net with LayerNorm & Res-Links) — Tabular</option>
+                      <option value="conv1d">1D Convolutional Neural Network (Conv1D-Net) — Sequence Patterns</option>
+                      <option value="bilstm">Bidirectional LSTM (BiLSTM) — Scratch Embeddings</option>
+                      <option value="mini-transformer">Task-Specific Mini-Transformer (2-Layer Self-Attention)</option>
+                      <option value="tabresnet">Tabular ResNet (TabResNet with GLU)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Model Size & Capacity</label>
+                    <div class="size-selection-row">
+                      <label class="size-pill-option">
+                        <input type="radio" name="scratchSize" value="micro">
+                        <span class="size-pill-label">Micro (~45K)</span>
+                      </label>
+                      <label class="size-pill-option">
+                        <input type="radio" name="scratchSize" value="small" checked>
+                        <span class="size-pill-label">Small (~220K)</span>
+                      </label>
+                      <label class="size-pill-option">
+                        <input type="radio" name="scratchSize" value="medium">
+                        <span class="size-pill-label">Med (~1.1M)</span>
+                      </label>
+                      <label class="size-pill-option">
+                        <input type="radio" name="scratchSize" value="large">
+                        <span class="size-pill-label">Lrg (~4.8M)</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. Target Task Selection & Weight Init & Validation -->
+                <div class="form-group mt-4">
+                  <div class="grid-2col">
+                    <div>
+                      <label class="form-label" for="scratchTaskSelect">Target Task</label>
+                      <select class="form-select" id="scratchTaskSelect">
+                        <option value="binary" selected>Binary Classification</option>
+                        <option value="multiclass">Multi-Class Classification</option>
+                        <option value="regression">Regression (Continuous Target)</option>
+                        <option value="anomaly">Sequence / Tabular Anomaly Detection</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="form-label" for="scratchInitSelect">Weight Initialization Scheme</label>
+                      <select class="form-select" id="scratchInitSelect">
+                        <option value="glorot-uniform" selected>Glorot / Xavier Uniform ($W \sim \mathcal{U}$)</option>
+                        <option value="he-normal">He / Kaiming Normal (Optimal for ReLU)</option>
+                        <option value="lecun-normal">LeCun Normal (SELU)</option>
+                        <option value="orthogonal">Orthogonal Random Matrix</option>
+                      </select>
+                    </div>
+                  </div>
+                  <!-- Validation result box -->
+                  <div class="dataset-task-validation-box mt-3" id="scratchTaskValidationBox">
+                    <div class="validation-status-line">
+                      <span class="status-dot"></span>
+                      <span id="scratchValidationMsg">Architecture initialized with random weights ($W_0$). Awaiting dataset.</span>
+                    </div>
+                    <div class="caption text-muted" id="scratchSampleCheck">No dataset loaded yet. Upload a dataset in Step 01 to validate task compatibility and sample volume.</div>
+                  </div>
+                </div>
+
+                <!-- 4. Preprocessing & Splits -->
+                <div class="form-group mt-4">
+                  <label class="form-label">Preprocessing & Data Splits</label>
+                  <div class="grid-3col">
+                    <div>
+                      <span class="caption text-muted">Partition Split</span>
+                      <select class="form-select mt-1" id="scratchSplitSelect">
+                        <option value="70-15-15" selected>70% Train / 15% Val / 15% Test</option>
+                        <option value="80-10-10">80% Train / 10% Val / 10% Test</option>
+                        <option value="60-20-20">60% Train / 20% Val / 20% Test</option>
+                      </select>
+                    </div>
+                    <div>
+                      <span class="caption text-muted">Numerical Scaling</span>
+                      <select class="form-select mt-1" id="scratchScalerSelect">
+                        <option value="standard" selected>StandardScaler (Z-Score)</option>
+                        <option value="minmax">MinMaxScaler [0, 1]</option>
+                        <option value="robust">RobustScaler (IQR)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <span class="caption text-muted">Categorical Encoding</span>
+                      <select class="form-select mt-1" id="scratchEncodingSelect">
+                        <option value="onehot" selected>One-Hot Encoding</option>
+                        <option value="embeddings">Learned Embedding Layer</option>
+                        <option value="ordinal">Ordinal Encoding</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 5. Scratch Hyperparameters -->
+                <div class="hyperparams-grid mt-4">
+                  <div class="form-group">
+                    <div class="slider-header">
+                      <label class="form-label" for="scratchEpochs">Epochs</label>
+                      <span class="slider-value font-mono" id="valScratchEpochs">50</span>
+                    </div>
+                    <input type="range" class="slider" id="scratchEpochs" min="10" max="200" value="50" step="5">
+                    <span class="caption text-muted">Scratch models require 30-100 epochs to converge.</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="scratchLR">Learning Rate</label>
+                    <input type="text" class="form-input font-mono" id="scratchLR" value="0.001" placeholder="e.g., 1e-3">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="scratchBatchSize">Batch Size</label>
+                    <select class="form-select font-mono" id="scratchBatchSize">
+                      <option value="16">16</option>
+                      <option value="32" selected>32</option>
+                      <option value="64">64</option>
+                      <option value="128">128</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <div class="slider-header">
+                      <label class="form-label" for="scratchDropout">Dropout Rate</label>
+                      <span class="slider-value font-mono" id="valScratchDropout">0.20</span>
+                    </div>
+                    <input type="range" class="slider" id="scratchDropout" min="0" max="0.5" value="0.2" step="0.05">
+                  </div>
+                </div>
+
+                <!-- Hardware Limitations Warning -->
+                <div class="resource-estimate-box mt-4">
+                  <div class="flex-between">
+                    <span class="resource-box-title">Hardware & Resource Boundaries</span>
+                    <span class="badge badge-sage">Feasible on Standard Worker</span>
+                  </div>
+                  <div class="resource-stats-row">
+                    <div class="resource-item">
+                      <span class="resource-label">Compute FLOPs</span>
+                      <span class="resource-val">~1.4 GFLOPs</span>
+                    </div>
+                    <div class="resource-item">
+                      <span class="resource-label">Memory Footprint</span>
+                      <span class="resource-val">~1.2 GB</span>
+                    </div>
+                    <div class="resource-item">
+                      <span class="resource-label">GPU Acceleration</span>
+                      <span class="resource-val">Optional (CPU Supported)</span>
+                    </div>
+                    <div class="resource-item">
+                      <span class="resource-label">Early Stopping</span>
+                      <span class="resource-val">Patience = 10 epochs</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              <!-- /MODE B PANEL -->
+
+            </div>
+            <!-- /Scrollable Panels Container -->
+
+            <!-- Pinned Bottom Dock: Governance & Action Buttons -->
+            <div class="ai-studio-bottom-dock">
+              <!-- ZEMO DATASET SECURITY & GOVERNANCE SCAN GATEWAY -->
+              <div class="governance-gateway-box">
+                <div class="flex-between">
+                  <div>
+                    <span class="caption text-muted">GOVERNANCE & SAFETY GATEWAY</span>
+                    <h4 class="gateway-title">Dataset Security & Policy Verification</h4>
+                  </div>
+                  <button class="btn btn-secondary btn-sm" id="btnRunSecurityScan">Run Policy Scan</button>
+                </div>
+                <div class="gateway-status-row mt-2" id="gatewayStatusRow">
+                  <div class="gateway-badge passed" id="gatewayBadge">
+                    <span class="status-dot"></span>
+                    <span id="gatewayStatusText">Policy Status: Verified & Approved</span>
+                  </div>
+                  <span class="caption text-muted" id="gatewayDetailText">0 PII violations • Target column confirmed • Validated against Restrictions rules</span>
+                </div>
+              </div>
+
+              <!-- PRIMARY ACTIONS & PRE-FLIGHT REVIEW TRIGGER -->
+              <div class="studio-action-row mt-3">
+                <button class="btn btn-secondary" id="btnReviewPlan">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  Review Experiment Plan
+                </button>
+                <button class="btn btn-primary btn-olive" id="btnLaunchTrainingDemo">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                  Confirm & Dispatch Training [DEMO]
+                </button>
+                <button class="btn btn-ghost btn-sm" id="btnViewBackendSpec">
+                  Backend API Spec
+                </button>
+              </div>
+            </div>
+            <!-- /ai-studio-bottom-dock -->
+
+          </div>
+          <!-- /Left Column -->
+
+
+          <!-- Right Column: Training Assistant Chatbox -->
+          <div class="ai-studio-chat-col">
+            <div class="training-assistant-card" id="trainingAssistantCard">
+              <!-- Chatbox Header -->
+              <div class="chatbox-header">
+                <div class="chatbox-header-info">
+                  <div class="assistant-avatar">Z</div>
+                  <div>
+                    <h3 class="chatbox-title">Zemo Training Assistant</h3>
+                    <div class="status-indicator">
+                      <span class="status-dot"></span>
+                      <span class="caption text-muted">Active Session • AI Guide</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="chatbox-actions">
+                  <button class="btn btn-ghost btn-xs" id="btnClearChat" title="Clear chat history">Clear History</button>
+                </div>
+              </div>
+
+              <!-- Suggested Prompt Chips -->
+              <div class="chatbox-chips-container">
+                <span class="caption text-muted chip-heading">Suggested Prompts:</span>
+                <div class="prompt-chips-scroll">
+                  <button class="prompt-chip" data-prompt="Train a sentiment classifier using my uploaded dataset.">
+                    Train a sentiment classifier using my uploaded dataset.
+                  </button>
+                  <button class="prompt-chip" data-prompt="Help me fine-tune a supported pre-trained model.">
+                    Help me fine-tune a supported pre-trained model.
+                  </button>
+                  <button class="prompt-chip" data-prompt="Build a new text classification model from scratch using only my dataset.">
+                    Build a new text classification model from scratch using only my dataset.
+                  </button>
+                  <button class="prompt-chip" data-prompt="Analyze my dataset and recommend a suitable training approach.">
+                    Analyze my dataset and recommend a suitable training approach.
+                  </button>
+                  <button class="prompt-chip" data-prompt="Explain my model's evaluation metrics.">
+                    Explain my model's evaluation metrics.
+                  </button>
+                </div>
+              </div>
+
+              <!-- Chat Message Stream -->
+              <div class="chat-messages-stream" id="chatMessagesStream">
+                <!-- Initial Assistant Welcome Message -->
+                <div class="chat-message assistant">
+                  <div class="msg-avatar">Z</div>
+                  <div class="msg-bubble">
+                    <div class="msg-author">Zemo Assistant <span class="msg-time">Just now</span></div>
+                    <div class="msg-content">
+                      <p>Hello! I am your <strong>Zemo Training Assistant</strong>. I can help you define your training goal, select between <strong>Pre-trained Adaptation</strong> and <strong>Train from Scratch</strong>, validate dataset policy compliance, tune hyperparameters, and interpret evaluation metrics.</p>
+                      <p>Click any suggested prompt chip above or describe what you want to build below.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Chat Input Area -->
+              <div class="chatbox-input-wrapper">
+                <form class="chatbox-input-form" id="chatForm">
+                  <input type="text" class="chatbox-input" id="chatInput" placeholder="Ask assistant: 'Fine-tune a classifier' or 'Analyze my dataset'..." autocomplete="off">
+                  <button type="submit" class="btn btn-primary btn-sm btn-olive" id="btnChatSend" aria-label="Send message">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                  </button>
+                </form>
+                <div class="chatbox-disclaimer">
+                  <span>🔒 Safe client session • No arbitrary execution • No secrets exposed</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <!-- /Right Column -->
+
+        </div>
+        <!-- /Main Studio Grid -->
+
+
+        <!-- LIVE TRAINING PROGRESS, LOGS & EVALUATION VISUALIZER (SIMULATED PROTOTYPE) -->
+        <div class="training-live-monitor mt-12 hidden" id="trainingLiveMonitor">
+          <div class="monitor-header">
+            <div>
+              <span class="caption text-muted">EXPERIMENT EXECUTION RUNNER</span>
+              <h3 class="subsection-title" id="liveMonitorTitle">Training Job: exp-ft-distilbert-v1</h3>
+            </div>
+            <div class="monitor-status-cluster">
+              <span class="queue-status training" id="liveJobStatusBadge"><span class="pulse-dot"></span> Training [DEMO]</span>
+              <button class="btn btn-danger btn-sm" id="btnCancelTrainingJob">Cancel Job</button>
+            </div>
+          </div>
+
+          <!-- Progress Bar & Key Stats -->
+          <div class="monitor-progress-wrapper mt-4">
+            <div class="progress-container">
+              <div class="progress-bar animated" style="width: 0%;" id="liveTrainingProgressBar"></div>
+            </div>
+            <div class="monitor-stats-grid mt-4">
+              <div class="monitor-stat-card">
+                <span class="stat-label">Epoch</span>
+                <span class="stat-value font-mono" id="liveStatEpoch">0 / 3</span>
+              </div>
+              <div class="monitor-stat-card">
+                <span class="stat-label">Train Loss</span>
+                <span class="stat-value font-mono" id="liveStatTrainLoss">--</span>
+              </div>
+              <div class="monitor-stat-card">
+                <span class="stat-label">Val Loss</span>
+                <span class="stat-value font-mono" id="liveStatValLoss">--</span>
+              </div>
+              <div class="monitor-stat-card">
+                <span class="stat-label">Accuracy / F1</span>
+                <span class="stat-value font-mono" id="liveStatAccuracy">--</span>
+              </div>
+              <div class="monitor-stat-card">
+                <span class="stat-label">Elapsed</span>
+                <span class="stat-value font-mono" id="liveStatElapsed">00:00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Terminal Logs Stream -->
+          <div class="live-terminal-wrapper mt-6">
+            <div class="terminal-bar">
+              <div class="terminal-dots">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <span class="terminal-title">Execution Worker Log Stream [DEMO]</span>
+              <span class="caption font-mono" id="liveLogCount">0 events</span>
+            </div>
+            <div class="terminal-logs-body" id="liveTerminalLogsBody">
+              <div class="log-entry">
+                <span class="log-timestamp">[00:00:00]</span>
+                <span class="log-level info">INFO</span>
+                <span class="log-message">[DEMO] Awaiting job launch dispatch...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Evaluation Results & Checkpoints Table -->
+          <div class="evaluation-results-box mt-8 hidden" id="liveEvaluationResultsBox">
+            <div class="flex-between">
+              <div>
+                <span class="caption text-muted">FINAL RUN BENCHMARKS</span>
+                <h4 class="subsection-title">Model Evaluation Metrics [DEMO]</h4>
+              </div>
+              <span class="badge badge-success">Training Completed [DEMO]</span>
+            </div>
+            <div class="results-metrics-grid mt-4">
+              <div class="result-metric-card">
+                <span class="result-metric-label">Final Validation Loss</span>
+                <div class="result-metric-val accent" id="finalValLoss">0.0241</div>
+              </div>
+              <div class="result-metric-card">
+                <span class="result-metric-label">Macro F1 Score</span>
+                <div class="result-metric-val" id="finalF1">0.9380</div>
+              </div>
+              <div class="result-metric-card">
+                <span class="result-metric-label">Evaluation Accuracy</span>
+                <div class="result-metric-val" id="finalAccuracy">94.2%</div>
+              </div>
+              <div class="result-metric-card">
+                <span class="result-metric-label">Inference Latency</span>
+                <div class="result-metric-val" id="finalLatency">1.2 ms/item</div>
+              </div>
+            </div>
+
+            <!-- Checkpoints Saved History -->
+            <div class="checkpoints-container mt-6">
+              <span class="caption text-muted">SAVED MODEL ARTIFACTS & CHECKPOINTS</span>
+              <div class="checkpoints-table-wrapper mt-2">
+                <table class="data-table" id="checkpointsTable">
+                  <thead>
+                    <tr>
+                      <th>Artifact Name</th>
+                      <th>Checkpoint Type</th>
+                      <th>Epoch</th>
+                      <th>Val Loss</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="checkpointsTableBody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="demo-notice mt-6">
+              <strong>Honesty Notice:</strong> This model training simulation illustrates the complete parameter configuration and evaluation telemetry pipeline. Connect a backend GPU worker cluster to execute real PyTorch/TensorFlow weight updates.
+            </div>
+          </div>
+
+        </div>
+        <!-- /Live Training Monitor -->
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       PRE-FLIGHT REVIEW MODAL
+       ============================================================ -->
+  <div class="modal-overlay" id="preflightReviewModal">
+    <div class="modal review-modal-dialog">
+      <div class="modal-header">
+        <div>
+          <span class="caption text-muted">STEP BEFORE EXECUTION</span>
+          <h3>Pre-Flight Training Review</h3>
+        </div>
+        <button class="modal-close" id="btnCloseReviewModal" aria-label="Close review dialog">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="review-provenance-box">
+          <div class="review-row">
+            <span class="review-label">Selected Mode</span>
+            <span class="review-val font-mono" id="reviewModeVal">Pre-trained Model Adaptation</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Architecture / Backbone</span>
+            <span class="review-val" id="reviewArchVal">DistilBERT-Base-Uncased (66.4M params)</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Weights Provenance</span>
+            <span class="review-val font-mono" id="reviewWeightsVal">Transfer Checkpoint (hf:distilbert-base)</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Dataset</span>
+            <span class="review-val" id="reviewDatasetVal">Customer Sentiment Reviews (10,000 samples)</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Governance Status</span>
+            <span class="badge badge-success" id="reviewGovVal">Passed (0 Policy Violations)</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Key Hyperparameters</span>
+            <span class="review-val font-mono" id="reviewParamsVal">Epochs: 3 | Batch: 16 | LR: 2e-5 | Split: 80/20</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Resource Estimate</span>
+            <span class="review-val" id="reviewResourceVal">~3.8 GB VRAM • ~7m 30s Runtime</span>
+          </div>
+        </div>
+
+        <div class="demo-notice mt-4">
+          <strong>Frontend Prototype Disclaimer:</strong> Backend execution cluster is not connected. Dispatching will trigger a demonstration simulation workflow with telemetry.
+        </div>
+      </div>
+      <div class="modal-footer mt-6">
+        <button class="btn btn-secondary" id="btnCancelReviewModal">Return to Configuration</button>
+        <button class="btn btn-primary btn-olive" id="btnConfirmAndLaunch">Confirm & Dispatch Job [DEMO]</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       BACKEND INTEGRATION SPECIFICATION MODAL
+       ============================================================ -->
+  <div class="modal-overlay" id="backendSpecModal">
+    <div class="modal spec-modal-dialog">
+      <div class="modal-header">
+        <div>
+          <span class="caption text-muted">DEVELOPER INTEGRATION ARCHITECTURE</span>
+          <h3>Backend Training Contract</h3>
+        </div>
+        <button class="modal-close" id="btnCloseSpecModal" aria-label="Close spec dialog">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body spec-body-content">
+        <p class="body-sm text-secondary">To connect this frontend to a real GPU training worker (PyTorch, Ray Train, or Celery), implement the following endpoints and data contracts:</p>
+        
+        <div class="spec-endpoint-card mt-4">
+          <span class="spec-method post">POST</span>
+          <span class="spec-path">/api/v1/training/pretrained</span>
+          <p class="spec-desc">Dispatches pre-trained fine-tuning or head-only adaptation. Validates model registry checkpoint.</p>
+          <pre class="spec-code-sample"><code>{
+  "mode": "pretrained",
+  "model_id": "distilbert-base-uncased",
+  "method": "classification-head", // or "full" or "lora"
+  "dataset_id": "ds_sentiment_v1",
+  "hyperparameters": {
+    "epochs": 3,
+    "learning_rate": 0.00002,
+    "batch_size": 16,
+    "validation_split": 0.20
+  },
+  "governance_verified": true
+}</code></pre>
+        </div>
+
+        <div class="spec-endpoint-card mt-4">
+          <span class="spec-method post">POST</span>
+          <span class="spec-path">/api/v1/training/scratch</span>
+          <p class="spec-desc">Initializes model from scratch with random weights ($W_0$). Strictly refuses external checkpoints.</p>
+          <pre class="spec-code-sample"><code>{
+  "mode": "scratch",
+  "architecture": "mlp", // "conv1d", "bilstm", "mini-transformer", "tabresnet"
+  "size": "small",
+  "task": "binary_classification",
+  "init_scheme": "glorot_uniform",
+  "dataset_id": "ds_churn_v1",
+  "zero_checkpoints_enforced": true,
+  "preprocessing": {
+    "scaler": "standard",
+    "encoding": "onehot",
+    "split": [0.70, 0.15, 0.15]
+  },
+  "hyperparameters": {
+    "epochs": 50,
+    "learning_rate": 0.001,
+    "batch_size": 32,
+    "dropout": 0.2
+  }
+}</code></pre>
+        </div>
+
+        <div class="spec-endpoint-card mt-4">
+          <span class="spec-method ws">WSS</span>
+          <span class="spec-path">/api/v1/training/jobs/{job_id}/stream</span>
+          <p class="spec-desc">WebSocket stream emitting live epoch progress, train/val losses, logs, and checkpoint artifacts.</p>
+        </div>
+      </div>
+      <div class="modal-footer mt-6">
+        <button class="btn btn-secondary" id="btnDismissSpecModal">Close Specification</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="logo">Zemo<span class="logo-dot"></span></a>
+          <p>AI/ML model training and experimentation platform. Configure, train, and evaluate machine learning models with precision and control.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <a href="#upload">Dataset Upload</a>
+          <a href="#restrictions">Restrictions</a>
+          <a href="#output">Output Preview</a>
+          <a href="#training">Training Lab</a>
+          <a href="#ai-training">AI Training Studio</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="#">Documentation</a>
+          <a href="#">API Reference</a>
+          <a href="#">Tutorials</a>
+          <a href="#">Community</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="#">About</a>
+          <a href="#">Blog</a>
+          <a href="#">Careers</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Zemo. All rights reserved.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Security</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Notification -->
+  <div class="notification" id="notification">
+    <span id="notificationText"></span>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
