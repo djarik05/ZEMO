@@ -3269,9 +3269,250 @@
       dlBtn.setAttribute('download', `${exp.name || 'model'}.joblib`);
     }
 
+    // Phase 6: Initialize interactive Prediction Engine and Export Bundle
+    setupModelPredictionAndExport(exp);
+
     const panel = document.getElementById('resultsPlaceholderPanel');
     if (panel) {
       panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  let activeInferenceExperiment = null;
+
+  async function setupModelPredictionAndExport(exp) {
+    activeInferenceExperiment = exp;
+    const container = document.getElementById('modelPredictionAndExportContainer');
+    if (!container || !exp || !exp.id) return;
+
+    container.classList.remove('hidden');
+
+    // Download links
+    const dlJoblib = document.getElementById('btnDownloadJoblib');
+    const dlPkl = document.getElementById('btnDownloadPkl');
+    const dlBundle = document.getElementById('btnDownloadBundleZip');
+
+    if (dlJoblib) {
+      dlJoblib.href = `${API_BASE}/experiments/${encodeURIComponent(exp.id)}/download?format=joblib`;
+      dlJoblib.setAttribute('download', `zemo_${exp.name || 'model'}.joblib`);
+    }
+    if (dlPkl) {
+      dlPkl.href = `${API_BASE}/experiments/${encodeURIComponent(exp.id)}/download?format=pkl`;
+      dlPkl.setAttribute('download', `zemo_${exp.name || 'model'}.pkl`);
+    }
+    if (dlBundle) {
+      dlBundle.href = `${API_BASE}/experiments/${encodeURIComponent(exp.id)}/export-bundle`;
+      dlBundle.setAttribute('download', `zemo_bundle_${exp.name || 'model'}.zip`);
+    }
+
+    // Setup input tabs
+    const tabForm = document.getElementById('tabPredForm');
+    const tabJson = document.getElementById('tabPredJson');
+    const viewForm = document.getElementById('predFormView');
+    const viewJson = document.getElementById('predJsonView');
+
+    if (tabForm && tabJson && viewForm && viewJson) {
+      tabForm.onclick = () => {
+        tabForm.classList.add('active');
+        tabJson.classList.remove('active');
+        viewForm.classList.remove('hidden');
+        viewJson.classList.add('hidden');
+      };
+      tabJson.onclick = () => {
+        tabJson.classList.add('active');
+        tabForm.classList.remove('active');
+        viewJson.classList.remove('hidden');
+        viewForm.classList.add('hidden');
+      };
+    }
+
+    // Fetch feature schema from metadata endpoint
+    let featureList = [];
+    try {
+      const metaRes = await fetch(`${API_BASE}/experiments/${encodeURIComponent(exp.id)}/metadata`);
+      if (metaRes.ok) {
+        const meta = await metaRes.json();
+        featureList = (meta.feature_schema && meta.feature_schema.features) || [];
+      }
+    } catch (e) {
+      console.warn('Could not fetch model metadata:', e);
+    }
+
+    if (!featureList || featureList.length === 0) {
+      if (exp.config && exp.config.selected_features) {
+        featureList = exp.config.selected_features;
+      } else if (state.analysis && state.analysis.numerical_columns) {
+        featureList = [...state.analysis.numerical_columns];
+      }
+    }
+
+    // Render Form Fields
+    const fieldsContainer = document.getElementById('dynamicPredictionFields');
+    const sampleRecord = {};
+    if (fieldsContainer) {
+      if (featureList.length > 0) {
+        fieldsContainer.innerHTML = featureList.map(feat => {
+          sampleRecord[feat] = 1.0;
+          return `
+            <div class="form-group" style="margin-bottom: 8px;">
+              <label class="form-label font-mono" style="font-size: 11px;">${escapeHtml(feat)}</label>
+              <input type="text" class="form-input pred-feature-input" data-feature="${escapeHtml(feat)}" placeholder="Enter value..." value="1.0" style="padding: 6px 10px; font-size: 12px;">
+            </div>
+          `;
+        }).join('');
+      } else {
+        fieldsContainer.innerHTML = `<p class="caption text-muted" style="grid-column: span 2;">No explicit features detected. You may use Batch JSON Input directly.</p>`;
+      }
+    }
+
+    // Prefill JSON Input
+    const txtJson = document.getElementById('txtPredictionJson');
+    if (txtJson && Object.keys(sampleRecord).length > 0) {
+      txtJson.value = JSON.stringify([sampleRecord], null, 2);
+    }
+
+    // Wire Execute Button
+    const btnExecute = document.getElementById('btnExecutePrediction');
+    if (btnExecute) {
+      btnExecute.onclick = () => runModelInference(exp.id, featureList);
+    }
+  }
+
+  async function runModelInference(expId, expectedFeatures) {
+    const statusMsg = document.getElementById('predictionStatusMessage');
+    const resultsContainer = document.getElementById('predictionResultsContainer');
+    const resultsOutput = document.getElementById('predictionOutputContent');
+    const latencyBadge = document.getElementById('predictionLatencyBadge');
+    const chkProbs = document.getElementById('chkIncludeProbabilities');
+
+    const isFormActive = document.getElementById('tabPredForm')?.classList.contains('active');
+    let inputPayload = null;
+
+    if (isFormActive) {
+      const inputs = document.querySelectorAll('.pred-feature-input');
+      const row = {};
+      inputs.forEach(inp => {
+        const featName = inp.dataset.feature;
+        const rawVal = inp.value.trim();
+        const numVal = Number(rawVal);
+        row[featName] = isNaN(numVal) || rawVal === '' ? rawVal : numVal;
+      });
+      inputPayload = row;
+    } else {
+      const rawJson = document.getElementById('txtPredictionJson')?.value || '';
+      try {
+        inputPayload = JSON.parse(rawJson);
+      } catch (err) {
+        showNotification('Invalid JSON input for prediction: ' + err.message, 'warning');
+        return;
+      }
+    }
+
+    if (statusMsg) statusMsg.textContent = 'Executing inference...';
+
+    try {
+      const res = await fetch(`${API_BASE}/experiments/${encodeURIComponent(expId)}/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: inputPayload,
+          include_probabilities: chkProbs ? chkProbs.checked : true,
+        }),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.detail || `Prediction failed with status ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (statusMsg) statusMsg.textContent = 'Prediction complete';
+      if (latencyBadge) latencyBadge.textContent = `${data.latency_ms.toFixed(2)} ms`;
+
+      if (resultsContainer) resultsContainer.classList.remove('hidden');
+
+      if (resultsOutput) {
+        let html = '';
+
+        if (data.sample_count === 1) {
+          const pred = data.predictions[0];
+          html += `
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px; display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <span class="caption text-muted" style="text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em;">Predicted Result</span>
+                <div style="font-size: 20px; font-weight: 700; color: var(--deep-olive); font-family: var(--font-mono); margin-top: 2px;">
+                  ${escapeHtml(String(pred))}
+                </div>
+              </div>
+              <span class="badge" style="background: rgba(46, 125, 50, 0.1); color: #2e7d32; font-weight: 600; font-size: 11px;">
+                Task: ${escapeHtml(data.task)}
+              </span>
+            </div>
+          `;
+
+          if (data.probabilities && data.probabilities.length > 0) {
+            const probDist = data.probabilities[0];
+            html += `
+              <div class="mt-3">
+                <span class="caption font-mono" style="font-size: 11px; font-weight: 600;">Prediction Probabilities</span>
+                <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+                  ${Object.entries(probDist).map(([cls, prob]) => {
+                    const pct = (prob * 100).toFixed(1);
+                    return `
+                      <div>
+                        <div class="flex-between caption" style="font-size: 11px; margin-bottom: 2px;">
+                          <span class="font-mono">${escapeHtml(cls)}</span>
+                          <span style="font-weight: 600;">${pct}%</span>
+                        </div>
+                        <div style="background: rgba(158, 172, 149, 0.2); height: 6px; border-radius: 3px; overflow: hidden;">
+                          <div style="background: var(--deep-olive); height: 100%; width: ${pct}%;"></div>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            `;
+          }
+        } else {
+          // Batch table
+          html += `
+            <div style="overflow-x: auto; max-height: 250px;">
+              <table style="width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 11px;">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--border-subtle); background: var(--bg-surface);">
+                    <th style="padding: 6px 10px; text-align: left;">#</th>
+                    <th style="padding: 6px 10px; text-align: left;">Prediction</th>
+                    ${data.probabilities ? '<th style="padding: 6px 10px; text-align: left;">Top Probability</th>' : ''}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${data.predictions.map((p, idx) => {
+                    let probCell = '';
+                    if (data.probabilities && data.probabilities[idx]) {
+                      const maxEntry = Object.entries(data.probabilities[idx]).sort((a,b) => b[1] - a[1])[0];
+                      probCell = `<td style="padding: 5px 10px;">${escapeHtml(maxEntry[0])} (${(maxEntry[1]*100).toFixed(1)}%)</td>`;
+                    }
+                    return `
+                      <tr style="border-bottom: 1px solid var(--border-subtle);">
+                        <td style="padding: 5px 10px; color: var(--text-muted);">${idx + 1}</td>
+                        <td style="padding: 5px 10px; font-weight: 600; color: var(--deep-olive);">${escapeHtml(String(p))}</td>
+                        ${probCell}
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+
+        resultsOutput.innerHTML = html;
+      }
+      showNotification('Prediction generated successfully!', 'success');
+    } catch (err) {
+      if (statusMsg) statusMsg.textContent = 'Error';
+      showNotification('Prediction failed: ' + err.message, 'warning');
     }
   }
 

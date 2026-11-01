@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Union
 from pydantic import BaseModel, Field
 
 
@@ -83,4 +83,41 @@ class CompareExperimentsResponse(BaseModel):
     best_model: Optional[Dict[str, Any]] = None
     metrics_comparison: Dict[str, Dict[str, Any]]
     recommendation: str
+
+
+class PredictionRequest(BaseModel):
+    data: Union[List[Dict[str, Any]], Dict[str, Any]] = Field(..., description="Single row object or list of row objects containing feature values.")
+    include_probabilities: bool = Field(default=True, description="Whether to include probability distribution for classification.")
+
+
+class PredictionResponse(BaseModel):
+    experiment_id: str
+    task: str
+    algorithm_id: str
+    predictions: List[Any]
+    probabilities: Optional[List[Dict[str, float]]] = None
+    sample_count: int
+    features_used: List[str]
+    latency_ms: float
+    timestamp: str
+
+
+class ModelMetadataResponse(BaseModel):
+    model_id: str
+    name: str
+    task: str
+    algorithm_id: str
+    dataset_id: str
+    dataset_version_id: Optional[str] = None
+    created_at: Optional[str] = None
+    completed_at: Optional[str] = None
+    duration_seconds: Optional[float] = None
+    feature_schema: Dict[str, Any]
+    preprocessing_strategy: Dict[str, Any]
+    hyperparameters: Dict[str, Any]
+    metrics: Dict[str, Any]
+    framework: str = "Scikit-learn"
+    serialization_format: str = "Joblib"
+    sample_prediction_code: str
+
 

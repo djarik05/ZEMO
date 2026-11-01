@@ -4,13 +4,15 @@ FastAPI Router for ML Experiments and Model Training.
 
 from __future__ import annotations
 
+import json
 import os
+import pickle
 import uuid
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,12 +24,16 @@ from services.ml.job_manager import TrainingJobManager
 from services.ml.loader import DatasetLoader, get_dataset_loader
 from services.ml.pipeline_builder import TrainingConfig
 from services.ml.evaluator import ExperimentComparator
+from services.ml.predictor import ModelPredictor, get_model_predictor
 from api.v1.experiments.schemas import (
     CancelExperimentResponse,
     CompareExperimentsRequest,
     CompareExperimentsResponse,
     ExperimentListResponse,
     ExperimentResponse,
+    ModelMetadataResponse,
+    PredictionRequest,
+    PredictionResponse,
     TrainExperimentRequest,
 )
 
@@ -347,11 +353,14 @@ async def delete_experiment(
 @router.get(
     "/{experiment_id}/download",
     summary="Download Trained Model Artifact",
+    description="Download the fitted Scikit-learn model artifact in .joblib or .pkl format.",
 )
 async def download_model(
     experiment_id: str,
+    format: Literal["joblib", "pkl"] = Query(default="joblib", description="Artifact format: joblib or pkl"),
     session: AsyncSession = Depends(get_db_session),
-) -> FileResponse:
+    predictor: ModelPredictor = Depends(get_model_predictor),
+) -> Response:
     stmt = select(Experiment).where(Experiment.id == experiment_id)
     res = await session.execute(stmt)
     experiment = res.scalar_one_or_none()
@@ -362,8 +371,173 @@ async def download_model(
     if not experiment.artifact_path or not os.path.exists(experiment.artifact_path):
         raise NotFoundError("Model artifact file does not exist or training did not complete.")
 
+    try:
+        predictor.validate_trusted_path(experiment_id)
+    except Exception as e:
+        raise NotFoundError(f"Secure artifact validation failed: {e}")
+
+    filename_base = f"zemo_{experiment.task}_{experiment.algorithm_id}_{experiment.id[:8]}"
+
+    if format == "pkl":
+        pipeline = predictor.load_trusted_pipeline(experiment_id)
+        pkl_bytes = pickle.dumps(pipeline)
+        return Response(
+            content=pkl_bytes,
+            media_type="application/octet-stream",
+            headers={"Content-Disposition": f'attachment; filename="{filename_base}.pkl"'},
+        )
+
     return FileResponse(
         experiment.artifact_path,
         media_type="application/octet-stream",
-        filename=f"zemo_{experiment.task}_{experiment.algorithm_id}_{experiment.id[:8]}.joblib",
+        filename=f"{filename_base}.joblib",
     )
+
+
+@router.get(
+    "/{experiment_id}/metadata",
+    response_model=ModelMetadataResponse,
+    summary="Get Model Metadata & Schema",
+    description="Returns model metadata, feature requirements, hyperparameter configuration, evaluation metrics, and sample Python inference code.",
+)
+async def get_model_metadata(
+    experiment_id: str,
+    session: AsyncSession = Depends(get_db_session),
+    predictor: ModelPredictor = Depends(get_model_predictor),
+) -> ModelMetadataResponse:
+    stmt = select(Experiment).where(Experiment.id == experiment_id)
+    res = await session.execute(stmt)
+    experiment = res.scalar_one_or_none()
+
+    if not experiment:
+        raise NotFoundError(f"Experiment '{experiment_id}' not found.")
+
+    cfg = experiment.config or {}
+    metrics = experiment.metrics or {}
+    feature_columns = cfg.get("selected_features", [])
+
+    sample_dict = {col: 1.0 for col in feature_columns}
+    sample_code = f'''import joblib
+import pandas as pd
+
+# 1. Load pipeline (fitted preprocessor + estimator)
+pipeline = joblib.load("model.joblib")
+
+# 2. New data matching required feature schema
+input_data = pd.DataFrame([{json.dumps(sample_dict, indent=4)}])
+
+# 3. Predict directly on raw inputs
+predictions = pipeline.predict(input_data)
+print("Predictions:", predictions)
+'''
+
+    return ModelMetadataResponse(
+        model_id=experiment.id,
+        name=experiment.name,
+        task=experiment.task,
+        algorithm_id=experiment.algorithm_id,
+        dataset_id=experiment.dataset_id,
+        dataset_version_id=experiment.dataset_version_id,
+        created_at=experiment.created_at.isoformat() if experiment.created_at else None,
+        completed_at=experiment.completed_at.isoformat() if experiment.completed_at else None,
+        duration_seconds=experiment.duration_seconds,
+        feature_schema={
+            "features": feature_columns,
+            "target_column": cfg.get("target_column"),
+            "classes": metrics.get("classes"),
+        },
+        preprocessing_strategy={
+            "missing_numeric": cfg.get("missing_numeric_strategy", "mean"),
+            "missing_categorical": cfg.get("missing_categorical_strategy", "most_frequent"),
+            "encoding": cfg.get("encoding_strategy", "auto"),
+            "scaling": cfg.get("scaling_strategy", "standard"),
+        },
+        hyperparameters=experiment.hyperparameters or {},
+        metrics={k: v for k, v in metrics.items() if not isinstance(v, (dict, list)) or k in ("confusion_matrix", "classes")},
+        framework="Scikit-learn",
+        serialization_format="Joblib",
+        sample_prediction_code=sample_code,
+    )
+
+
+@router.get(
+    "/{experiment_id}/export-bundle",
+    summary="Download Model Export Bundle (.zip)",
+    description="Downloads a self-contained ZIP archive containing model.joblib, model.pkl, metadata.json, and standalone predict_example.py.",
+)
+async def export_model_bundle(
+    experiment_id: str,
+    session: AsyncSession = Depends(get_db_session),
+    predictor: ModelPredictor = Depends(get_model_predictor),
+) -> StreamingResponse:
+    stmt = select(Experiment).where(Experiment.id == experiment_id)
+    res = await session.execute(stmt)
+    experiment = res.scalar_one_or_none()
+
+    if not experiment:
+        raise NotFoundError(f"Experiment '{experiment_id}' not found.")
+
+    if not experiment.artifact_path or not os.path.exists(experiment.artifact_path):
+        raise NotFoundError("Model artifact file does not exist or training did not complete.")
+
+    try:
+        zip_buffer = predictor.generate_export_bundle(experiment)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate export bundle: {e}")
+
+    filename = f"zemo_export_{experiment.task}_{experiment.algorithm_id}_{experiment.id[:8]}.zip"
+    return StreamingResponse(
+        zip_buffer,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.post(
+    "/{experiment_id}/predict",
+    response_model=PredictionResponse,
+    summary="Run Online Model Prediction",
+    description="Executes online prediction using the fitted trusted pipeline on single or batch raw input records.",
+)
+async def predict_with_model(
+    experiment_id: str,
+    payload: PredictionRequest,
+    session: AsyncSession = Depends(get_db_session),
+    predictor: ModelPredictor = Depends(get_model_predictor),
+) -> PredictionResponse:
+    stmt = select(Experiment).where(Experiment.id == experiment_id)
+    res = await session.execute(stmt)
+    experiment = res.scalar_one_or_none()
+
+    if not experiment:
+        raise NotFoundError(f"Experiment '{experiment_id}' not found.")
+
+    if not experiment.artifact_path or not os.path.exists(experiment.artifact_path):
+        raise NotFoundError("Model artifact file does not exist or training did not complete.")
+
+    try:
+        pred_res = predictor.predict(
+            experiment_id=experiment_id,
+            experiment_record=experiment,
+            input_data=payload.data,
+            include_probabilities=payload.include_probabilities,
+        )
+    except (ValueError, TypeError) as e:
+        raise ValidationError(str(e))
+    except (FileNotFoundError, PermissionError) as e:
+        raise NotFoundError(str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {e}")
+
+    return PredictionResponse(
+        experiment_id=pred_res.experiment_id,
+        task=pred_res.task,
+        algorithm_id=pred_res.algorithm_id,
+        predictions=pred_res.predictions,
+        probabilities=pred_res.probabilities,
+        sample_count=pred_res.sample_count,
+        features_used=pred_res.features_used,
+        latency_ms=pred_res.latency_ms,
+        timestamp=datetime.utcnow().isoformat(),
+    )
+

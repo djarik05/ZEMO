@@ -25,6 +25,7 @@ from .pipeline_builder import DynamicPipelineBuilder, TrainingConfig, PipelineBu
 from .trainer import MLTrainingEngine, TrainingResult
 from .job_manager import TrainingJobManager, ActiveJobState
 from .evaluator import ModelEvaluator, ExperimentComparator
+from .predictor import ModelPredictor, PredictionResult, get_model_predictor
 
 __all__ = [
     "DatasetLoader",
@@ -53,6 +54,9 @@ __all__ = [
     "ActiveJobState",
     "ModelEvaluator",
     "ExperimentComparator",
+    "ModelPredictor",
+    "PredictionResult",
+    "get_model_predictor",
 ]
 
 

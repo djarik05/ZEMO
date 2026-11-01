@@ -1516,6 +1516,74 @@
               <div id="evaluationDiagnosticsContent" style="font-size: 12px; overflow-x: auto;"></div>
             </div>
 
+            <!-- PHASE 6: Model Export & Interactive Prediction Engine -->
+            <div id="modelPredictionAndExportContainer" class="mt-4 hidden" style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 20px; background: var(--bg-surface-elevated);">
+              <div class="flex-between align-center mb-3">
+                <div>
+                  <h4 class="heading-xs" style="margin: 0; font-family: var(--font-heading);">Model Export & Prediction Engine</h4>
+                  <span class="caption text-muted" style="font-size: 11px;">Generate real-time predictions or export the complete fitted Scikit-learn pipeline for offline production deployment.</span>
+                </div>
+                <div class="flex-gap-2 align-center">
+                  <a id="btnDownloadJoblib" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 5px 10px; text-decoration: none;" target="_blank">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    .joblib
+                  </a>
+                  <a id="btnDownloadPkl" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 5px 10px; text-decoration: none;" target="_blank">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    .pkl
+                  </a>
+                  <a id="btnDownloadBundleZip" class="btn btn-primary btn-sm" style="font-size: 11px; padding: 5px 12px; text-decoration: none; background: var(--deep-olive); color: #fff; border-color: var(--deep-olive);" target="_blank">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                    Export Bundle (.zip)
+                  </a>
+                </div>
+              </div>
+
+              <!-- Prediction Tabs: Form Input vs JSON Batch -->
+              <div class="flex-between align-center mt-4 mb-2 pb-2" style="border-bottom: 1px solid var(--border-subtle);">
+                <div class="flex-gap-2">
+                  <button type="button" class="btn btn-ghost btn-sm active" id="tabPredForm" style="font-size: 11px; font-weight: 600;">Feature Form Input</button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="tabPredJson" style="font-size: 11px;">Batch JSON Input</button>
+                </div>
+                <div class="flex-gap-2 align-center">
+                  <label style="font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                    <input type="checkbox" id="chkIncludeProbabilities" checked> Include Class Probabilities
+                  </label>
+                </div>
+              </div>
+
+              <!-- Form Input View -->
+              <div id="predFormView" class="mt-3">
+                <div id="dynamicPredictionFields" class="grid-2 gap-3">
+                  <!-- Generated dynamically for each expected feature -->
+                </div>
+              </div>
+
+              <!-- JSON Input View -->
+              <div id="predJsonView" class="mt-3 hidden">
+                <p class="caption text-muted mb-2" style="font-size: 11px;">Provide a single record object or an array of record objects matching the model's feature schema.</p>
+                <textarea id="txtPredictionJson" class="form-input font-mono" rows="4" style="width: 100%; font-size: 12px; resize: vertical;" placeholder='[{"feature_1": 1.0, "feature_2": 2.5}]'></textarea>
+              </div>
+
+              <!-- Run Prediction Action -->
+              <div class="flex-between align-center mt-4">
+                <button type="button" class="btn btn-primary" id="btnExecutePrediction" style="font-size: 12px; padding: 6px 16px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                  Generate Prediction
+                </button>
+                <span id="predictionStatusMessage" class="caption text-muted" style="font-size: 11px;">Ready for input</span>
+              </div>
+
+              <!-- Prediction Results Display -->
+              <div id="predictionResultsContainer" class="mt-4 hidden" style="border-top: 1px dashed var(--border-subtle); padding-top: 16px;">
+                <div class="flex-between align-center mb-2">
+                  <span class="caption font-mono" style="font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Inference Output</span>
+                  <span class="badge" id="predictionLatencyBadge" style="font-size: 10px; background: rgba(76, 175, 80, 0.15); color: #2e7d32;">0.00 ms</span>
+                </div>
+                <div id="predictionOutputContent"></div>
+              </div>
+            </div>
+
             <div class="demo-notice mt-4" style="margin-bottom: 0;">
               <strong>Real ML Evaluation:</strong> Every metric, confusion matrix cell, feature importance weight, and diagnostic score is computed from actual predictions and cross-validation on this dataset.
             </div>
