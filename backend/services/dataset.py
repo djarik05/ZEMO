@@ -29,7 +29,7 @@ class DatasetService:
         format: str,
     ) -> Dataset:
         format = format.lower()
-        if format not in ("csv", "json", "jsonl"):
+        if format not in ("csv", "json", "jsonl", "xlsx", "parquet"):
             raise ValidationError(f"Unsupported format: {format}")
 
         from io import BytesIO
@@ -533,7 +533,7 @@ class DatasetService:
 
     async def add_version(self, dataset_id: str, file_content: bytes, original_filename: str, format: str) -> DatasetVersion:
         format = format.lower()
-        if format not in ("csv", "json", "jsonl"):
+        if format not in ("csv", "json", "jsonl", "xlsx", "parquet"):
             raise ValidationError(f"Unsupported format: {format}")
 
         async for session in get_db_session():

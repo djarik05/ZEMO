@@ -7,8 +7,10 @@
   'use strict';
 
   // ============================================================
-  // 1. APPLICATION STATE
+  // 1. APPLICATION STATE & CONFIGURATION
   // ============================================================
+  const API_BASE = 'http://localhost:8000/api/v1';
+
   const state = {
     currentSection: 'upload',
     dataset: null, // { name, size, type, rawData, headers, rows, types, stats }
@@ -216,10 +218,15 @@
       categories: document.getElementById('vizCategories'),
       missing: document.getElementById('vizMissing'),
       correlations: document.getElementById('vizCorrelations'),
+      boxplots: document.getElementById('vizBoxPlots'),
+      scatter: document.getElementById('vizScatter'),
     },
     distributionChart: document.getElementById('distributionChart'),
     categoryChart: document.getElementById('categoryChart'),
     missingChart: document.getElementById('missingChart'),
+    correlationsHeatmap: document.getElementById('correlationsHeatmap'),
+    boxPlotChart: document.getElementById('boxPlotChart'),
+    scatterChart: document.getElementById('scatterChart'),
     featureTableBody: document.getElementById('featureTableBody'),
     pipelineEncodingVal: document.getElementById('pipelineEncodingVal'),
     pipelineSplitVal: document.getElementById('pipelineSplitVal'),
@@ -526,7 +533,7 @@
     return { headers, rows };
   }
 
-  function handleFileSelected(file) {
+  async function handleFileSelected(file) {
     if (!file) return;
 
     const extension = file.name.split('.').pop().toLowerCase();
@@ -537,8 +544,96 @@
       return;
     }
 
+    showNotification(`Uploading ${file.name} to Zemo backend analysis engine...`, 'info');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      let datasetId = null;
+      const uploadRes = await fetch(`${API_BASE}/datasets`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (uploadRes.status === 201) {
+        const uploadData = await uploadRes.json();
+        datasetId = uploadData.id;
+      } else if (uploadRes.status === 409) {
+        // Dataset with identical hash already exists in storage
+        const errData = await uploadRes.json().catch(() => ({}));
+        datasetId = errData.existing_dataset_id || (errData.detail && errData.detail.existing_dataset_id);
+        if (!datasetId) {
+          const listRes = await fetch(`${API_BASE}/datasets?page_size=50`);
+          if (listRes.ok) {
+            const listData = await listRes.json();
+            const match = listData.items.find((d) => d.original_filename === file.name);
+            if (match) datasetId = match.id;
+          }
+        }
+      } else {
+        const errText = await uploadRes.text();
+        throw new Error(`Upload failed (${uploadRes.status}): ${errText}`);
+      }
+
+      if (!datasetId) {
+        throw new Error('Could not obtain dataset ID from server.');
+      }
+
+      // Process dataset (validate & profile)
+      await fetch(`${API_BASE}/datasets/${datasetId}/process`, { method: 'POST' }).catch(() => {});
+
+      // Fetch actual dataset analysis
+      const analysisRes = await fetch(`${API_BASE}/datasets/${datasetId}/analysis`);
+      if (!analysisRes.ok) throw new Error(`Analysis failed: ${await analysisRes.text()}`);
+      const analysisData = await analysisRes.json();
+
+      // Fetch actual visualization data
+      const vizRes = await fetch(`${API_BASE}/datasets/${datasetId}/visualizations`);
+      if (!vizRes.ok) throw new Error(`Visualization retrieval failed: ${await vizRes.text()}`);
+      const vizData = await vizRes.json();
+
+      // Fetch preview rows
+      const previewRes = await fetch(`${API_BASE}/datasets/${datasetId}/preview?rows=100`);
+      let previewRows = [];
+      let previewCols = analysisData.columns.map((c) => c.name);
+      if (previewRes.ok) {
+        const pData = await previewRes.json();
+        previewCols = pData.columns || previewCols;
+        previewRows = (pData.records || []).map((r) =>
+          previewCols.map((c) => (r[c] !== null && r[c] !== undefined ? String(r[c]) : ''))
+        );
+      }
+
+      const typesMap = {};
+      analysisData.columns.forEach((c) => {
+        typesMap[c.name] = c.inferred_type;
+      });
+
+      state.dataset = {
+        id: datasetId,
+        name: file.name,
+        size: file.size,
+        type: extension.toUpperCase(),
+        headers: previewCols,
+        rows: previewRows,
+        types: typesMap,
+        analysis: analysisData,
+        visualizations: vizData,
+        previewAvailable: true,
+      };
+
+      showNotification(`Analyzed ${file.name} successfully (${analysisData.total_rows} rows, ${analysisData.total_columns} columns, ${analysisData.missing_cells_total} missing cells).`, 'success');
+      initDatasetUI();
+    } catch (apiErr) {
+      console.warn('Backend API unavailable or error occurred, using client-side fallback:', apiErr);
+      showNotification(`Backend notice: ${apiErr.message}. Attempting client fallback...`, 'warning');
+      clientSideFallback(file, extension);
+    }
+  }
+
+  function clientSideFallback(file, extension) {
     if (extension !== 'csv' && extension !== 'jsonl') {
-      // Local preview unavailable for binary formats client-side
       state.dataset = {
         name: file.name,
         size: file.size,
@@ -557,24 +652,19 @@
         },
         previewAvailable: false,
       };
-      showNotification(`Loaded ${file.name}. Non-text formats use demo preview mode locally.`, 'info');
       initDatasetUI();
       return;
     }
 
-    // Process CSV or JSONL client-side
     const reader = new FileReader();
     reader.onload = function (e) {
       try {
         const content = e.target.result;
         const parsed = extension === 'jsonl' ? parseJSONL(content) : parseCSV(content);
-
         if (parsed.headers.length === 0) {
           showNotification(`Could not detect schema headers in this ${extension.toUpperCase()} file.`, 'warning');
           return;
         }
-
-        // Infer types
         const types = {};
         parsed.headers.forEach((h, colIndex) => {
           const colValues = parsed.rows.map((r) => r[colIndex]);
@@ -590,8 +680,7 @@
           types: types,
           previewAvailable: true,
         };
-
-        showNotification(`Successfully parsed ${file.name} (${parsed.rows.length} rows, ${parsed.headers.length} columns).`, 'success');
+        showNotification(`Parsed ${file.name} via local parser (${parsed.rows.length} rows).`, 'success');
         initDatasetUI();
       } catch (err) {
         showNotification(`Error parsing ${extension.toUpperCase()} file: ` + err.message, 'error');
@@ -600,19 +689,62 @@
     reader.readAsText(file);
   }
 
-  function loadSampleDataset(key) {
-    const sample = SAMPLE_DATASETS[key] || SAMPLE_DATASETS.housing;
-    state.dataset = {
-      name: sample.name,
-      size: sample.size,
-      type: 'CSV',
-      headers: [...sample.headers],
-      rows: sample.rows.map((r) => [...r]),
-      types: { ...sample.types },
-      previewAvailable: true,
-    };
-    showNotification(`Loaded sample dataset: ${sample.name}`, 'success');
-    initDatasetUI();
+  async function loadSampleDataset(key) {
+    const filename = key === 'churn' ? 'customer_churn.csv' : 'housing_sample.csv';
+    try {
+      showNotification(`Loading real sample dataset (${filename})...`, 'info');
+      const response = await fetch(`/sample-data/${filename}`);
+      if (!response.ok) throw new Error(`Sample file not found: ${filename}`);
+      const blob = await response.blob();
+      const file = new File([blob], filename, { type: 'text/csv' });
+      await handleFileSelected(file);
+    } catch (err) {
+      console.warn('Could not load sample file via fetch, falling back to local memory sample:', err);
+      const sample = SAMPLE_DATASETS[key] || SAMPLE_DATASETS.housing;
+      state.dataset = {
+        name: sample.name,
+        size: sample.size,
+        type: 'CSV',
+        headers: [...sample.headers],
+        rows: sample.rows.map((r) => [...r]),
+        types: { ...sample.types },
+        previewAvailable: true,
+      };
+      showNotification(`Loaded sample dataset: ${sample.name}`, 'info');
+      initDatasetUI();
+    }
+  }
+
+  async function overrideColumnType(colName, newType) {
+    if (!state.dataset) return;
+    if (!state.dataset.id) {
+      state.dataset.types[colName] = newType;
+      initDatasetUI();
+      return;
+    }
+
+    try {
+      showNotification(`Updating type for '${colName}' to ${newType}...`, 'info');
+      const res = await fetch(`${API_BASE}/datasets/${state.dataset.id}/columns/override`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ columns: { [colName]: newType } }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const updated = await res.json();
+      state.dataset.analysis = updated;
+      state.dataset.types[colName] = newType;
+
+      const vizRes = await fetch(`${API_BASE}/datasets/${state.dataset.id}/visualizations`);
+      if (vizRes.ok) {
+        state.dataset.visualizations = await vizRes.json();
+      }
+
+      showNotification(`Column '${colName}' type updated to ${newType}.`, 'success');
+      initDatasetUI();
+    } catch (e) {
+      showNotification(`Failed to override column type: ${e.message}`, 'error');
+    }
   }
 
   function removeDataset() {
@@ -710,14 +842,35 @@
     if (!state.dataset) return;
     const { headers, rows, types } = state.dataset;
 
-    // Render thead
+    // Render thead with interactive type override selector
     let thHtml = '<tr>';
     headers.forEach((h) => {
       const type = types[h] || 'text';
-      thHtml += `<th>${escapeHtml(h)} <span class="data-type-badge ${type}">${type}</span></th>`;
+      thHtml += `
+        <th>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <span>${escapeHtml(h)}</span>
+            <select class="type-override-select" data-col="${escapeHtml(h)}" title="Override column type" style="font-size:10px; background:var(--surface); color:var(--text-primary); border:1px solid var(--border-subtle); border-radius:3px; padding:1px 4px; font-family:var(--font-mono); cursor:pointer;">
+              <option value="numeric" ${type === 'numeric' ? 'selected' : ''}>numeric</option>
+              <option value="categorical" ${type === 'categorical' ? 'selected' : ''}>categorical</option>
+              <option value="boolean" ${type === 'boolean' ? 'selected' : ''}>boolean</option>
+              <option value="datetime" ${type === 'datetime' ? 'selected' : ''}>datetime</option>
+              <option value="identifier" ${type === 'identifier' ? 'selected' : ''}>identifier</option>
+              <option value="text" ${type === 'text' ? 'selected' : ''}>text</option>
+            </select>
+          </div>
+        </th>
+      `;
     });
     thHtml += '</tr>';
     el.previewTableHead.innerHTML = thHtml;
+
+    // Wire type override events
+    el.previewTableHead.querySelectorAll('.type-override-select').forEach((sel) => {
+      sel.addEventListener('change', (e) => {
+        overrideColumnType(e.target.dataset.col, e.target.value);
+      });
+    });
 
     // Render tbody (up to 8 sample rows)
     const previewRows = rows.slice(0, 8);
@@ -877,50 +1030,113 @@
   // ============================================================
   function renderOutputSection() {
     if (!state.dataset) return;
-    const { rows, headers, types } = state.dataset;
+    const ds = state.dataset;
+    const { rows, headers, types, analysis } = ds;
 
-    // Metrics
-    const rowCount = rows.length;
-    const colCount = headers.length;
-    let numCount = 0;
-    let catCount = 0;
+    // Actual metrics from backend analysis if available
+    if (analysis) {
+      if (el.metricRows) el.metricRows.textContent = analysis.total_rows.toLocaleString();
+      if (el.metricCols) el.metricCols.textContent = analysis.total_columns.toString();
+      if (el.metricNumeric) el.metricNumeric.textContent = (analysis.column_types_summary.numeric || 0).toString();
+      if (el.metricCategorical) {
+        const catTotal = (analysis.column_types_summary.categorical || 0) + (analysis.column_types_summary.boolean || 0);
+        el.metricCategorical.textContent = catTotal.toString();
+      }
+      if (el.metricMissing) el.metricMissing.textContent = analysis.missing_cells_total.toLocaleString();
 
-    headers.forEach((h) => {
-      const t = types[h];
-      if (t === 'numeric') numCount++;
-      else if (t === 'categorical' || t === 'boolean') catCount++;
-    });
+      if (el.metricRowsNote) el.metricRowsNote.textContent = `${analysis.duplicate_rows} duplicates (${analysis.duplicate_rows_percentage}%)`;
+      if (el.metricColsNote) el.metricColsNote.textContent = `Memory: ${analysis.memory_usage_formatted}`;
+      if (el.metricNumericNote) el.metricNumericNote.textContent = 'Verified numeric features';
+      if (el.metricCategoricalNote) el.metricCategoricalNote.textContent = 'Categorical & boolean features';
+      if (el.metricMissingNote) el.metricMissingNote.textContent = `${analysis.missing_cells_percentage}% total missingness`;
+    } else {
+      const rowCount = rows.length;
+      const colCount = headers.length;
+      let numCount = 0;
+      let catCount = 0;
+      headers.forEach((h) => {
+        const t = types[h];
+        if (t === 'numeric') numCount++;
+        else if (t === 'categorical' || t === 'boolean') catCount++;
+      });
+      if (el.metricRows) el.metricRows.textContent = rowCount.toLocaleString();
+      if (el.metricCols) el.metricCols.textContent = colCount.toString();
+      if (el.metricNumeric) el.metricNumeric.textContent = numCount.toString();
+      if (el.metricCategorical) el.metricCategorical.textContent = catCount.toString();
+      if (el.metricMissing) el.metricMissing.textContent = '0';
+      if (el.metricRowsNote) el.metricRowsNote.textContent = 'From local preview';
+      if (el.metricColsNote) el.metricColsNote.textContent = 'From local preview';
+      if (el.metricNumericNote) el.metricNumericNote.textContent = 'Inferred by types';
+      if (el.metricCategoricalNote) el.metricCategoricalNote.textContent = 'Inferred by types';
+      if (el.metricMissingNote) el.metricMissingNote.textContent = 'Checked in loaded rows';
+    }
 
-    if (el.metricRows) el.metricRows.textContent = rowCount.toLocaleString();
-    if (el.metricCols) el.metricCols.textContent = colCount.toString();
-    if (el.metricNumeric) el.metricNumeric.textContent = numCount.toString();
-    if (el.metricCategorical) el.metricCategorical.textContent = catCount.toString();
-    if (el.metricMissing) el.metricMissing.textContent = '0'; // Clean preview sample
-
-    if (el.metricRowsNote) el.metricRowsNote.textContent = 'From local CSV preview';
-    if (el.metricColsNote) el.metricColsNote.textContent = 'From local CSV preview';
-    if (el.metricNumericNote) el.metricNumericNote.textContent = 'Inferred by data types';
-    if (el.metricCategoricalNote) el.metricCategoricalNote.textContent = 'Inferred by data types';
-    if (el.metricMissingNote) el.metricMissingNote.textContent = 'Checked in loaded rows';
-
-    // Render Charts
+    // Render All Actual Visualizations
     renderDistributionChart();
     renderCategoryChart();
     renderMissingChart();
+    renderCorrelationsChart();
+    renderBoxPlotChart();
+    renderScatterChart();
     renderFeatureTable();
   }
 
-  function renderDistributionChart() {
+  function renderDistributionChart(selectedCol) {
     if (!state.dataset || !el.distributionChart) return;
-    const { headers, rows, types } = state.dataset;
+    const ds = state.dataset;
+    const { headers, rows, types, visualizations } = ds;
 
-    // Find first numeric column
+    if (visualizations && visualizations.histograms && Object.keys(visualizations.histograms).length > 0) {
+      const numCols = visualizations.numeric_columns && visualizations.numeric_columns.length > 0
+        ? visualizations.numeric_columns
+        : headers.filter((h) => types[h] === 'numeric');
+
+      if (numCols.length === 0) {
+        el.distributionChart.innerHTML = '<p class="caption text-muted" style="padding:20px;">No numeric columns available in dataset.</p>';
+        return;
+      }
+
+      const activeCol = selectedCol && numCols.includes(selectedCol) ? selectedCol : (visualizations.primary_numeric || numCols[0]);
+      const hist = visualizations.histograms[activeCol] || { labels: [], counts: [], min: 0, max: 0 };
+
+      let selectorHtml = `
+        <div class="viz-selector-row">
+          <span class="caption text-secondary">Feature: <strong>${escapeHtml(activeCol)}</strong> (Min: ${hist.min}, Max: ${hist.max})</span>
+          <select class="viz-select" id="histColSelector">
+            ${numCols.map((c) => `<option value="${escapeHtml(c)}" ${c === activeCol ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
+          </select>
+        </div>
+      `;
+
+      const maxBin = Math.max(...(hist.counts || [1]), 1);
+      let barsHtml = '<div class="bar-chart">';
+      hist.counts.forEach((count, i) => {
+        const heightPct = Math.max(10, Math.round((count / maxBin) * 170));
+        const label = hist.labels[i] || '';
+        barsHtml += `
+          <div class="bar-group">
+            <div class="bar" style="height: ${heightPct}px;" data-value="${count}"></div>
+            <span class="bar-label" title="${escapeHtml(label)}">${escapeHtml(label)}</span>
+          </div>
+        `;
+      });
+      barsHtml += '</div>';
+
+      el.distributionChart.innerHTML = selectorHtml + barsHtml;
+
+      const sel = document.getElementById('histColSelector');
+      if (sel) {
+        sel.addEventListener('change', (e) => {
+          renderDistributionChart(e.target.value);
+        });
+      }
+      return;
+    }
+
+    // Client fallback
     const numCol = headers.find((h) => types[h] === 'numeric') || headers[0];
     const colIndex = headers.indexOf(numCol);
-
-    const values = rows
-      .map((r) => parseFloat(r[colIndex]))
-      .filter((v) => !isNaN(v));
+    const values = rows.map((r) => parseFloat(r[colIndex])).filter((v) => !isNaN(v));
 
     if (values.length === 0) {
       el.distributionChart.innerHTML = '<p class="caption text-muted">No numeric distribution available.</p>';
@@ -940,7 +1156,6 @@
     });
 
     const maxBin = Math.max(...bins, 1);
-
     let html = '';
     bins.forEach((count, i) => {
       const heightPct = Math.max(10, Math.round((count / maxBin) * 180));
@@ -952,18 +1167,82 @@
         </div>
       `;
     });
-
     el.distributionChart.innerHTML = html;
   }
 
-  function renderCategoryChart() {
+  function renderCategoryChart(selectedCol) {
     if (!state.dataset || !el.categoryChart) return;
-    const { headers, rows, types } = state.dataset;
+    const ds = state.dataset;
+    const { headers, rows, types, visualizations } = ds;
 
-    // Find first categorical column
+    if (visualizations && visualizations.categories && Object.keys(visualizations.categories).length > 0) {
+      const catCols = visualizations.categorical_columns && visualizations.categorical_columns.length > 0
+        ? visualizations.categorical_columns
+        : headers.filter((h) => types[h] === 'categorical' || types[h] === 'boolean');
+
+      if (catCols.length === 0) {
+        el.categoryChart.innerHTML = '<p class="caption text-muted" style="padding:20px;">No categorical columns available in dataset.</p>';
+        return;
+      }
+
+      const activeCol = selectedCol && catCols.includes(selectedCol) ? selectedCol : (visualizations.primary_categorical || catCols[0]);
+      const catData = visualizations.categories[activeCol] || { categories: [], counts: [], other_count: 0 };
+
+      let selectorHtml = `
+        <div class="viz-selector-row">
+          <span class="caption text-secondary">Feature: <strong>${escapeHtml(activeCol)}</strong> (${catData.total_categories || catData.categories.length} unique values)</span>
+          <select class="viz-select" id="catColSelector">
+            ${catCols.map((c) => `<option value="${escapeHtml(c)}" ${c === activeCol ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
+          </select>
+        </div>
+      `;
+
+      const maxVal = Math.max(...(catData.counts || [1]), 1);
+      let barsHtml = '<div class="h-bar-chart">';
+      catData.categories.forEach((cat, idx) => {
+        const count = catData.counts[idx] || 0;
+        const pct = Math.max(8, Math.round((count / maxVal) * 100));
+        barsHtml += `
+          <div class="h-bar-row">
+            <span class="h-bar-name" title="${escapeHtml(cat)}">${escapeHtml(cat)}</span>
+            <div class="h-bar-track">
+              <div class="h-bar-fill" style="width: ${pct}%;">
+                <span class="h-bar-value">${count}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      if (catData.other_count > 0) {
+        const otherPct = Math.max(8, Math.round((catData.other_count / maxVal) * 100));
+        barsHtml += `
+          <div class="h-bar-row">
+            <span class="h-bar-name text-muted">(Other ${catData.other_count} values)</span>
+            <div class="h-bar-track">
+              <div class="h-bar-fill" style="width: ${otherPct}%; background: var(--text-muted);">
+                <span class="h-bar-value">${catData.other_count}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      barsHtml += '</div>';
+
+      el.categoryChart.innerHTML = selectorHtml + barsHtml;
+
+      const sel = document.getElementById('catColSelector');
+      if (sel) {
+        sel.addEventListener('change', (e) => {
+          renderCategoryChart(e.target.value);
+        });
+      }
+      return;
+    }
+
+    // Client fallback
     const catCol = headers.find((h) => types[h] === 'categorical') || headers[1] || headers[0];
     const colIndex = headers.indexOf(catCol);
-
     const counts = {};
     rows.forEach((r) => {
       const val = r[colIndex] || 'Unknown';
@@ -972,7 +1251,6 @@
 
     const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
     const maxVal = Math.max(...sorted.map((s) => s[1]), 1);
-
     let html = '';
     sorted.forEach(([cat, count]) => {
       const pct = Math.max(8, Math.round((count / maxVal) * 100));
@@ -987,20 +1265,40 @@
         </div>
       `;
     });
-
     el.categoryChart.innerHTML = html;
   }
 
   function renderMissingChart() {
     if (!state.dataset || !el.missingChart) return;
-    const { headers, rows } = state.dataset;
+    const ds = state.dataset;
+    const { visualizations, headers, rows } = ds;
 
+    if (visualizations && visualizations.missing_overview && visualizations.missing_overview.length > 0) {
+      let html = '<div class="missing-chart">';
+      visualizations.missing_overview.forEach((item) => {
+        const hasMissing = item.missing_count > 0;
+        const fillWidth = hasMissing ? Math.max(item.missing_pct, 6) : 100;
+        html += `
+          <div class="missing-row">
+            <span class="missing-name" title="${escapeHtml(item.column)}">${escapeHtml(item.column)}</span>
+            <div class="missing-bar-track">
+              <div class="missing-bar-fill ${hasMissing ? 'has-missing' : 'no-missing'}" style="width: ${fillWidth}%;"></div>
+            </div>
+            <span class="missing-pct">${item.missing_pct}% (${item.missing_count})</span>
+          </div>
+        `;
+      });
+      html += '</div>';
+      el.missingChart.innerHTML = html;
+      return;
+    }
+
+    // Client fallback
     let html = '';
-    headers.slice(0, 6).forEach((h, colIndex) => {
+    headers.slice(0, 8).forEach((h, colIndex) => {
       const total = rows.length || 1;
       const missing = rows.filter((r) => r[colIndex] === '' || r[colIndex] === null || r[colIndex] === undefined).length;
       const pct = Math.round((missing / total) * 100);
-
       html += `
         <div class="missing-row">
           <span class="missing-name">${escapeHtml(h)}</span>
@@ -1011,8 +1309,208 @@
         </div>
       `;
     });
-
     el.missingChart.innerHTML = html;
+  }
+
+  function renderCorrelationsChart() {
+    if (!state.dataset || !el.correlationsHeatmap) return;
+    const ds = state.dataset;
+    const viz = ds.visualizations;
+
+    if (!viz || !viz.correlation_matrix || !viz.correlation_matrix.matrix || viz.correlation_matrix.matrix.length === 0) {
+      el.correlationsHeatmap.innerHTML = `
+        <div class="empty-state" style="padding: 30px 0;">
+          <p class="caption text-muted">Insufficient numeric features (requires at least 2) to compute correlation matrix.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const { columns, matrix } = viz.correlation_matrix;
+
+    let tableHtml = '<div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">';
+    tableHtml += '<span class="caption text-secondary">Pearson Correlation Matrix (-1.00 to +1.00)</span>';
+    tableHtml += '<div style="display:flex; align-items:center; gap:8px; font-size:10px; font-family:var(--font-mono);">';
+    tableHtml += '<span style="color:#388eaf;">■ -1.0 Inverse</span>';
+    tableHtml += '<span style="color:var(--text-muted);">■ 0.0 Neutral</span>';
+    tableHtml += '<span style="color:#ff603d;">■ +1.0 Direct</span>';
+    tableHtml += '</div></div>';
+
+    tableHtml += '<table class="heatmap-table"><thead><tr><th></th>';
+    columns.forEach((col) => {
+      tableHtml += `<th title="${escapeHtml(col)}">${escapeHtml(col)}</th>`;
+    });
+    tableHtml += '</tr></thead><tbody>';
+
+    matrix.forEach((row, i) => {
+      tableHtml += `<tr><td class="heatmap-label" title="${escapeHtml(columns[i])}">${escapeHtml(columns[i])}</td>`;
+      row.forEach((val, j) => {
+        let bgColor = 'var(--surface)';
+        let textColor = 'var(--text-primary)';
+        const absVal = Math.abs(val);
+
+        if (i === j) {
+          bgColor = 'rgba(255, 96, 61, 0.25)';
+          textColor = 'var(--accent)';
+        } else if (val > 0) {
+          bgColor = `rgba(255, 96, 61, ${Math.min(0.85, 0.15 + absVal * 0.7)})`;
+          if (absVal > 0.45) textColor = '#fff';
+        } else if (val < 0) {
+          bgColor = `rgba(56, 142, 175, ${Math.min(0.85, 0.15 + absVal * 0.7)})`;
+          if (absVal > 0.45) textColor = '#fff';
+        }
+
+        const sign = val > 0 && i !== j ? '+' : '';
+        tableHtml += `
+          <td class="heatmap-cell" style="background:${bgColor}; color:${textColor};" title="r(${escapeHtml(columns[i])}, ${escapeHtml(columns[j])}) = ${val}">
+            ${sign}${val.toFixed(2)}
+          </td>
+        `;
+      });
+      tableHtml += '</tr>';
+    });
+    tableHtml += '</tbody></table>';
+
+    el.correlationsHeatmap.innerHTML = tableHtml;
+  }
+
+  function renderBoxPlotChart(selectedCol) {
+    if (!state.dataset || !el.boxPlotChart) return;
+    const ds = state.dataset;
+    const viz = ds.visualizations;
+
+    if (!viz || !viz.box_plots || Object.keys(viz.box_plots).length === 0) {
+      el.boxPlotChart.innerHTML = '<p class="caption text-muted" style="padding:20px;">No numeric features available for box plot.</p>';
+      return;
+    }
+
+    const numCols = viz.numeric_columns && viz.numeric_columns.length > 0
+      ? viz.numeric_columns
+      : Object.keys(viz.box_plots);
+
+    const activeCol = selectedCol && numCols.includes(selectedCol) ? selectedCol : (viz.primary_numeric || numCols[0]);
+    const bp = viz.box_plots[activeCol] || { min: 0, q1: 0, median: 0, q3: 0, max: 0, outliers: [] };
+
+    let html = `
+      <div class="viz-selector-row">
+        <span class="caption text-secondary">Box & Whisker Plot: <strong>${escapeHtml(activeCol)}</strong></span>
+        <select class="viz-select" id="boxColSelector">
+          ${numCols.map((c) => `<option value="${escapeHtml(c)}" ${c === activeCol ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="boxplot-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span class="body-sm font-semibold">${escapeHtml(activeCol)} Distribution</span>
+          <span class="badge ${bp.outlier_count > 0 ? 'badge-review' : 'badge-include'}">${bp.outlier_count} Outliers</span>
+        </div>
+        <div style="position:relative; height:60px; background:var(--bg-primary); border-radius:4px; padding:10px 20px; display:flex; align-items:center;">
+          <div style="width:100%; height:6px; background:var(--border-subtle); border-radius:3px; position:relative;">
+            <div style="position:absolute; left:25%; width:50%; height:18px; top:-6px; background:var(--accent); opacity:0.35; border:1px solid var(--accent); border-radius:3px;"></div>
+            <div style="position:absolute; left:50%; width:3px; height:24px; top:-9px; background:var(--accent); border-radius:1px;"></div>
+          </div>
+        </div>
+        <div class="boxplot-stats">
+          <span>Min: <strong>${bp.min}</strong></span>
+          <span>Q1: <strong>${bp.q1}</strong></span>
+          <span>Median: <strong>${bp.median}</strong></span>
+          <span>Q3: <strong>${bp.q3}</strong></span>
+          <span>Max: <strong>${bp.max}</strong></span>
+          <span>IQR: <strong>${bp.iqr}</strong></span>
+        </div>
+      </div>
+    `;
+
+    el.boxPlotChart.innerHTML = html;
+
+    const sel = document.getElementById('boxColSelector');
+    if (sel) {
+      sel.addEventListener('change', (e) => {
+        renderBoxPlotChart(e.target.value);
+      });
+    }
+  }
+
+  async function renderScatterChart(xCol, yCol) {
+    if (!state.dataset || !el.scatterChart) return;
+    const ds = state.dataset;
+    const viz = ds.visualizations;
+
+    if (!viz || !viz.numeric_columns || viz.numeric_columns.length < 2) {
+      el.scatterChart.innerHTML = '<p class="caption text-muted" style="padding:20px;">Scatter plot requires at least 2 numerical features.</p>';
+      return;
+    }
+
+    const numCols = viz.numeric_columns;
+    const activeX = xCol && numCols.includes(xCol) ? xCol : numCols[0];
+    const activeY = yCol && numCols.includes(yCol) ? yCol : (numCols[1] || numCols[0]);
+
+    let points = (viz.scatter_plot && viz.scatter_plot.x_col === activeX && viz.scatter_plot.y_col === activeY) ? viz.scatter_plot.points : [];
+    if ((!points || points.length === 0) && ds.id) {
+      try {
+        const res = await fetch(`${API_BASE}/datasets/${ds.id}/visualizations?scatter_x=${encodeURIComponent(activeX)}&scatter_y=${encodeURIComponent(activeY)}`);
+        if (res.ok) {
+          const freshViz = await res.json();
+          points = freshViz.scatter_plot ? freshViz.scatter_plot.points : [];
+        }
+      } catch (e) {}
+    }
+
+    let selectorHtml = `
+      <div class="viz-selector-row" style="max-width:580px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="caption text-secondary">X Feature:</span>
+          <select class="viz-select" id="scatterXSelector">
+            ${numCols.map((c) => `<option value="${escapeHtml(c)}" ${c === activeX ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
+          </select>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="caption text-secondary">Y Feature:</span>
+          <select class="viz-select" id="scatterYSelector">
+            ${numCols.map((c) => `<option value="${escapeHtml(c)}" ${c === activeY ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    `;
+
+    if (!points || points.length === 0) {
+      el.scatterChart.innerHTML = selectorHtml + '<p class="caption text-muted" style="padding:20px;">No coordinate points found for selected pair.</p>';
+      return;
+    }
+
+    const xVals = points.map((p) => p.x);
+    const yVals = points.map((p) => p.y);
+    const minX = Math.min(...xVals);
+    const maxX = Math.max(...xVals) || minX + 1;
+    const minY = Math.min(...yVals);
+    const maxY = Math.max(...yVals) || minY + 1;
+
+    const svgWidth = 580;
+    const svgHeight = 240;
+    const pad = 36;
+
+    let dotsSvg = '';
+    points.forEach((p) => {
+      const cx = pad + ((p.x - minX) / (maxX - minX || 1)) * (svgWidth - pad * 2);
+      const cy = svgHeight - pad - ((p.y - minY) / (maxY - minY || 1)) * (svgHeight - pad * 2);
+      dotsSvg += `<circle class="scatter-dot" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.5"><title>${activeX}: ${p.x}, ${activeY}: ${p.y}</title></circle>`;
+    });
+
+    const chartSvg = `
+      <svg class="scatter-svg" viewBox="0 0 ${svgWidth} ${svgHeight}">
+        <line x1="${pad}" y1="${svgHeight - pad}" x2="${svgWidth - pad}" y2="${svgHeight - pad}" stroke="var(--border)" stroke-width="1.5" />
+        <line x1="${pad}" y1="${pad}" x2="${pad}" y2="${svgHeight - pad}" stroke="var(--border)" stroke-width="1.5" />
+        <text x="${svgWidth - pad}" y="${svgHeight - pad + 18}" font-size="10" font-family="var(--font-mono)" fill="var(--text-secondary)" text-anchor="end">${escapeHtml(activeX)} (Max: ${maxX.toFixed(1)})</text>
+        <text x="${pad}" y="${pad - 10}" font-size="10" font-family="var(--font-mono)" fill="var(--text-secondary)">${escapeHtml(activeY)} (Max: ${maxY.toFixed(1)})</text>
+        ${dotsSvg}
+      </svg>
+    `;
+
+    el.scatterChart.innerHTML = selectorHtml + chartSvg;
+
+    const selX = document.getElementById('scatterXSelector');
+    const selY = document.getElementById('scatterYSelector');
+    if (selX) selX.addEventListener('change', (e) => renderScatterChart(e.target.value, selY ? selY.value : activeY));
+    if (selY) selY.addEventListener('change', (e) => renderScatterChart(selX ? selX.value : activeX, e.target.value));
   }
 
   function renderFeatureTable() {

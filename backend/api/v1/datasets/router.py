@@ -26,7 +26,11 @@ from .schemas import (
     ProfileDatasetRequest,
     ValidationResponse,
     DeleteDatasetResponse,
+    DatasetAnalysisResponse,
+    VisualizationResponse,
+    ColumnOverrideRequest,
 )
+from services.ml import get_dataset_loader, get_dataset_analyzer, get_visualization_engine
 from .scan_schemas import (
     ScanCreateRequest,
     ScanResponse,
@@ -81,8 +85,8 @@ router.include_router(readiness_router, prefix="/readiness", tags=["readiness"])
 
 def validate_file_format(filename: str) -> str:
     ext = filename.lower().split(".")[-1] if "." in filename else ""
-    if ext not in ("csv", "json", "jsonl"):
-        raise ValidationError(f"Unsupported file format: {ext}. Supported: csv, json, jsonl")
+    if ext not in ("csv", "json", "jsonl", "xlsx", "parquet"):
+        raise ValidationError(f"Unsupported file format: {ext}. Supported: csv, json, jsonl, xlsx, parquet")
     return ext
 
 
@@ -309,7 +313,7 @@ async def add_dataset_version(
         raise ValidationError("No filename provided")
 
     format = format.lower()
-    if format not in ("csv", "json", "jsonl"):
+    if format not in ("csv", "json", "jsonl", "xlsx", "parquet"):
         raise ValidationError(f"Unsupported format: {format}")
 
     settings = get_settings()
@@ -522,3 +526,110 @@ async def retry_scan(dataset_id: str, scan_id: str):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
 
     return {"scan": ScanResponse.model_validate(scan)}
+
+
+@router.get(
+    "/{dataset_id}/analysis",
+    response_model=DatasetAnalysisResponse,
+    summary="Get automatic column detection, profiling, and descriptive statistics",
+)
+async def get_dataset_analysis(
+    dataset_id: str,
+    version_id: Optional[str] = Query(None, description="Specific version ID (defaults to latest)"),
+):
+    loader = get_dataset_loader()
+    analyzer = get_dataset_analyzer()
+    try:
+        df, version = await loader.load_by_dataset_id(dataset_id, version_id)
+        overrides = {}
+        if version.schema_metadata and isinstance(version.schema_metadata, dict):
+            overrides = version.schema_metadata.get("type_overrides", {})
+        analysis = analyzer.analyze_dataset(df, type_overrides=overrides)
+        return DatasetAnalysisResponse(
+            dataset_id=dataset_id,
+            version_id=version.id,
+            **analysis,
+        )
+    except NotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValidationError as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+
+
+@router.get(
+    "/{dataset_id}/visualizations",
+    response_model=VisualizationResponse,
+    summary="Get structured visualization data for histograms, boxplots, categories, missingness, correlation matrix, and scatter plot",
+)
+async def get_dataset_visualizations(
+    dataset_id: str,
+    version_id: Optional[str] = Query(None, description="Specific version ID (defaults to latest)"),
+    num_col: Optional[str] = Query(None, description="Selected numeric column for histogram & boxplot"),
+    cat_col: Optional[str] = Query(None, description="Selected categorical column for distribution chart"),
+    scatter_x: Optional[str] = Query(None, description="Selected X numeric column for scatter plot"),
+    scatter_y: Optional[str] = Query(None, description="Selected Y numeric column for scatter plot"),
+):
+    loader = get_dataset_loader()
+    visualizer = get_visualization_engine()
+    try:
+        df, version = await loader.load_by_dataset_id(dataset_id, version_id)
+        viz_data = visualizer.generate_all_visualizations(
+            df=df,
+            selected_numeric=num_col,
+            selected_categorical=cat_col,
+            scatter_x=scatter_x,
+            scatter_y=scatter_y,
+        )
+        return VisualizationResponse(
+            dataset_id=dataset_id,
+            version_id=version.id,
+            **viz_data,
+        )
+    except NotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValidationError as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+
+
+@router.post(
+    "/{dataset_id}/columns/override",
+    response_model=DatasetAnalysisResponse,
+    summary="Override inferred column types for a dataset",
+)
+async def override_column_types(
+    dataset_id: str,
+    request: ColumnOverrideRequest,
+    version_id: Optional[str] = Query(None, description="Specific version ID (defaults to latest)"),
+):
+    from core.database.config import get_db_session
+    from core.database.models.dataset_version import DatasetVersion
+
+    loader = get_dataset_loader()
+    analyzer = get_dataset_analyzer()
+
+    try:
+        df, version = await loader.load_by_dataset_id(dataset_id, version_id)
+        overrides = dict(request.columns)
+
+        async for session in get_db_session():
+            v = await session.get(DatasetVersion, version.id)
+            if v:
+                existing_meta = dict(v.schema_metadata or {})
+                existing_overrides = dict(existing_meta.get("type_overrides", {}))
+                existing_overrides.update(request.columns)
+                existing_meta["type_overrides"] = existing_overrides
+                v.schema_metadata = existing_meta
+                await session.commit()
+                overrides = existing_overrides
+                break
+
+        analysis = analyzer.analyze_dataset(df, type_overrides=overrides)
+        return DatasetAnalysisResponse(
+            dataset_id=dataset_id,
+            version_id=version.id,
+            **analysis,
+        )
+    except NotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValidationError as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))

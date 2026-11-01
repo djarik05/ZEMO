@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -108,9 +108,57 @@ class ProfileDatasetRequest(BaseModel):
 
 
 class AddVersionRequest(BaseModel):
-    format: str = Field(..., pattern="^(csv|json|jsonl)$")
+    format: str = Field(..., pattern="^(csv|json|jsonl|xlsx|parquet)$")
 
 
 class DeleteDatasetResponse(BaseModel):
     success: bool
     message: str
+
+
+class ColumnProfileResponse(BaseModel):
+    name: str
+    inferred_type: str
+    dtype: str
+    is_nullable: bool
+    null_count: int
+    null_percentage: float
+    unique_count: int
+    unique_percentage: float
+    sample_values: List[Any]
+    stats: dict = Field(default_factory=dict)
+
+
+class DatasetAnalysisResponse(BaseModel):
+    dataset_id: str
+    version_id: str
+    total_rows: int
+    total_columns: int
+    missing_cells_total: int
+    missing_cells_percentage: float
+    duplicate_rows: int
+    duplicate_rows_percentage: float
+    memory_usage_bytes: int
+    memory_usage_formatted: str
+    column_types_summary: dict
+    columns: List[ColumnProfileResponse]
+    target_candidates: List[str]
+
+
+class VisualizationResponse(BaseModel):
+    dataset_id: str
+    version_id: str
+    primary_numeric: Optional[str] = None
+    primary_categorical: Optional[str] = None
+    numeric_columns: List[str] = Field(default_factory=list)
+    categorical_columns: List[str] = Field(default_factory=list)
+    histograms: dict = Field(default_factory=dict)
+    box_plots: dict = Field(default_factory=dict)
+    categories: dict = Field(default_factory=dict)
+    missing_overview: List[dict] = Field(default_factory=list)
+    correlation_matrix: dict = Field(default_factory=dict)
+    scatter_plot: dict = Field(default_factory=dict)
+
+
+class ColumnOverrideRequest(BaseModel):
+    columns: dict[str, str]

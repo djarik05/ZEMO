@@ -43,6 +43,8 @@ class DatasetFormat(str, enum.Enum):
     CSV = "csv"
     JSON = "json"
     JSONL = "jsonl"
+    XLSX = "xlsx"
+    PARQUET = "parquet"
 
 
 class ValidationStatus(str, enum.Enum):

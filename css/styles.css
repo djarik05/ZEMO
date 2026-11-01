@@ -1628,6 +1628,124 @@ ul, ol {
   color: var(--text-secondary);
 }
 
+/* Visualization Controls & Selectors */
+.viz-selector-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding: 0 var(--space-2);
+}
+.viz-select {
+  padding: 4px 10px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--border-radius-sm);
+  outline: none;
+}
+.viz-select:focus {
+  border-color: var(--accent);
+}
+
+/* Correlation Heatmap */
+.correlation-heatmap-container {
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: var(--space-2);
+}
+.heatmap-table {
+  border-collapse: separate;
+  border-spacing: 3px;
+  margin: 0 auto;
+}
+.heatmap-table th {
+  padding: 6px 10px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+}
+.heatmap-table td.heatmap-label {
+  text-align: right;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+.heatmap-cell {
+  width: 48px;
+  height: 38px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  border-radius: 4px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: default;
+}
+.heatmap-cell:hover {
+  transform: scale(1.12);
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+/* Box Plots */
+.boxplot-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: var(--space-4) 0;
+}
+.boxplot-card {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+}
+.boxplot-stats {
+  display: flex;
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: var(--space-2);
+}
+
+/* Scatter Plot */
+.scatter-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-2) 0;
+}
+.scatter-svg {
+  width: 100%;
+  max-width: 580px;
+  height: 240px;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--border-radius);
+}
+.scatter-dot {
+  fill: var(--accent);
+  opacity: 0.65;
+  transition: opacity 0.2s;
+}
+.scatter-dot:hover {
+  opacity: 1;
+  r: 5;
+}
+
 /* Workflow Diagram */
 .workflow {
   display: flex;

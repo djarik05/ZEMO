@@ -287,6 +287,65 @@ class JSONLParser(BaseParser):
         )
 
 
+class XLSXParser(BaseParser):
+    def parse(self, file: BinaryIO) -> ParseResult:
+        errors = []
+        warnings = []
+        try:
+            file.seek(0)
+            df = pd.read_excel(file, dtype=str, na_filter=False)
+        except Exception as e:
+            raise ParseError(f"Failed to parse Excel: {e}") from e
+
+        records = df.to_dict(orient="records")
+        columns = list(df.columns)
+        record_count = len(records)
+        column_count = len(columns)
+
+        warnings.extend(self._validate_limits(record_count, column_count))
+        records = self._truncate_records(records)
+        records, columns = self._truncate_columns(records, columns)
+
+        return ParseResult(
+            records=records,
+            columns=columns,
+            record_count=record_count,
+            column_count=column_count,
+            errors=errors,
+            warnings=warnings,
+        )
+
+
+class ParquetParser(BaseParser):
+    def parse(self, file: BinaryIO) -> ParseResult:
+        errors = []
+        warnings = []
+        try:
+            file.seek(0)
+            df = pd.read_parquet(file)
+            df = df.astype(str)
+        except Exception as e:
+            raise ParseError(f"Failed to parse Parquet: {e}") from e
+
+        records = df.to_dict(orient="records")
+        columns = [str(c) for c in df.columns]
+        record_count = len(records)
+        column_count = len(columns)
+
+        warnings.extend(self._validate_limits(record_count, column_count))
+        records = self._truncate_records(records)
+        records, columns = self._truncate_columns(records, columns)
+
+        return ParseResult(
+            records=records,
+            columns=columns,
+            record_count=record_count,
+            column_count=column_count,
+            errors=errors,
+            warnings=warnings,
+        )
+
+
 def get_parser(format: str) -> BaseParser:
     format = format.lower()
     if format == "csv":
@@ -295,5 +354,9 @@ def get_parser(format: str) -> BaseParser:
         return JSONParser()
     elif format == "jsonl":
         return JSONLParser()
+    elif format in ("xlsx", "xls"):
+        return XLSXParser()
+    elif format == "parquet":
+        return ParquetParser()
     else:
         raise ParseError(f"Unsupported format: {format}")

@@ -747,7 +747,9 @@
               <button class="viz-tab active" data-viz="distribution">Distribution <span class="data-badge-real" style="margin-left:4px;">Actual</span></button>
               <button class="viz-tab" data-viz="categories">Categories <span class="data-badge-real" style="margin-left:4px;">Actual</span></button>
               <button class="viz-tab" data-viz="missing">Missing Values <span class="data-badge-real" style="margin-left:4px;">Actual</span></button>
-              <button class="viz-tab" data-viz="correlations">Correlations <span class="illustrative-badge" style="margin-left:4px;">Placeholder</span></button>
+              <button class="viz-tab" data-viz="correlations">Correlations <span class="data-badge-real" style="margin-left:4px;">Actual</span></button>
+              <button class="viz-tab" data-viz="boxplots">Box Plots <span class="data-badge-real" style="margin-left:4px;">Actual</span></button>
+              <button class="viz-tab" data-viz="scatter">Scatter Plot <span class="data-badge-real" style="margin-left:4px;">Actual</span></button>
             </div>
 
             <div class="viz-panel active" id="vizDistribution">
@@ -766,11 +768,18 @@
               </div>
             </div>
             <div class="viz-panel" id="vizCorrelations">
-              <div class="empty-state" style="padding: 40px 0;">
-                <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                <h3>Correlation Matrix</h3>
-                <p>Full bivariate correlation requires backend vector computation. This placeholder illustrates planned heatmap topology.</p>
-                <span class="illustrative-badge mt-4">Illustrative placeholder</span>
+              <div id="correlationsHeatmap" class="correlation-heatmap-container">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+            <div class="viz-panel" id="vizBoxPlots">
+              <div id="boxPlotChart" class="boxplot-container">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+            <div class="viz-panel" id="vizScatter">
+              <div id="scatterChart" class="scatter-container">
+                <!-- Populated by JS -->
               </div>
             </div>
           </div>
