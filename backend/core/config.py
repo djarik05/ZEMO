@@ -20,7 +20,18 @@ class Settings(BaseSettings):
     api_prefix: str = Field(default="/api/v1", description="API version prefix")
     log_level: str = Field(default="INFO", description="Logging level")
     cors_origins: List[str] = Field(
-        default=["http://localhost:3000", "http://127.0.0.1:3000"],
+        default=[
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:5500",
+            "http://127.0.0.1:5500",
+            "http://localhost:8000",
+            "http://127.0.0.1:8000",
+            "http://localhost:8080",
+            "http://127.0.0.1:8080",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ],
         description="Allowed CORS origins",
     )
 

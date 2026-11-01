@@ -9,7 +9,9 @@
   // ============================================================
   // 1. APPLICATION STATE & CONFIGURATION
   // ============================================================
-  const API_BASE = 'http://localhost:8000/api/v1';
+  const API_BASE = (window.location && window.location.origin && window.location.origin.startsWith('http') && window.location.origin.includes(':8000'))
+    ? '/api/v1'
+    : 'http://localhost:8000/api/v1';
 
   const state = {
     currentSection: 'upload',

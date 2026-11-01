@@ -50,6 +50,8 @@
   "tests/test_datasets.py::TestStorageService::test_file_size_limit",
   "tests/test_datasets.py::TestStorageService::test_filename_collision_handling",
   "tests/test_datasets.py::TestStorageService::test_save_and_delete_file",
+  "tests/test_full_workflow_integration.py::test_full_eleven_stage_ml_workflow",
+  "tests/test_full_workflow_integration.py::test_static_frontend_and_health_regression",
   "tests/test_health.py::test_cors_origins_parsing",
   "tests/test_health.py::test_health_endpoint_returns_200",
   "tests/test_health.py::test_health_endpoint_returns_expected_fields",

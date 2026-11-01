@@ -57,6 +57,23 @@ def create_app() -> FastAPI:
     app.include_router(algorithms_router, prefix=settings.api_prefix)
     app.include_router(experiments_router, prefix=f"{settings.api_prefix}/experiments")
 
+    # Mount frontend static files and root web app
+    from pathlib import Path
+    from fastapi.staticfiles import StaticFiles
+    from fastapi.responses import FileResponse
+
+    workspace_root = Path(__file__).resolve().parent.parent
+    if (workspace_root / "index.html").exists():
+        if (workspace_root / "js").exists():
+            app.mount("/js", StaticFiles(directory=str(workspace_root / "js")), name="frontend_js")
+        if (workspace_root / "css").exists():
+            app.mount("/css", StaticFiles(directory=str(workspace_root / "css")), name="frontend_css")
+        if (workspace_root / "assets").exists():
+            app.mount("/assets", StaticFiles(directory=str(workspace_root / "assets")), name="frontend_assets")
+
+        @app.get("/", include_in_schema=False)
+        async def serve_index():
+            return FileResponse(str(workspace_root / "index.html"))
 
     return app
 
