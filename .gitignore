@@ -26,6 +26,8 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+*.joblib
+*.pkl
 
 # Virtual Environments
 venv/
