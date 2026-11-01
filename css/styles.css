@@ -10,41 +10,47 @@
    1. CSS CUSTOM PROPERTIES
    ============================================================ */
 :root {
-  /* Colors */
+  /* Colors — Premium Dark Charcoal & Olive Palette */
   --bg-primary: #171716;
-  --bg-secondary: #20201E;
-  --bg-panel: #292824;
+  --bg-secondary: #1F1F1D;
+  --bg-panel: #262622;
+  --surface: #2E2E28;
+  --surface-hover: #383832;
   --text-primary: #F1EEE7;
-  --text-secondary: #A5A198;
-  --accent: #FF603D;
-  --accent-hover: #E8522F;
-  --accent-subtle: rgba(255, 96, 61, 0.1);
-  --accent-muted: rgba(255, 96, 61, 0.15);
-  --border: #45433E;
-  --border-subtle: #33312C;
-  --surface: #33312C;
+  --text-secondary: #A6A298;
+  --text-muted: #828679;
+
+  --border: #3D3B35;
+  --border-subtle: #2A2A26;
+  --border-focus: #7E8D75;
 
   /* Status Colors */
   --success: #4ADE80;
-  --success-bg: rgba(74, 222, 128, 0.1);
+  --success-bg: rgba(74, 222, 128, 0.12);
   --warning: #FBBF24;
-  --warning-bg: rgba(251, 191, 36, 0.1);
+  --warning-bg: rgba(251, 191, 36, 0.12);
   --error: #F87171;
-  --error-bg: rgba(248, 113, 113, 0.1);
+  --error-bg: rgba(248, 113, 113, 0.12);
   --info: #60A5FA;
-  --info-bg: rgba(96, 165, 250, 0.1);
+  --info-bg: rgba(96, 165, 250, 0.12);
 
-  /* Brand Colors (Calm Organic Identity) */
-  --brand-bg: #F7F6F2;
+  /* Brand Colors (Calm Organic Dark Identity) */
+  --brand-bg: #171716;
   --brand-sage: #9EAC95;
   --brand-sage-light: #C4CFC0;
   --brand-sage-dark: #7E8D75;
   --brand-sage-subtle: rgba(158, 172, 149, 0.16);
-  --brand-olive: #4D5837;
-  --brand-olive-light: #626F47;
-  --brand-olive-dark: #373E27;
-  --brand-olive-subtle: rgba(77, 88, 55, 0.14);
-  --brand-olive-border: rgba(77, 88, 55, 0.28);
+  --brand-olive: #626F47;
+  --brand-olive-light: #7E8D75;
+  --brand-olive-dark: #4D5837;
+  --brand-olive-subtle: rgba(98, 111, 71, 0.20);
+  --brand-olive-border: rgba(126, 141, 117, 0.35);
+
+  /* Accent (Organic Deep Olive) */
+  --accent: #626F47;
+  --accent-hover: #4D5837;
+  --accent-subtle: rgba(98, 111, 71, 0.18);
+  --accent-muted: rgba(98, 111, 71, 0.28);
 
   /* Typography */
   --font-display: 'Instrument Serif', Georgia, serif;
@@ -117,61 +123,84 @@ body {
 }
 
 /* ============================================================
-   CALM ORGANIC BRAND THEME (Background: #F7F6F2 | Sage: #9EAC95 | Deep Olive: #4D5837)
+   CONSISTENT PREMIUM DARK THEME
+   Dark Charcoal (#171716) | Deep Olive (#626F47) | Sage (#9EAC95)
    ============================================================ */
-body.theme-organic {
-  --bg-primary: #F7F6F2;
-  --bg-secondary: #EFECE5;
-  --bg-panel: #E7E3D8;
-  --surface: #DFDBD0;
-  --text-primary: #2B2F23;
-  --text-secondary: #5E6554;
-  --border: #C8C3B4;
-  --border-subtle: #D8D4C7;
-  --accent: #4D5837;
-  --accent-hover: #373E27;
-  --accent-subtle: rgba(77, 88, 55, 0.14);
-  --accent-muted: rgba(77, 88, 55, 0.20);
-  background-color: var(--brand-bg);
+body, body.theme-organic, body.theme-dark {
+  --bg-primary: #171716;
+  --bg-secondary: #1E1E1C;
+  --bg-panel: #262622;
+  --surface: #2E2E28;
+  --surface-hover: #383832;
+  --text-primary: #F1EEE7;
+  --text-secondary: #A6A298;
+  --text-muted: #828679;
+  --border: #3D3B35;
+  --border-subtle: #2A2A26;
+  --border-focus: #7E8D75;
+  --brand-bg: #171716;
+  --brand-olive: #626F47;
+  --brand-olive-light: #7E8D75;
+  --brand-olive-dark: #4D5837;
+  --brand-olive-subtle: rgba(98, 111, 71, 0.20);
+  --brand-olive-border: rgba(126, 141, 117, 0.35);
+  --brand-sage: #9EAC95;
+  --brand-sage-light: #C4CFC0;
+  --brand-sage-dark: #7E8D75;
+  --brand-sage-subtle: rgba(158, 172, 149, 0.16);
+  --accent: #626F47;
+  --accent-hover: #4D5837;
+  --accent-subtle: rgba(98, 111, 71, 0.18);
+  --accent-muted: rgba(98, 111, 71, 0.28);
+  background-color: var(--bg-primary);
   color: var(--text-primary);
 }
 
-body.theme-organic .header {
-  background-color: rgba(247, 246, 242, 0.94);
-  border-bottom-color: var(--border-subtle);
+.header {
+  background: rgba(23, 23, 22, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-body.theme-organic .footer {
-  background-color: #EFECE5;
-  border-top-color: var(--border-subtle);
+.footer {
+  background: #181816;
+  border-top: 1px solid var(--border-subtle);
 }
 
-body.theme-organic .nav-link:hover,
-body.theme-organic .nav-link.active {
-  color: var(--brand-olive);
+.nav-link {
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
 }
 
-body.theme-organic .nav-link.active::after {
-  background: var(--brand-olive);
+.nav-link:hover,
+.nav-link.active {
+  color: #FFFFFF;
 }
 
-body.theme-organic .logo {
-  color: var(--brand-olive);
+.nav-link.active::after {
+  background: var(--brand-olive-light);
 }
 
-body.theme-organic .logo-dot {
-  background: var(--brand-sage);
+.logo {
+  color: #FFFFFF;
 }
 
-body.theme-organic .btn-primary {
+.logo-dot {
+  background: var(--brand-olive-light);
+}
+
+.btn-primary {
   background: var(--brand-olive);
   border-color: var(--brand-olive);
-  color: #F7F6F2;
+  color: #FFFFFF;
+  font-weight: 600;
 }
 
-body.theme-organic .btn-primary:hover {
+.btn-primary:hover {
   background: var(--brand-olive-dark);
   border-color: var(--brand-olive-dark);
+  color: #FFFFFF;
 }
 
 ::selection {
@@ -581,23 +610,25 @@ ul, ol {
 }
 
 .btn-primary {
-  background: var(--accent);
-  color: var(--bg-primary);
-  border-color: var(--accent);
+  background: var(--brand-olive);
+  color: #FFFFFF;
+  border-color: var(--brand-olive);
 }
 .btn-primary:hover {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
+  background: var(--brand-olive-dark);
+  border-color: var(--brand-olive-dark);
+  color: #FFFFFF;
 }
 
 .btn-secondary {
-  background: transparent;
+  background: var(--surface);
   border-color: var(--border);
   color: var(--text-primary);
 }
 .btn-secondary:hover {
-  background: var(--bg-panel);
-  border-color: var(--text-secondary);
+  background: var(--surface-hover);
+  border-color: var(--brand-sage-dark);
+  color: #FFFFFF;
 }
 
 .btn-ghost {
@@ -1332,6 +1363,13 @@ ul, ol {
 .form-input:focus {
   outline: none;
   border-color: var(--accent);
+}
+
+.form-input::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.85;
 }
 
 .form-select {
@@ -4063,10 +4101,13 @@ ul, ol {
 .chat-message {
   display: flex;
   gap: var(--space-3);
-  max-width: 92%;
+  max-width: 88%;
+  width: fit-content;
+  align-items: flex-start;
 }
 .chat-message.assistant {
   align-self: flex-start;
+  flex-direction: row;
 }
 .chat-message.user {
   align-self: flex-end;
@@ -4082,27 +4123,35 @@ ul, ol {
   font-size: 12px;
   font-weight: 600;
   flex-shrink: 0;
+  margin-top: 2px;
 }
 .chat-message.assistant .msg-avatar {
   background: var(--brand-olive);
-  color: #F7F6F2;
+  color: #FFFFFF;
 }
 .chat-message.user .msg-avatar {
-  background: var(--border);
+  background: var(--surface);
+  border: 1px solid var(--border);
   color: var(--text-primary);
 }
 .msg-bubble {
-  background: var(--surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--border-radius);
-  padding: var(--space-4);
-  font-size: 13px;
+  background: #252521;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--border-radius-md);
+  padding: 12px 16px;
+  font-size: 13.5px;
   line-height: 1.55;
   color: var(--text-primary);
+  width: fit-content;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 .chat-message.user .msg-bubble {
-  background: var(--brand-olive-subtle);
-  border-color: var(--brand-olive-border);
+  background: linear-gradient(135deg, #4D5837, #57643E);
+  border-color: rgba(158, 172, 149, 0.4);
+  color: #FFFFFF;
 }
 .msg-author {
   font-size: 10px;
@@ -4817,23 +4866,14 @@ ul, ol {
   scroll-behavior: smooth;
 }
 
-/* Message Bubble */
+/* Message Bubble - Dynamic Width & Natural Content Sizing */
 .zemo-msg {
   display: flex;
   gap: 10px;
-  max-width: 88%;
+  max-width: 86%;
+  width: fit-content;
+  align-items: flex-start;
   animation: zemoFadeInUp 0.25s ease-out;
-}
-
-@keyframes zemoFadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .zemo-msg.user {
@@ -4843,11 +4883,12 @@ ul, ol {
 
 .zemo-msg.assistant {
   align-self: flex-start;
+  flex-direction: row;
 }
 
 .zemo-msg-avatar {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
   flex-shrink: 0;
   display: flex;
@@ -4855,83 +4896,187 @@ ul, ol {
   justify-content: center;
   font-size: 12px;
   font-weight: 700;
+  margin-top: 2px;
 }
 
 .zemo-msg.assistant .zemo-msg-avatar {
   background: var(--brand-olive);
-  color: #F7F6F2;
+  color: #FFFFFF;
 }
 
 .zemo-msg.user .zemo-msg-avatar {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--surface);
+  border: 1px solid var(--border);
   color: var(--text-primary);
 }
 
 .zemo-msg-bubble {
   border-radius: 14px;
   padding: 10px 14px;
-  font-size: 13px;
+  font-size: 13.5px;
   line-height: 1.55;
   word-break: break-word;
+  overflow-wrap: break-word;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .zemo-msg.assistant .zemo-msg-bubble {
-  background: rgba(45, 45, 42, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
+  background: #252521;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #F1EEE7;
   border-top-left-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .zemo-msg.user .zemo-msg-bubble {
-  background: linear-gradient(135deg, rgba(77, 88, 55, 0.9), rgba(62, 71, 45, 0.95));
-  border: 1px solid rgba(158, 172, 149, 0.35);
-  color: #F7F6F2;
+  background: linear-gradient(135deg, #4D5837, #57643E);
+  border: 1px solid rgba(158, 172, 149, 0.4);
+  color: #FFFFFF;
   border-top-right-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
-.zemo-msg-bubble p {
+/* Markdown Rendering in Assistant & User Bubbles */
+.zemo-msg-bubble p,
+.msg-content p {
   margin: 0 0 8px 0;
 }
-
-.zemo-msg-bubble p:last-child {
+.zemo-msg-bubble p:last-child,
+.msg-content p:last-child {
   margin-bottom: 0;
 }
 
-.zemo-msg-bubble strong {
-  color: #fff;
+.zemo-msg-bubble h1, .zemo-msg-bubble h2, .zemo-msg-bubble h3, .zemo-msg-bubble h4,
+.msg-content h1, .msg-content h2, .msg-content h3, .msg-content h4 {
+  color: #FFFFFF;
+  font-weight: 600;
+  margin: 10px 0 6px 0;
+  line-height: 1.35;
+}
+.zemo-msg-bubble h1, .msg-content h1 { font-size: 16px; }
+.zemo-msg-bubble h2, .msg-content h2 { font-size: 15px; }
+.zemo-msg-bubble h3, .msg-content h3 { font-size: 14px; }
+.zemo-msg-bubble h4, .msg-content h4 { font-size: 13.5px; }
+
+.zemo-msg-bubble strong,
+.msg-content strong {
+  color: #FFFFFF;
   font-weight: 600;
 }
 
-.zemo-msg-bubble em {
+.zemo-msg-bubble em,
+.msg-content em {
   font-style: italic;
   color: var(--brand-sage-light);
 }
 
-.zemo-msg-bubble code {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  background: rgba(0, 0, 0, 0.35);
-  padding: 2px 5px;
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #A3E635;
-}
-
-.zemo-msg-bubble ul, .zemo-msg-bubble ol {
-  margin: 4px 0 8px 18px;
+.zemo-msg-bubble ul, .zemo-msg-bubble ol,
+.msg-content ul, .msg-content ol {
+  margin: 6px 0 8px 18px;
   padding: 0;
 }
 
-.zemo-msg-bubble li {
+.zemo-msg-bubble li,
+.msg-content li {
   margin-bottom: 4px;
+  line-height: 1.5;
 }
 
-.zemo-msg-time {
+.zemo-msg-bubble a,
+.msg-content a {
+  color: #A3E635;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--transition-fast);
+}
+.zemo-msg-bubble a:hover,
+.msg-content a:hover {
+  color: #BEF264;
+}
+
+/* Inline Code */
+.zemo-msg-bubble code,
+.msg-content code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #B5E853;
+}
+
+/* Code Blocks */
+.zemo-msg-bubble pre,
+.msg-content pre {
+  background: #141412;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 8px 0;
+  overflow-x: auto;
+  max-width: 100%;
+}
+.zemo-msg-bubble pre code,
+.msg-content pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: #D2F58A;
+  font-size: 12px;
+  line-height: 1.5;
+  display: block;
+  white-space: pre;
+}
+
+/* Blockquotes */
+.zemo-msg-bubble blockquote,
+.msg-content blockquote {
+  border-left: 3px solid var(--brand-olive-light);
+  margin: 8px 0;
+  padding: 4px 10px;
+  background: rgba(98, 111, 71, 0.12);
+  color: #C4CFC0;
+  font-style: italic;
+  border-radius: 0 4px 4px 0;
+}
+
+/* Tables inside chat */
+.zemo-msg-bubble table,
+.msg-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 12px;
+  overflow-x: auto;
+  display: block;
+}
+.zemo-msg-bubble th,
+.msg-content th {
+  background: rgba(45, 45, 40, 0.9);
+  color: #FFFFFF;
+  font-weight: 600;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  text-align: left;
+}
+.zemo-msg-bubble td,
+.msg-content td {
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #E2DFD8;
+}
+.zemo-msg-bubble tr:nth-child(even),
+.msg-content tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.zemo-msg-time,
+.msg-time {
   font-size: 10px;
   color: var(--text-muted);
-  margin-top: 4px;
+  margin-top: 5px;
   display: block;
 }
 

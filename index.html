@@ -31,9 +31,9 @@
       </nav>
 
       <div class="header-actions">
-        <button class="theme-toggle-btn" id="themeToggle" title="Toggle Brand Theme (Calm Organic / Dark Editorial)">
-          <span class="theme-dot"></span>
-          <span id="themeToggleLabel">Calm Organic</span>
+        <button class="theme-toggle-btn" id="themeToggle" title="Zemo Premium Dark Theme">
+          <span class="theme-dot" style="background: var(--brand-olive-light);"></span>
+          <span id="themeToggleLabel">Dark Theme</span>
         </button>
         <div class="workspace-selector" id="workspaceSelector">
           <span class="workspace-dot"></span>
@@ -1467,7 +1467,7 @@
                 <span class="caption text-muted" style="text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px;">Active Benchmark Overview</span>
                 <div class="heading-sm" id="resultExperimentName">No experiment evaluated yet</div>
               </div>
-              <span class="badge" id="resultExperimentBadge" style="background: rgba(158,172,149,0.15); color: var(--deep-olive);">Awaiting Benchmark</span>
+              <span class="badge" id="resultExperimentBadge" style="background: rgba(158,172,149,0.15); color: var(--brand-sage-light);">Awaiting Benchmark</span>
             </div>
 
             <!-- Metrics Grid -->
@@ -1501,7 +1501,7 @@
             <div id="featureImportanceContainer" class="mt-4 hidden" style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px; background: var(--bg-surface-elevated);">
               <div class="flex-between align-center mb-3">
                 <span class="caption font-mono" style="font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Feature Importance Attribution</span>
-                <span class="badge" id="featureImportanceMethodBadge" style="font-size: 10px; background: rgba(76, 175, 80, 0.15); color: #2e7d32;">Tree Gini / MSE</span>
+                <span class="badge" id="featureImportanceMethodBadge" style="font-size: 10px; background: rgba(76, 175, 80, 0.15); color: #4ADE80;">Tree Gini / MSE</span>
               </div>
               <p class="caption text-muted mb-3" id="featureImportanceExplanation" style="margin-top: 0; font-size: 11px;">Calculated directly from estimator node purity splits.</p>
               <div id="featureImportanceBarsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
@@ -1578,7 +1578,7 @@
               <div id="predictionResultsContainer" class="mt-4 hidden" style="border-top: 1px dashed var(--border-subtle); padding-top: 16px;">
                 <div class="flex-between align-center mb-2">
                   <span class="caption font-mono" style="font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em;">Inference Output</span>
-                  <span class="badge" id="predictionLatencyBadge" style="font-size: 10px; background: rgba(76, 175, 80, 0.15); color: #2e7d32;">0.00 ms</span>
+                  <span class="badge" id="predictionLatencyBadge" style="font-size: 10px; background: rgba(76, 175, 80, 0.15); color: #4ADE80;">0.00 ms</span>
                 </div>
                 <div id="predictionOutputContent"></div>
               </div>
@@ -2611,6 +2611,8 @@
     <span id="notificationText"></span>
   </div>
 
+  <script src="js/vendor/marked.min.js"></script>
+  <script src="js/vendor/purify.min.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

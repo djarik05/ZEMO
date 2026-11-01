@@ -3897,10 +3897,9 @@
     },
   };
 
-  // 1. THEME MANAGEMENT
+  // 1. THEME MANAGEMENT — Consistent Premium Dark Theme
   function initTheme() {
-    const savedTheme = localStorage.getItem('zemo_theme') || 'organic';
-    applyTheme(savedTheme);
+    applyTheme('dark');
 
     if (el.themeToggle) {
       el.themeToggle.addEventListener('click', toggleTheme);
@@ -3908,21 +3907,16 @@
   }
 
   function applyTheme(theme) {
-    state.theme = theme;
-    if (theme === 'organic') {
-      document.body.classList.add('theme-organic');
-      if (el.themeToggleLabel) el.themeToggleLabel.textContent = 'Calm Organic';
-    } else {
-      document.body.classList.remove('theme-organic');
-      if (el.themeToggleLabel) el.themeToggleLabel.textContent = 'Dark Editorial';
-    }
-    localStorage.setItem('zemo_theme', theme);
+    state.theme = 'dark';
+    document.body.classList.remove('theme-organic');
+    document.body.classList.add('theme-dark');
+    if (el.themeToggleLabel) el.themeToggleLabel.textContent = 'Dark Theme';
+    localStorage.setItem('zemo_theme', 'dark');
   }
 
   function toggleTheme() {
-    const nextTheme = state.theme === 'organic' ? 'dark' : 'organic';
-    applyTheme(nextTheme);
-    showNotification(`Switched theme to ${nextTheme === 'organic' ? 'Calm Organic' : 'Dark Editorial'}.`, 'info');
+    applyTheme('dark');
+    showNotification('Zemo Premium Dark Theme active.', 'info');
   }
 
   // 2. SETUP AI TRAINING CONTROLS
@@ -4597,17 +4591,8 @@
     const msgEl = document.createElement('div');
     msgEl.className = 'chat-message assistant';
 
-    // Format markdown text simply and securely
-    let formattedHtml = escapeHtml(markdownText)
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`([^`]+)`/g, '<code class="font-mono">$1</code>')
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n• (.*?)/g, '<br>• $1')
-      .replace(/\n1\. (.*?)/g, '<br>1. $1')
-      .replace(/\n2\. (.*?)/g, '<br>2. $1')
-      .replace(/\n3\. (.*?)/g, '<br>3. $1')
-      .replace(/\n4\. (.*?)/g, '<br>4. $1');
+    // Format markdown text with proper renderer
+    let formattedHtml = formatChatMarkdown(markdownText);
 
     let cardHtml = '';
     if (configCard) {
@@ -4928,37 +4913,32 @@
 
   function formatChatMarkdown(text) {
     if (!text) return '';
-    let html = escapeHtml(text);
+    try {
+      if (typeof marked !== 'undefined') {
+        marked.setOptions({
+          breaks: true,
+          gfm: true
+        });
+        const parsed = marked.parse(text);
+        if (typeof DOMPurify !== 'undefined') {
+          return DOMPurify.sanitize(parsed, {
+            ADD_ATTR: ['target', 'rel']
+          });
+        }
+        return parsed;
+      }
+    } catch (err) {
+      console.warn('Markdown parsing error:', err);
+    }
 
-    // Code blocks ```language ... ```
-    html = html.replace(/```([a-zA-Z0-9_\-\.]*)\n([\s\S]*?)```/g, (match, lang, code) => {
-      return `<pre class="chat-code-block" style="background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 6px; overflow-x: auto; margin: 6px 0; border: 1px solid rgba(255,255,255,0.1);"><code class="font-mono" style="color: #A3E635; font-size: 11px;">${code.trim()}</code></pre>`;
-    });
-
-    // Inline code `code`
-    html = html.replace(/`([^`]+)`/g, '<code class="font-mono">$1</code>');
-
-    // Bold **text**
-    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-
-    // Italic *text*
-    html = html.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
-
-    // Markdown headers ### Title
-    html = html.replace(/^### (.*$)/gim, '<h5 style="margin: 8px 0 3px 0; font-size: 13px; color: #fff; font-weight: 600;">$1</h5>');
-    html = html.replace(/^## (.*$)/gim, '<h4 style="margin: 10px 0 4px 0; font-size: 14px; color: #fff; font-weight: 600;">$1</h4>');
-
-    // Numbered lists 1. Item
-    html = html.replace(/^\d+\.\s+(.*$)/gim, '<li style="margin-left: 14px;">$1</li>');
-
-    // Bullet lists - or *
-    html = html.replace(/^[-*•]\s+(.*$)/gim, '<li style="margin-left: 14px;">$1</li>');
-
-    // Paragraph linebreaks
-    html = html.replace(/\n\n+/g, '</p><p>');
-    html = html.replace(/\n/g, '<br>');
-
-    return `<p>${html}</p>`;
+    // Resilient fallback formatting
+    const safe = escapeHtml(text)
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/`([^`]+)`/g, '<code class="font-mono">$1</code>')
+      .replace(/\n\n+/g, '</p><p>')
+      .replace(/\n/g, '<br>');
+    return `<p>${safe}</p>`;
   }
 
   function setupFloatingZemoAssistant() {
