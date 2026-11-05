@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
   <title>Zemo — AI/ML Model Training Platform</title>
   <meta name="description" content="Premium AI/ML model training and experimentation platform. Configure, train, and evaluate machine learning models with precision.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1624,12 +1625,257 @@
               <!-- Dynamic content injected by app.js -->
             </div>
           </div>
+=======
+  <title>Zemo — AI Data Privacy, Security &amp; Training Safety Platform</title>
+  <meta name="description" content="Inspect datasets, uncover sensitive PII, evaluate adversarial security risks, and prepare sanitized data for safe AI model training.">
+
+  <!-- Favicon with Custom Zemo Shield-Node Mark -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234D5837'/%3E%3Ccircle cx='16' cy='11' r='3.2' fill='%23F7F6F2'/%3E%3Ccircle cx='10' cy='21' r='2.8' fill='%239EAC95'/%3E%3Ccircle cx='22' cy='21' r='2.8' fill='%239EAC95'/%3E%3Cpath d='M16 14.2v6.8M10 21h12' stroke='%23F7F6F2' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E">
+
+  <!-- Google Fonts Fallback -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Instrument+Serif:ital@1&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
+  <!-- Zemo Design System Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Accessible Skip Link -->
+  <a href="#overview" class="skip-link">Skip to main content</a>
+
+  <!-- ============================================================
+       NAVIGATION BAR
+       ============================================================ -->
+  <header class="nav-header" role="banner">
+    <div class="container nav-container">
+      
+      <!-- Brand Logo -->
+      <a href="#overview" class="nav-brand" aria-label="Zemo Homepage">
+        <svg class="brand-symbol" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.6" stroke-dasharray="3 3"/>
+          <circle cx="16" cy="10" r="3.2" fill="currentColor"/>
+          <circle cx="9.5" cy="21" r="2.8" fill="var(--sage)"/>
+          <circle cx="22.5" cy="21" r="2.8" fill="var(--sage)"/>
+          <path d="M16 13.2L10 20M16 13.2L22 20M10.5 21H21.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <div class="brand-text-block">
+          <span class="brand-name">ZEMO</span>
+          <span class="brand-tag">AI DATA SAFETY</span>
+        </div>
+      </a>
+
+      <!-- Center Navigation Links -->
+      <nav class="nav-links" id="site-nav" aria-label="Primary Navigation">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#dataset" class="nav-link">Dataset</a>
+        <a href="#models" class="nav-link">AI Models</a>
+        <a href="#security" class="nav-link">Security</a>
+        <a href="#workflow" class="nav-link">Pipeline</a>
+        <a href="#training" class="nav-link">Training</a>
+      </nav>
+
+      <!-- Right Actions -->
+      <div class="nav-actions">
+        <div class="system-status" aria-label="System status: Active">
+          <span class="status-dot"></span>
+          <span>SYSTEM READY</span>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" id="nav-start-analysis">
+          Start Analysis
+        </button>
+        <button type="button" class="mobile-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Toggle navigation menu">
+          <div class="burger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ============================================================
+       MAIN WORKSPACE CONTENT
+       ============================================================ -->
+  <main class="page-wrapper" id="main-content">
+
+    <!-- ============================================================
+         01. HERO / AI INTELLIGENCE CORE
+         ============================================================ -->
+    <section class="section hero" id="overview" aria-labelledby="hero-heading">
+      <div class="container">
+        <div class="hero-grid">
+
+          <!-- Left Editorial Copy -->
+          <div class="hero-content reveal">
+            <div class="eyebrow">AI DATA SAFETY INFRASTRUCTURE</div>
+            
+            <div class="hero-headline">
+              <h1 id="hero-heading">
+                Make Your Data<br>
+                <span class="editorial-accent">Ready for Intelligence.</span>
+              </h1>
+            </div>
+
+            <p class="hero-desc">
+              Inspect, understand, and prepare your datasets before they enter AI training pipelines. Zemo brings privacy, security, and data quality into one intelligent workspace.
+            </p>
+
+            <div class="hero-actions">
+              <a href="#dataset" class="btn btn-primary btn-lg">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                </svg>
+                Start with a Dataset
+              </a>
+              <a href="#workflow" class="btn btn-secondary btn-lg">
+                Explore the Workflow
+              </a>
+            </div>
+
+            <div class="hero-indicators">
+              <div class="indicator-item">
+                <svg class="indicator-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span>Privacy-Aware Processing</span>
+              </div>
+              <div class="indicator-item">
+                <svg class="indicator-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                  <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                </svg>
+                <span>Explainable Risk Analysis</span>
+              </div>
+              <div class="indicator-item">
+                <svg class="indicator-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                </svg>
+                <span>Controlled Data Access</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Organic AI Intelligence Orb Canvas -->
+          <div class="hero-visual reveal delay-100">
+            <div class="orb-container">
+              <div class="orb-badge-top">ZEMO INTELLIGENCE CORE</div>
+              <canvas id="orb-canvas" width="480" height="480" aria-label="Interactive organic AI intelligence core visualization"></canvas>
+              <div class="orb-badge-bottom">
+                <span class="orb-state-indicator"></span>
+                <span id="orb-state-text">AWAITING DATASET</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         02. DATASET UPLOAD WORKSPACE (01 / DATA INPUT)
+         ============================================================ -->
+    <section class="section" id="dataset" aria-labelledby="dataset-heading">
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-label">01 / DATA INPUT</div>
+          <h2 class="section-title" id="dataset-heading">Start with your data.</h2>
+          <p class="section-description">
+            Bring a dataset into the workspace to begin its safety assessment. Files remain safely in your browser session for this frontend demonstration.
+          </p>
+        </div>
+
+        <div class="upload-panel reveal">
+          
+          <!-- Drag and Drop Target -->
+          <div class="upload-dropzone" id="upload-dropzone" tabindex="0" role="button" aria-label="File upload dropzone">
+            <div class="upload-icon-circle">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <h3>Drop your dataset here</h3>
+            <p>Drag and drop a file, or browse from your computer</p>
+            
+            <div class="format-tags">
+              <span class="format-tag">.CSV</span>
+              <span class="format-tag">.JSON</span>
+              <span class="format-tag">.JSONL</span>
+              <span class="format-tag">MAX 50MB</span>
+            </div>
+
+            <button type="button" class="btn btn-secondary btn-sm" id="browse-file-btn" style="margin-top: 1.25rem;">
+              Browse Local Files
+            </button>
+            <input type="file" id="file-input" accept=".csv,.json,.jsonl" style="display: none;" aria-hidden="true">
+          </div>
+
+          <!-- Selected File Card (Hidden Initially) -->
+          <div class="selected-file-box" id="selected-file-box">
+            <div class="file-meta-group">
+              <div class="file-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+              </div>
+              <div>
+                <div class="file-title" id="file-name-text">dataset_preview.jsonl</div>
+                <div class="file-details" id="file-meta-text">4.2 MB • JSONL Format • Local Memory</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: var(--space-2);">
+              <button type="button" class="btn btn-primary btn-sm" id="inspect-dataset-btn" style="display: none;">
+                Inspect Dataset
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm" id="remove-file-btn" title="Remove selected file">
+                Remove
+              </button>
+            </div>
+          </div>
+
+          <!-- Simulated Progress Bar (Hidden Initially) -->
+          <div class="upload-progress-wrapper" id="upload-progress-wrapper">
+            <div class="progress-track">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-labels">
+              <span id="progress-stage">Parsing records...</span>
+              <span id="progress-percent">0%</span>
+            </div>
+          </div>
+
+          <!-- Explicit Privacy Notice -->
+          <div class="demo-notice">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            <div>
+              <strong>FastAPI Backend Connected:</strong> Uploaded datasets are parsed, profiled, and scanned locally by the Zemo Python FastAPI engine (<code>POST /api/v1/datasets/upload</code> &rarr; <code>POST /api/v1/scans</code>). All sensitive evidence is irreversibly masked.
+            </div>
+          </div>
+
+>>>>>>> 2c2398d4b8ef804b3ebbf1c63a3df241e3e575d8
         </div>
 
       </div>
     </section>
 
     <!-- ============================================================
+<<<<<<< HEAD
          SECTION 5: AI TRAINING (DUAL-MODE STUDIO + CHATBOX)
          ============================================================ -->
     <section class="section ai-training-section" id="ai-training">
@@ -2334,11 +2580,631 @@
 
             <div class="demo-notice mt-6">
               <strong>Honesty Notice:</strong> This model training simulation illustrates the complete parameter configuration and evaluation telemetry pipeline. Connect a backend GPU worker cluster to execute real PyTorch/TensorFlow weight updates.
+=======
+         03. TARGET AI MODEL SELECTION (02 / TARGET INTELLIGENCE)
+         ============================================================ -->
+    <section class="section" id="models" aria-labelledby="models-heading">
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-label">02 / TARGET INTELLIGENCE</div>
+          <h2 class="section-title" id="models-heading">Choose your AI environment.</h2>
+          <p class="section-description">
+            Define the intended AI provider and processing environment to tailor safety standards, token sanitization rules, and privacy controls.
+          </p>
+        </div>
+
+        <div class="model-section-grid">
+          
+          <!-- 6 Provider Cards Grid -->
+          <div class="models-cards-grid reveal">
+            
+            <!-- 1. OpenAI -->
+            <div class="model-card selected" data-provider="openai" tabindex="0" role="button" aria-pressed="true">
+              <div>
+                <div class="model-card-header">
+                  <div class="model-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M12 2a10 10 0 0 1 10 10c0 2.2-.7 4.2-1.9 5.9l-2.1-1.2A8 8 0 1 0 6 18l-1.9 1.2A10 10 0 0 1 12 2z"/>
+                    </svg>
+                  </div>
+                  <span class="model-category-badge">Cloud Provider</span>
+                </div>
+                <div class="model-name">OpenAI</div>
+                <p class="model-desc">GPT-series foundation models with high reasoning capacity and structured outputs.</p>
+              </div>
+              <div class="model-capabilities">
+                <span class="capability-pill">Text Analysis</span>
+                <span class="capability-pill">Vision</span>
+                <span class="capability-pill">Function Calling</span>
+                <span class="capability-pill">Fine-Tuning</span>
+              </div>
+            </div>
+
+            <!-- 2. Anthropic -->
+            <div class="model-card" data-provider="anthropic" tabindex="0" role="button" aria-pressed="false">
+              <div>
+                <div class="model-card-header">
+                  <div class="model-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="12,2 22,20 2,20"/>
+                    </svg>
+                  </div>
+                  <span class="model-category-badge">Cloud Provider</span>
+                </div>
+                <div class="model-name">Anthropic</div>
+                <p class="model-desc">Claude models focused on safety alignment, Constitutional AI, and long-context analysis.</p>
+              </div>
+              <div class="model-capabilities">
+                <span class="capability-pill">Text Analysis</span>
+                <span class="capability-pill">Vision</span>
+                <span class="capability-pill">Tool Use</span>
+              </div>
+            </div>
+
+            <!-- 3. Google Gemini -->
+            <div class="model-card" data-provider="gemini" tabindex="0" role="button" aria-pressed="false">
+              <div>
+                <div class="model-card-header">
+                  <div class="model-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/>
+                    </svg>
+                  </div>
+                  <span class="model-category-badge">Cloud Provider</span>
+                </div>
+                <div class="model-name">Google Gemini</div>
+                <p class="model-desc">Native multimodal architecture with enterprise-grade GCP privacy boundaries.</p>
+              </div>
+              <div class="model-capabilities">
+                <span class="capability-pill">Text Analysis</span>
+                <span class="capability-pill">Vision</span>
+                <span class="capability-pill">Audio</span>
+                <span class="capability-pill">Embeddings</span>
+              </div>
+            </div>
+
+            <!-- 4. Meta Llama -->
+            <div class="model-card" data-provider="meta" tabindex="0" role="button" aria-pressed="false">
+              <div>
+                <div class="model-card-header">
+                  <div class="model-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <circle cx="7" cy="12" r="4"/>
+                      <circle cx="17" cy="12" r="4"/>
+                      <path d="M7 8h10v8H7z"/>
+                    </svg>
+                  </div>
+                  <span class="model-category-badge">Open Weights</span>
+                </div>
+                <div class="model-name">Meta Llama</div>
+                <p class="model-desc">Open-weight foundation models for fully private datacenter and self-hosted deployments.</p>
+              </div>
+              <div class="model-capabilities">
+                <span class="capability-pill">Fine-Tuning</span>
+                <span class="capability-pill">Self-Hosted</span>
+                <span class="capability-pill">Private Enclave</span>
+              </div>
+            </div>
+
+            <!-- 5. Mistral AI -->
+            <div class="model-card" data-provider="mistral" tabindex="0" role="button" aria-pressed="false">
+              <div>
+                <div class="model-card-header">
+                  <div class="model-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="4" y="4" width="7" height="7"/>
+                      <rect x="13" y="4" width="7" height="7"/>
+                      <rect x="4" y="13" width="7" height="7"/>
+                      <rect x="13" y="13" width="7" height="7"/>
+                    </svg>
+                  </div>
+                  <span class="model-category-badge">European Cloud</span>
+                </div>
+                <div class="model-name">Mistral AI</div>
+                <p class="model-desc">High-efficiency foundation models with strict European sovereign data residency options.</p>
+              </div>
+              <div class="model-capabilities">
+                <span class="capability-pill">Text Analysis</span>
+                <span class="capability-pill">Function Calling</span>
+                <span class="capability-pill">Fine-Tuning</span>
+              </div>
+            </div>
+
+            <!-- 6. Ollama / Local Models -->
+            <div class="model-card" data-provider="ollama" tabindex="0" role="button" aria-pressed="false">
+              <div>
+                <div class="model-card-header">
+                  <div class="model-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="3" y="6" width="18" height="12" rx="2"/>
+                      <circle cx="8" cy="12" r="1.5" fill="var(--surface)"/>
+                      <circle cx="16" cy="12" r="1.5" fill="var(--surface)"/>
+                    </svg>
+                  </div>
+                  <span class="model-category-badge">Local Processing</span>
+                </div>
+                <div class="model-name">Ollama / Local</div>
+                <p class="model-desc">Run weights completely on-premises with zero network data egress beyond your firewall.</p>
+              </div>
+              <div class="model-capabilities">
+                <span class="capability-pill">Air-Gapped</span>
+                <span class="capability-pill">Zero Egress</span>
+                <span class="capability-pill">Private Hardware</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Configuration Panel (Right Column) -->
+          <div class="model-config-panel reveal delay-100">
+            <div class="config-panel-header">
+              <h3 class="config-panel-title" id="config-provider-name">OpenAI Configuration</h3>
+              <p class="config-panel-sub">Target execution parameters &amp; privacy preferences</p>
+            </div>
+
+            <form class="config-form" id="model-config-form" onsubmit="return false;">
+              <div class="form-group">
+                <label class="form-label" for="config-model-select">Target Model Architecture</label>
+                <select class="form-select" id="config-model-select">
+                  <option value="gpt-4o" selected>gpt-4o</option>
+                  <option value="gpt-4o-mini">gpt-4o-mini</option>
+                  <option value="o1-preview">o1-preview</option>
+                  <option value="o3-mini">o3-mini</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="config-env-select">Processing Environment</label>
+                <select class="form-select" id="config-env-select">
+                  <option value="Cloud Isolated">Cloud Isolated (Zero Data Retention)</option>
+                  <option value="Hybrid Enclave">Hybrid Confidential Enclave</option>
+                  <option value="Local Air-Gapped">Local Air-Gapped Cluster</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="config-task-select">Intended AI Operation</label>
+                <select class="form-select" id="config-task-select">
+                  <option value="Supervised Fine-Tuning">Supervised Fine-Tuning (SFT)</option>
+                  <option value="RAG Knowledge Indexing">RAG Knowledge Indexing</option>
+                  <option value="Model Safety Evaluation">Model Safety Evaluation Benchmark</option>
+                  <option value="Direct Inference">Direct Model Inference</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="config-privacy-select">Privacy Enforcement Level</label>
+                <select class="form-select" id="config-privacy-select">
+                  <option value="Strict">Strict (Block all credentials &amp; redact PII)</option>
+                  <option value="Permissive">Permissive (Redact high-risk PII only)</option>
+                  <option value="Audit Only">Audit Only (Generate findings without masking)</option>
+                </select>
+              </div>
+
+              <div class="config-disclaimer">
+                <strong>Backend synchronization:</strong> Target provider and privacy parameters are persisted to the FastAPI backend (<code>POST /api/v1/models/config</code>) and drive readiness evaluation thresholds.
+              </div>
+
+              <button type="button" class="btn btn-primary" id="save-config-btn" style="width: 100%; margin-top: var(--space-2);">
+                Save Target Configuration
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         04. SECURITY ANALYSIS OUTPUT (03 / SECURITY INTELLIGENCE)
+         ============================================================ -->
+    <section class="section" id="security" aria-labelledby="security-heading">
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-label">03 / SECURITY INTELLIGENCE</div>
+          <h2 class="section-title" id="security-heading">Understand what your data contains.</h2>
+          <p class="section-description">
+            Explore privacy findings, security risks, and data-quality signals through one transparent, explainable analysis workspace.
+          </p>
+        </div>
+
+        <div class="analysis-container">
+          
+          <!-- Empty State (Shown before sample analysis is loaded) -->
+          <div class="analysis-empty-state" id="analysis-empty-state">
+            <div class="empty-icon-circle">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <h3 class="empty-title">Awaiting Dataset Inspection</h3>
+            <p class="empty-desc">
+              Select a dataset above to trigger automated safety scanning, or load our illustrative sample analysis to explore detection capabilities, findings, and remediation options.
+            </p>
+            <button type="button" class="btn btn-primary btn-lg" id="load-sample-btn">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clip-rule="evenodd"/>
+              </svg>
+              Load Sample Analysis
+            </button>
+          </div>
+
+          <!-- Loaded Analysis Workspace (Revealed upon loading) -->
+          <div class="analysis-workspace" id="analysis-workspace">
+            
+            <!-- Demo Mode Warning Banner -->
+            <div class="demo-notice" style="background: rgba(179, 139, 78, 0.12); border-color: rgba(179, 139, 78, 0.28);">
+              <svg viewBox="0 0 20 20" fill="var(--warning)" style="width: 18px; height: 18px;">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              <div>
+                <strong>DEMONSTRATION ANALYSIS:</strong> The findings below are illustrative mock samples from <code>customer_dialogues_v2.jsonl</code>. All credentials, phone numbers, and names are harmless fictional placeholders.
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm" id="reset-analysis-btn" style="margin-left: auto;">
+                Reset Analysis
+              </button>
+            </div>
+
+            <!-- Summary Metrics Cards -->
+            <div class="metrics-row">
+              
+              <div class="metric-card warning">
+                <div class="metric-card-header">
+                  <span class="metric-title">Overall Risk Score</span>
+                  <span class="severity-badge high">HIGH RISK</span>
+                </div>
+                <div class="metric-val" id="metric-risk-score">0</div>
+                <div class="metric-sub">Score out of 100 • Requires action</div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-card-header">
+                  <span class="metric-title">Sensitive Data (PII)</span>
+                  <span class="severity-badge medium">MEDIUM</span>
+                </div>
+                <div class="metric-val" id="metric-sensitive-count">0</div>
+                <div class="metric-sub">Emails, phones, direct customer IDs</div>
+              </div>
+
+              <div class="metric-card danger">
+                <div class="metric-card-header">
+                  <span class="metric-title">Security Findings</span>
+                  <span class="severity-badge critical">CRITICAL</span>
+                </div>
+                <div class="metric-val" id="metric-security-count">0</div>
+                <div class="metric-sub">Leaked keys &amp; prompt injections</div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-card-header">
+                  <span class="metric-title">Data Quality Signals</span>
+                  <span class="severity-badge low">MONITOR</span>
+                </div>
+                <div class="metric-val" id="metric-quality-count">0</div>
+                <div class="metric-sub">Schema drift &amp; missing labels</div>
+              </div>
+
+            </div>
+
+            <!-- Risk Distribution Bar Visualizer -->
+            <div class="risk-distrib-card">
+              <div class="risk-distrib-header">
+                <span class="risk-distrib-title">Severity Distribution Breakdown</span>
+                <span style="font-size: var(--text-xs); font-family: var(--font-mono); color: var(--text-muted);">40 Total Detected Incidents</span>
+              </div>
+              <div class="risk-bar" role="progressbar" aria-label="Risk severity distribution">
+                <div class="risk-bar-segment critical" id="risk-seg-critical" style="width: 7.5%;" title="Critical: 3"></div>
+                <div class="risk-bar-segment high" id="risk-seg-high" style="width: 20%;" title="High: 8"></div>
+                <div class="risk-bar-segment medium" id="risk-seg-medium" style="width: 37.5%;" title="Medium: 15"></div>
+                <div class="risk-bar-segment low" id="risk-seg-low" style="width: 35%;" title="Low: 14"></div>
+              </div>
+              <div class="risk-legend">
+                <div class="legend-item"><span class="legend-dot critical"></span> Critical (3)</div>
+                <div class="legend-item"><span class="legend-dot high"></span> High (8)</div>
+                <div class="legend-item"><span class="legend-dot medium"></span> Medium (15)</div>
+                <div class="legend-item"><span class="legend-dot low"></span> Low (14)</div>
+              </div>
+            </div>
+
+            <!-- Findings Table & Filtering -->
+            <div class="findings-container">
+              
+              <div class="findings-toolbar">
+                <div class="toolbar-filters">
+                  <button type="button" class="filter-btn active" data-severity="all">All Findings (10)</button>
+                  <button type="button" class="filter-btn" data-severity="critical">Critical (3)</button>
+                  <button type="button" class="filter-btn" data-severity="high">High (3)</button>
+                  <button type="button" class="filter-btn" data-severity="medium">Medium (3)</button>
+                  <button type="button" class="filter-btn" data-severity="low">Low (1)</button>
+                </div>
+                <div>
+                  <input type="text" class="search-input" id="findings-search-input" placeholder="Search findings, records, or tags..." aria-label="Search findings">
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="findings-table" aria-label="Security and Privacy Findings">
+                  <thead>
+                    <tr>
+                      <th scope="col" style="width: 36%;">Finding &amp; ID</th>
+                      <th scope="col" style="width: 20%;">Category</th>
+                      <th scope="col" style="width: 14%;">Severity</th>
+                      <th scope="col" style="width: 16%;">Location</th>
+                      <th scope="col" style="width: 14%;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="findings-table-body">
+                    <!-- Populated dynamically by sample-analysis.js -->
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         INTERACTIVE DATA SAFETY WORKFLOW VISUALIZATION
+         ============================================================ -->
+    <section class="section" id="workflow" aria-labelledby="workflow-heading">
+      <div class="container">
+        
+        <div class="section-header text-center">
+          <div class="section-label">PIPELINE ARCHITECTURE</div>
+          <h2 class="section-title" id="workflow-heading">Data Safety Pipeline</h2>
+          <p class="section-description" style="margin-left: auto; margin-right: auto;">
+            Explore the multi-stage defense architecture connecting raw dataset ingestion to safe AI model deployment.
+          </p>
+        </div>
+
+        <div class="workflow-map-container reveal">
+          <div class="workflow-pipeline" role="tablist" aria-label="Pipeline Stages">
+            
+            <div class="workflow-stage-node completed" data-stage="input" role="tab" tabindex="0">
+              <div class="node-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                </svg>
+              </div>
+              <span class="node-title">Data Input</span>
+              <span class="node-status">PASSED</span>
+            </div>
+
+            <div class="pipeline-arrow">&rarr;</div>
+
+            <div class="workflow-stage-node completed" data-stage="privacy" role="tab" tabindex="0">
+              <div class="node-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </div>
+              <span class="node-title">Privacy Scan</span>
+              <span class="node-status">PASSED</span>
+            </div>
+
+            <div class="pipeline-arrow">&rarr;</div>
+
+            <div class="workflow-stage-node completed" data-stage="security" role="tab" tabindex="0">
+              <div class="node-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </div>
+              <span class="node-title">Security Analysis</span>
+              <span class="node-status">FLAGGED (3)</span>
+            </div>
+
+            <div class="pipeline-arrow">&rarr;</div>
+
+            <div class="workflow-stage-node active" data-stage="risk" role="tab" tabindex="0">
+              <div class="node-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+              </div>
+              <span class="node-title">Risk Assessment</span>
+              <span class="node-status">ACTIVE STAGE</span>
+            </div>
+
+            <div class="pipeline-arrow">&rarr;</div>
+
+            <div class="workflow-stage-node" data-stage="sanitization" role="tab" tabindex="0">
+              <div class="node-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+              </div>
+              <span class="node-title">Sanitization</span>
+              <span class="node-status">QUEUED</span>
+            </div>
+
+            <div class="pipeline-arrow">&rarr;</div>
+
+            <div class="workflow-stage-node" data-stage="validation" role="tab" tabindex="0">
+              <div class="node-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+              </div>
+              <span class="node-title">Validation</span>
+              <span class="node-status">PENDING</span>
+            </div>
+
+            <div class="pipeline-arrow">&rarr;</div>
+
+            <div class="workflow-stage-node" data-stage="readiness" role="tab" tabindex="0">
+              <div class="node-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                  <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+                </svg>
+              </div>
+              <span class="node-title">AI Readiness</span>
+              <span class="node-status">PENDING</span>
+            </div>
+
+          </div>
+
+          <!-- Dynamic Stage Explainer Card -->
+          <div class="workflow-explainer-card">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--olive)" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+            <div>
+              <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: 4px;">
+                <h4 id="explainer-stage-title" style="margin: 0;">Risk Assessment</h4>
+                <span class="step-badge warning" id="explainer-stage-status">Current Pipeline Status: ACTIVE</span>
+              </div>
+              <p id="explainer-stage-desc" style="font-size: var(--text-sm); color: var(--text-muted); margin: 0;">
+                Calculates a unified multi-factor risk score by synthesizing PII occurrence, credential exposure entropy, and adversarial prompt attack surface.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         05. TRAINING READINESS WORKSPACE (04 / TRAINING READINESS)
+         ============================================================ -->
+    <section class="section" id="training" aria-labelledby="training-heading">
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-label">04 / TRAINING READINESS</div>
+          <h2 class="section-title" id="training-heading">Prepare your next training run.</h2>
+          <p class="section-description">
+            Review the dataset, understand outstanding safety requirements, and establish a certified, compliant path toward AI model fine-tuning.
+          </p>
+        </div>
+
+        <div class="readiness-grid">
+          
+          <!-- Left Column: Verification Checklist -->
+          <div class="readiness-stages-list reveal">
+            
+            <div class="stage-step-item">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <div class="step-title">Dataset Format &amp; Schema Validation</div>
+                <div class="step-desc">18,420 records parsed successfully. Schema complies with JSONL specification.</div>
+              </div>
+              <span class="step-badge pass">PASSED</span>
+            </div>
+
+            <div class="stage-step-item">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <div class="step-title">Privacy &amp; PII Audit</div>
+                <div class="step-desc">24 records flagged for PII. Automated pseudonymization rule queued.</div>
+              </div>
+              <span class="step-badge warning">ACTION REQ</span>
+            </div>
+
+            <div class="stage-step-item">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <div class="step-title">Security &amp; Credential Screening</div>
+                <div class="step-desc">3 critical secrets &amp; 2 prompt injections flagged. Blocking required.</div>
+              </div>
+              <span class="step-badge warning">CRITICAL REQ</span>
+            </div>
+
+            <div class="stage-step-item">
+              <div class="step-num">4</div>
+              <div class="step-content">
+                <div class="step-title">Required Remediation Execution</div>
+                <div class="step-desc">Awaiting execution approval for redaction policies.</div>
+              </div>
+              <span class="step-badge pending">PENDING</span>
+            </div>
+
+            <div class="stage-step-item">
+              <div class="step-num">5</div>
+              <div class="step-content">
+                <div class="step-title">Post-Remediation Revalidation</div>
+                <div class="step-desc">Verification scan will run automatically following sanitization.</div>
+              </div>
+              <span class="step-badge pending">PENDING</span>
+            </div>
+
+            <div class="stage-step-item">
+              <div class="step-num">6</div>
+              <div class="step-content">
+                <div class="step-title">Training Safety Certificate</div>
+                <div class="step-desc">Readiness score (78%) is below the mandatory 95% threshold.</div>
+              </div>
+              <span class="step-badge pending">BLOCKED</span>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Readiness Score Summary -->
+          <div class="readiness-summary-card reveal delay-100">
+            <div>
+              <div style="font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.06em;">
+                Current Readiness Score
+              </div>
+              <div class="gauge-wrapper">
+                <div class="gauge-percentage">78%</div>
+                <div class="gauge-status-label">Threshold: 95% Required</div>
+              </div>
+            </div>
+
+            <div class="readiness-stats-table">
+              <div class="stat-row">
+                <span class="stat-label">Total Sample Records</span>
+                <span class="stat-value">18,420</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Verified Clean Records</span>
+                <span class="stat-value" style="color: var(--success);">17,890 (97.1%)</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Records to Sanitize</span>
+                <span class="stat-value" style="color: var(--warning);">412</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Records to Block</span>
+                <span class="stat-value" style="color: var(--danger);">118</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-label">Target Architecture</span>
+                <span class="stat-value">OpenAI GPT-4o</span>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary btn-lg" id="prepare-training-btn" style="width: 100%;">
+              Prepare Training Workspace
+            </button>
+
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; line-height: 1.45;">
+              Safety readiness requires resolving all critical credential findings prior to model ingestion.
+>>>>>>> 2c2398d4b8ef804b3ebbf1c63a3df241e3e575d8
             </div>
           </div>
 
         </div>
+<<<<<<< HEAD
         <!-- /Live Training Monitor -->
+=======
+>>>>>>> 2c2398d4b8ef804b3ebbf1c63a3df241e3e575d8
 
       </div>
     </section>
@@ -2346,6 +3212,7 @@
   </main>
 
   <!-- ============================================================
+<<<<<<< HEAD
        PRE-FLIGHT REVIEW MODAL
        ============================================================ -->
   <div class="modal-overlay" id="preflightReviewModal">
@@ -2614,5 +3481,170 @@
   <script src="js/vendor/marked.min.js"></script>
   <script src="js/vendor/purify.min.js"></script>
   <script src="js/app.js"></script>
+=======
+       FINDINGS DETAIL SLIDING DRAWER
+       ============================================================ -->
+  <aside class="finding-drawer" id="finding-drawer" aria-labelledby="drawer-title" aria-modal="true" role="dialog">
+    <div class="drawer-header">
+      <div>
+        <span class="severity-badge critical" id="drawer-severity-badge">CRITICAL</span>
+        <span class="action-badge block" id="drawer-action-badge" style="margin-left: 6px;">BLOCK</span>
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm" id="close-drawer-btn" aria-label="Close details panel">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <div>
+        <h3 id="drawer-title" style="font-size: var(--text-lg); margin-bottom: 4px; color: var(--text);">
+          Exposed API Key in Conversation Context
+        </h3>
+        <div id="drawer-category" style="font-size: var(--text-xs); color: var(--text-muted);">
+          Exposed Credentials
+        </div>
+      </div>
+
+      <div class="drawer-field">
+        <div class="drawer-label">Detection Location</div>
+        <div id="drawer-location" style="font-size: var(--text-sm); font-family: var(--font-mono); color: var(--olive-dark);">
+          Record #1,402 (field: `metadata.auth_debug`)
+        </div>
+      </div>
+
+      <div class="drawer-field">
+        <div class="drawer-label">Technical Explanation</div>
+        <div id="drawer-description" style="font-size: var(--text-sm); color: var(--text-muted); line-height: 1.6;">
+          A string matching an active cloud service secret token format was identified inside the unparsed transcript payload.
+        </div>
+      </div>
+
+      <div class="drawer-field">
+        <div class="drawer-label">Fictional Harmless Evidence</div>
+        <div class="evidence-box" id="drawer-evidence">
+          bearer_token: 'sk-live-DEMO-xxxxxxxxxxxx-sample-only'
+        </div>
+      </div>
+
+      <div class="drawer-field">
+        <div class="drawer-label">Potential AI Downstream Impact</div>
+        <div id="drawer-impact" style="font-size: var(--text-sm); color: var(--text-muted); line-height: 1.6;">
+          Critical risk of credential regurgitation and unauthorized cloud resource access if ingested into training memory.
+        </div>
+      </div>
+
+      <div class="drawer-field">
+        <div class="drawer-label">Recommended Remediation</div>
+        <div id="drawer-remediation" style="font-size: var(--text-sm); color: var(--olive-dark); font-weight: 500; line-height: 1.6;">
+          Block affected record completely. Purge secret from source pipeline and rotate corresponding credentials.
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       MODAL DIALOG: TRAINING READINESS PREPARATION
+       ============================================================ -->
+  <div class="modal-overlay" id="training-modal" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-heading">Training Workspace Preparation</h3>
+        <button type="button" class="btn btn-ghost btn-sm" data-close-modal aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p style="margin-bottom: var(--space-4);">
+          <strong>Backend Integration Notice:</strong> Actual irreversible data sanitization, token redaction, and model export will be orchestrated through the Zemo Python FastAPI backend upon connection.
+        </p>
+        <p style="margin-bottom: var(--space-4);">
+          In this frontend preview, your selected dataset has remained completely within your browser's client-side memory. No live AI provider transmission or model fine-tuning run has taken place.
+        </p>
+        <div style="background: var(--surface-muted); padding: var(--space-4); border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: var(--text-xs);">
+          <strong>FastAPI Pipeline Route:</strong> <code>POST /api/v1/training/prepare</code><br>
+          <strong>Status:</strong> Simulation Approved for Demonstration
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-close-modal>
+          Understood &amp; Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ============================================================
+       BRAND FOOTER
+       ============================================================ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      
+      <div class="footer-grid">
+        
+        <div class="footer-brand-col">
+          <div style="display: flex; align-items: center; gap: var(--space-3); color: var(--text);">
+            <svg class="brand-symbol" viewBox="0 0 32 32" fill="none" style="width: 28px; height: 28px;">
+              <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.6" stroke-dasharray="3 3"/>
+              <circle cx="16" cy="10" r="3.2" fill="currentColor"/>
+              <circle cx="9.5" cy="21" r="2.8" fill="var(--sage)"/>
+              <circle cx="22.5" cy="21" r="2.8" fill="var(--sage)"/>
+              <path d="M16 13.2L10 20M16 13.2L22 20M10.5 21H21.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            <span style="font-weight: 700; letter-spacing: 0.08em; color: var(--olive-dark);">ZEMO</span>
+          </div>
+          <p>
+            Building a safer foundation for artificial intelligence through transparent dataset inspection, privacy guarantees, and verifiable safety readiness.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-heading">Platform Workflow</div>
+          <ul class="footer-links-list">
+            <li><a href="#overview" class="footer-link">Intelligence Core</a></li>
+            <li><a href="#dataset" class="footer-link">Dataset Ingestion</a></li>
+            <li><a href="#models" class="footer-link">Target AI Models</a></li>
+            <li><a href="#security" class="footer-link">Security Intelligence</a></li>
+            <li><a href="#training" class="footer-link">Training Readiness</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-heading">Governance &amp; Safety</div>
+          <ul class="footer-links-list">
+            <li><a href="#security" class="footer-link">Privacy-Aware Processing</a></li>
+            <li><a href="#security" class="footer-link">Explainable Risk Analysis</a></li>
+            <li><a href="#models" class="footer-link">Air-Gapped Processing</a></li>
+            <li><a href="#workflow" class="footer-link">Data Sanitization Rules</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 Zemo AI Safety Infrastructure. All rights reserved.</div>
+        <div style="display: flex; align-items: center; gap: var(--space-3);">
+          <span>Frontend Architecture Prototype</span>
+          <span class="preview-badge">ZEMO FRONTEND PREVIEW</span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Zemo Application Orchestrator -->
+  <script type="module" src="js/app.js"></script>
+
+>>>>>>> 2c2398d4b8ef804b3ebbf1c63a3df241e3e575d8
 </body>
 </html>
