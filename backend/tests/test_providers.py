@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import Settings, get_settings
 from core.database.config import get_database, Base
-from core.exceptions import register_exception_handlers
+from core.exceptions import register_exception_handlers, NotFoundError
 from core.logging import setup_logging
 from api.v1.health import router as health_router
 from api.v1.integrations.router import router as integrations_router
@@ -106,7 +106,7 @@ class TestProviderAPI:
     @pytest.mark.asyncio
     async def test_create_provider(self, async_client: AsyncClient):
         """Test creating a new AI provider."""
-        with patch("services.integrations.provider_registry.get_provider_registry_service") as mock_service:
+        with patch("api.v1.integrations.router.get_provider_registry_service") as mock_service:
             mock_registry = AsyncMock()
             mock_service.return_value = mock_registry
             
@@ -178,7 +178,7 @@ class TestProviderAPI:
     @pytest.mark.asyncio
     async def test_list_providers(self, async_client: AsyncClient):
         """Test listing AI providers."""
-        with patch("services.integrations.provider_registry.get_provider_registry_service") as mock_service:
+        with patch("api.v1.integrations.router.get_provider_registry_service") as mock_service:
             mock_registry = AsyncMock()
             mock_service.return_value = mock_registry
             
@@ -224,7 +224,7 @@ class TestProviderAPI:
     @pytest.mark.asyncio
     async def test_get_provider(self, async_client: AsyncClient):
         """Test getting a specific provider."""
-        with patch("services.integrations.provider_registry.get_provider_registry_service") as mock_service:
+        with patch("api.v1.integrations.router.get_provider_registry_service") as mock_service:
             mock_registry = AsyncMock()
             mock_service.return_value = mock_registry
             
@@ -253,10 +253,10 @@ class TestProviderAPI:
     @pytest.mark.asyncio
     async def test_get_provider_not_found(self, async_client: AsyncClient):
         """Test getting a non-existent provider."""
-        with patch("services.integrations.provider_registry.get_provider_registry_service") as mock_service:
+        with patch("api.v1.integrations.router.get_provider_registry_service") as mock_service:
             mock_registry = AsyncMock()
             mock_service.return_value = mock_registry
-            mock_registry.get_provider.side_effect = Exception("Not found")
+            mock_registry.get_provider.side_effect = NotFoundError("Not found")
 
             response = await async_client.get("/api/v1/integrations/providers/nonexistent")
 
@@ -265,7 +265,7 @@ class TestProviderAPI:
     @pytest.mark.asyncio
     async def test_update_provider(self, async_client: AsyncClient):
         """Test updating a provider."""
-        with patch("services.integrations.provider_registry.get_provider_registry_service") as mock_service:
+        with patch("api.v1.integrations.router.get_provider_registry_service") as mock_service:
             mock_registry = AsyncMock()
             mock_service.return_value = mock_registry
             
@@ -298,7 +298,7 @@ class TestProviderAPI:
     @pytest.mark.asyncio
     async def test_test_provider_connection(self, async_client: AsyncClient):
         """Test provider connection testing."""
-        with patch("services.integrations.provider_registry.get_provider_registry_service") as mock_service:
+        with patch("api.v1.integrations.router.get_provider_registry_service") as mock_service:
             mock_registry = AsyncMock()
             mock_service.return_value = mock_registry
             
@@ -319,7 +319,7 @@ class TestProviderAPI:
     @pytest.mark.asyncio
     async def test_smoke_test_provider(self, async_client: AsyncClient):
         """Test provider smoke test."""
-        with patch("services.integrations.provider_registry.get_provider_registry_service") as mock_service:
+        with patch("api.v1.integrations.router.get_provider_registry_service") as mock_service:
             mock_registry = AsyncMock()
             mock_service.return_value = mock_registry
             
@@ -344,7 +344,7 @@ class TestProviderAPI:
     @pytest.mark.asyncio
     async def test_list_provider_models(self, async_client: AsyncClient):
         """Test listing models for a provider."""
-        with patch("services.integrations.provider_registry.get_provider_registry_service") as mock_service:
+        with patch("api.v1.integrations.router.get_provider_registry_service") as mock_service:
             mock_registry = AsyncMock()
             mock_service.return_value = mock_registry
             
@@ -400,7 +400,7 @@ class TestProviderAPI:
     @pytest.mark.asyncio
     async def test_get_model_capabilities(self, async_client: AsyncClient):
         """Test getting model capabilities."""
-        with patch("services.integrations.provider_registry.get_provider_registry_service") as mock_service:
+        with patch("api.v1.integrations.router.get_provider_registry_service") as mock_service:
             mock_registry = AsyncMock()
             mock_service.return_value = mock_registry
             
@@ -437,7 +437,7 @@ class TestProviderAPI:
     @pytest.mark.asyncio
     async def test_upsert_model_capability(self, async_client: AsyncClient):
         """Test adding/updating model capability."""
-        with patch("services.integrations.provider_registry.get_provider_registry_service") as mock_service:
+        with patch("api.v1.integrations.router.get_provider_registry_service") as mock_service:
             mock_registry = AsyncMock()
             mock_service.return_value = mock_registry
             
@@ -487,7 +487,7 @@ class TestProviderAPI:
     @pytest.mark.asyncio
     async def test_update_model_capability(self, async_client: AsyncClient):
         """Test updating model capability."""
-        with patch("services.integrations.provider_registry.get_provider_registry_service") as mock_service:
+        with patch("api.v1.integrations.router.get_provider_registry_service") as mock_service:
             mock_registry = AsyncMock()
             mock_service.return_value = mock_registry
             
@@ -549,7 +549,7 @@ class TestProviderAPI:
     @pytest.mark.asyncio
     async def test_delete_model_capability(self, async_client: AsyncClient):
         """Test deleting model capability."""
-        with patch("services.integrations.provider_registry.get_provider_registry_service") as mock_service:
+        with patch("api.v1.integrations.router.get_provider_registry_service") as mock_service:
             mock_registry = AsyncMock()
             mock_service.return_value = mock_registry
             mock_registry.delete_model_capability.return_value = True
@@ -563,7 +563,7 @@ class TestProviderAPI:
     @pytest.mark.asyncio
     async def test_disable_provider(self, async_client: AsyncClient):
         """Test disabling a provider."""
-        with patch("services.integrations.provider_registry.get_provider_registry_service") as mock_service:
+        with patch("api.v1.integrations.router.get_provider_registry_service") as mock_service:
             mock_registry = AsyncMock()
             mock_service.return_value = mock_registry
             
@@ -591,7 +591,7 @@ class TestProviderAPI:
     @pytest.mark.asyncio
     async def test_delete_provider(self, async_client: AsyncClient):
         """Test deleting a provider."""
-        with patch("services.integrations.provider_registry.get_provider_registry_service") as mock_service:
+        with patch("api.v1.integrations.router.get_provider_registry_service") as mock_service:
             mock_registry = AsyncMock()
             mock_service.return_value = mock_registry
             mock_registry.delete_provider.return_value = True
@@ -620,6 +620,10 @@ class TestProviderRegistryService:
             mock_session = AsyncMock()
             mock_db.return_value.__aiter__.return_value = [mock_session]
             
+            mock_check = MagicMock()
+            mock_check.scalar_one_or_none.return_value = None
+            mock_session.execute.return_value = mock_check
+
             mock_provider = Provider(
                 id="test-id",
                 name="test-provider",
@@ -677,13 +681,12 @@ class TestProviderRegistryService:
                 ),
             ]
             
-            mock_result = AsyncMock()
+            mock_result = MagicMock()
             mock_result.scalars.return_value.all.return_value = mock_providers
-            mock_session.execute.return_value = mock_result
             
-            mock_count_result = AsyncMock()
+            mock_count_result = MagicMock()
             mock_count_result.scalar.return_value = 1
-            mock_session.execute.side_effect = [mock_result, mock_count_result]
+            mock_session.execute.side_effect = [mock_count_result, mock_result]
             
             providers, total = await service.list_providers()
             
@@ -702,6 +705,10 @@ class TestProviderRegistryService:
             mock_session = AsyncMock()
             mock_db.return_value.__aiter__.return_value = [mock_session]
             
+            mock_check = MagicMock()
+            mock_check.scalar_one_or_none.return_value = None
+            mock_session.execute.return_value = mock_check
+
             mock_provider = Provider(
                 id="test-id",
                 name="test-provider",
@@ -733,6 +740,10 @@ class TestProviderRegistryService:
             mock_session = AsyncMock()
             mock_db.return_value.__aiter__.return_value = [mock_session]
             
+            mock_check = MagicMock()
+            mock_check.scalar_one_or_none.return_value = None
+            mock_session.execute.return_value = mock_check
+
             mock_provider = Provider(
                 id="test-id",
                 name="test-provider",

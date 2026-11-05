@@ -1050,6 +1050,16 @@
                 <div class="model-desc">Continuous target estimation with linear parameter mapping</div>
                 <span class="model-tag">Regression · Traditional</span>
               </div>
+              <div class="model-card" data-model="ridge" data-category="traditional" data-task="regression">
+                <div class="model-name">Ridge Regression</div>
+                <div class="model-desc">L2 Tikhonov regularization preventing coefficient inflation</div>
+                <span class="model-tag">Regression · Traditional</span>
+              </div>
+              <div class="model-card" data-model="lasso" data-category="traditional" data-task="regression">
+                <div class="model-name">Lasso Regression</div>
+                <div class="model-desc">L1 regularization producing sparse feature selection</div>
+                <span class="model-tag">Regression · Traditional</span>
+              </div>
               <div class="model-card" data-model="logistic-regression" data-category="traditional" data-task="classification">
                 <div class="model-name">Logistic Regression</div>
                 <div class="model-desc">Sigmoidal probability mapping for discrete categorical targets</div>
@@ -1070,10 +1080,10 @@
                 <div class="model-desc">Sequential additive gradient learning for competitive tabular accuracy</div>
                 <span class="model-tag">Class / Reg · Traditional</span>
               </div>
-              <div class="model-card" data-model="svm" data-category="traditional" data-task="classification">
-                <div class="model-name">Support Vector Machine</div>
-                <div class="model-desc">Maximum-margin hyperplane separation with kernel embeddings</div>
-                <span class="model-tag">Classification · Traditional</span>
+              <div class="model-card" data-model="svm" data-category="traditional" data-task="classification regression">
+                <div class="model-name">Support Vector Machine (SVM/SVR)</div>
+                <div class="model-desc">Maximum-margin hyperplane separation and epsilon-tube regression</div>
+                <span class="model-tag">Class / Reg · Traditional</span>
               </div>
               <div class="model-card" data-model="knn" data-category="traditional" data-task="classification regression">
                 <div class="model-name">K-Nearest Neighbors</div>

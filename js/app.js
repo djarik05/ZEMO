@@ -902,9 +902,13 @@
     // Render table
     renderPreviewTable();
 
-    // Init restrictions default state
+    // Init restrictions default state: auto-exclude identifier and personal information columns
     ds.headers.forEach((col) => {
-      if (!state.restrictions.columns[col]) {
+      const lower = col.toLowerCase();
+      const isIdentifier = lower.includes('name') || lower.includes('roll') || lower.includes('phone') || lower.includes('email') || lower === 'id' || lower.endsWith('_id');
+      if (isIdentifier) {
+        state.restrictions.columns[col] = 'exclude';
+      } else if (!state.restrictions.columns[col]) {
         state.restrictions.columns[col] = 'include';
       }
     });
@@ -1046,6 +1050,35 @@
     renderFeatureTable();
   }
 
+  function detectTaskForTarget(targetCol) {
+    if (!state.dataset || !targetCol) return 'classification';
+    const headerIdx = (state.dataset.headers || []).indexOf(targetCol);
+    if (headerIdx === -1) return 'classification';
+    const rows = state.dataset.rows || [];
+    const vals = rows.map((r) => r[headerIdx]).filter((v) => v !== null && v !== undefined && v !== '');
+    if (vals.length === 0) return 'classification';
+
+    const uniqueVals = new Set(vals);
+    const isAllNumeric = vals.every((v) => !isNaN(Number(v)) && String(v).trim() !== '');
+    const hasDecimals = vals.some((v) => String(v).includes('.'));
+
+    if (isAllNumeric && (hasDecimals || uniqueVals.size > 15)) {
+      return 'regression';
+    }
+    return 'classification';
+  }
+
+  function syncTaskWithTarget(targetCol) {
+    if (!targetCol) return;
+    const task = detectTaskForTarget(targetCol);
+    if (state.algorithmConfig) {
+      state.algorithmConfig.task = task;
+    }
+    if (state.selectedModel) {
+      selectModel(state.selectedModel);
+    }
+  }
+
   function populateTargetDropdowns() {
     if (!state.dataset) return;
     const { headers } = state.dataset;
@@ -1055,19 +1088,22 @@
       options += `<option value="${escapeHtml(h)}">${escapeHtml(h)}</option>`;
     });
 
+    // Prefer 4th Semester SGPA for academic datasets, or last column as default
+    const sgpaTarget = headers.find((h) => h.toLowerCase().includes('4th_sem') || h.toLowerCase().includes('4thsem'));
+    const defaultTarget = sgpaTarget || headers[headers.length - 1];
+
     if (el.targetColumn) {
       el.targetColumn.innerHTML = options;
-      // Preselect last column as likely target
-      const defaultTarget = headers[headers.length - 1];
       el.targetColumn.value = defaultTarget;
       state.restrictions.constraints.targetColumn = defaultTarget;
     }
 
     if (el.expTarget) {
       el.expTarget.innerHTML = options;
-      el.expTarget.value = state.restrictions.constraints.targetColumn;
+      el.expTarget.value = defaultTarget;
     }
 
+    syncTaskWithTarget(defaultTarget);
     updateRestrictionSummary();
   }
 
@@ -1798,19 +1834,67 @@
   let hpValidationDebounceTimer = null;
 
   async function selectModel(modelKey) {
-    state.selectedModel = modelKey;
-    const meta = MODEL_METADATA[modelKey] || {
-      name: modelKey,
-      type: 'classification',
-      tasks: ['classification'],
-      defaultMetric: 'f1',
+    let resolvedKey = modelKey;
+    const currentTask = (state.algorithmConfig && state.algorithmConfig.task) || detectTaskForTarget(state.restrictions.constraints.targetColumn);
+
+    if (currentTask === 'regression') {
+      const regressionMap = {
+        'random-forest': 'random-forest-regressor',
+        'random_forest_classifier': 'random_forest_regressor',
+        'decision-tree': 'decision-tree-regressor',
+        'decision_tree_classifier': 'decision_tree_regressor',
+        'gradient-boosting': 'gradient-boosting-regressor',
+        'gradient_boosting_classifier': 'gradient_boosting_regressor',
+        'logistic-regression': 'linear-regression',
+        'logistic_regression': 'linear-regression',
+        'svm': 'svr',
+        'svc': 'svr',
+        'knn': 'knn-regressor',
+        'knn_classifier': 'knn_regressor',
+        'mlp': 'gradient-boosting-regressor',
+        'ffnn': 'gradient-boosting-regressor',
+      };
+      if (regressionMap[modelKey]) {
+        resolvedKey = regressionMap[modelKey];
+      }
+    } else if (currentTask === 'classification') {
+      const classificationMap = {
+        'linear-regression': 'logistic-regression',
+        'linear_regression': 'logistic_regression',
+        'ridge': 'logistic-regression',
+        'lasso': 'logistic-regression',
+        'random-forest-regressor': 'random-forest',
+        'decision-tree-regressor': 'decision-tree',
+        'gradient-boosting-regressor': 'gradient-boosting',
+        'svr': 'svm',
+        'knn-regressor': 'knn',
+      };
+      if (classificationMap[modelKey]) {
+        resolvedKey = classificationMap[modelKey];
+      }
+    }
+
+    state.selectedModel = resolvedKey;
+    const meta = MODEL_METADATA[resolvedKey] || MODEL_METADATA[modelKey] || {
+      name: resolvedKey,
+      type: currentTask,
+      tasks: [currentTask],
+      defaultMetric: currentTask === 'regression' ? 'rmse' : 'f1',
       paramGroup: 'treeParams',
-      algoId: modelKey,
+      algoId: resolvedKey,
     };
 
     // Update active model cards
     el.modelCards.forEach((card) => {
-      if (card.dataset.model === modelKey) {
+      const cm = card.dataset.model;
+      const isMatch = cm === modelKey || cm === resolvedKey ||
+        (resolvedKey === 'random-forest-regressor' && cm === 'random-forest') ||
+        (resolvedKey === 'decision-tree-regressor' && cm === 'decision-tree') ||
+        (resolvedKey === 'gradient-boosting-regressor' && cm === 'gradient-boosting') ||
+        (resolvedKey === 'svr' && cm === 'svm') ||
+        (resolvedKey === 'knn-regressor' && cm === 'knn') ||
+        (resolvedKey === 'linear-regression' && cm === 'linear-regression');
+      if (isMatch) {
         card.classList.add('selected');
       } else {
         card.classList.remove('selected');
@@ -1818,8 +1902,8 @@
     });
 
     // Update select in experiment config form
-    if (el.expModel && el.expModel.value !== modelKey) {
-      el.expModel.value = modelKey;
+    if (el.expModel && el.expModel.value !== resolvedKey) {
+      el.expModel.value = resolvedKey;
     }
 
     // Update evaluation metrics based on model type
@@ -1832,7 +1916,7 @@
     handleClusteringWorkflowUI(meta.type);
 
     // Load registry algorithm schema & dynamic hyperparameter form
-    await loadRegistryAlgorithm(meta.algoId || modelKey, meta.type);
+    await loadRegistryAlgorithm(meta.algoId || resolvedKey, meta.type);
 
     showNotification(`Selected algorithm: ${meta.name}`, 'info');
   }
@@ -2391,6 +2475,7 @@
         const val = e.target.value;
         state.restrictions.constraints.targetColumn = val;
         if (el.expTarget) el.expTarget.value = val;
+        syncTaskWithTarget(val);
         updateRestrictionSummary();
         renderFeatureTable();
       });
@@ -2630,8 +2715,10 @@
     // Target sync
     if (el.expTarget) {
       el.expTarget.addEventListener('change', (e) => {
-        state.restrictions.constraints.targetColumn = e.target.value;
-        if (el.targetColumn) el.targetColumn.value = e.target.value;
+        const val = e.target.value;
+        state.restrictions.constraints.targetColumn = val;
+        if (el.targetColumn) el.targetColumn.value = val;
+        syncTaskWithTarget(val);
         updateRestrictionSummary();
         renderFeatureTable();
       });
@@ -2740,9 +2827,9 @@
           return;
         }
 
-        const task = (state.algorithmConfig && state.algorithmConfig.task) || 'classification';
+        const targetCol = state.restrictions.constraints.targetColumn || null;
+        const task = (state.algorithmConfig && state.algorithmConfig.task) || detectTaskForTarget(targetCol);
         const isClustering = task === 'clustering';
-        const targetCol = isClustering ? null : (state.restrictions.constraints.targetColumn || null);
 
         if (!isClustering && !targetCol) {
           showNotification('Please select a target column for supervised training in the Data Preparation section.', 'warning');
@@ -2758,7 +2845,7 @@
           return;
         }
 
-        const algorithmId = (state.algorithmConfig && state.algorithmConfig.id) || (isClustering ? 'kmeans' : 'random_forest');
+        const algorithmId = (state.algorithmConfig && state.algorithmConfig.id) || (isClustering ? 'kmeans' : (task === 'regression' ? 'linear_regression' : 'random_forest_classifier'));
 
         // Extract user hyperparameters from dynamic input fields
         const params = {};

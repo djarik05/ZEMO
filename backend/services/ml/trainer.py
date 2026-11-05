@@ -36,10 +36,12 @@ from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 try:
+    from core.config import get_settings
     from core.exceptions import AppValidationError as ValidationError
     from services.ml.pipeline_builder import DynamicPipelineBuilder, TrainingConfig
     from services.ml.evaluator import ModelEvaluator
 except ImportError:
+    from backend.core.config import get_settings
     from backend.core.exceptions import AppValidationError as ValidationError
     from backend.services.ml.pipeline_builder import DynamicPipelineBuilder, TrainingConfig
     from backend.services.ml.evaluator import ModelEvaluator
@@ -120,7 +122,13 @@ class MLTrainingEngine:
         artifacts_dir: Optional[str] = None,
         pipeline_builder: Optional[DynamicPipelineBuilder] = None,
     ):
-        self.artifacts_dir = Path(artifacts_dir or "data/experiments")
+        if artifacts_dir:
+            self.artifacts_dir = Path(artifacts_dir).resolve()
+        else:
+            try:
+                self.artifacts_dir = Path(get_settings().experiments_dir).resolve()
+            except Exception:
+                self.artifacts_dir = (Path(__file__).resolve().parent.parent.parent / "data" / "experiments").resolve()
         self.artifacts_dir.mkdir(parents=True, exist_ok=True)
         self.builder = pipeline_builder or DynamicPipelineBuilder()
 
@@ -165,7 +173,7 @@ class MLTrainingEngine:
         # Experiment artifact directory
         exp_dir = self.artifacts_dir / experiment_id
         exp_dir.mkdir(parents=True, exist_ok=True)
-        artifact_path = str(exp_dir / "model.joblib")
+        artifact_path = str((exp_dir / "model.joblib").resolve())
 
         target_classes: Optional[List[str]] = None
         metrics: Dict[str, Any] = {}
@@ -263,11 +271,21 @@ class MLTrainingEngine:
                     log("info", f"Computed learning curve across {len(lc['curve_points'])} training increments.")
 
             elif config.task == "regression":
-                metrics = ModelEvaluator.evaluate_regression(build_res.pipeline, X_test, y_test)
+                metrics = ModelEvaluator.evaluate_regression(
+                    build_res.pipeline, X_test, y_test, X_train=X_train, y_train=y_train
+                )
                 log(
                     "info",
                     f"Test Results -> RMSE: {metrics['rmse']:.4f}, MAE: {metrics['mae']:.4f}, R²: {metrics['r2']:.4f}, Explained Var: {metrics['explained_variance']:.4f}."
                 )
+                if metrics.get("dummy_baseline") and metrics["dummy_baseline"].get("rmse") is not None:
+                    db = metrics["dummy_baseline"]
+                    log("info", f"DummyRegressor Baseline -> RMSE: {db['rmse']:.4f}, MAE: {db['mae']:.4f}, Improvement over baseline: {db['improvement_pct']:.2f}%.")
+                if metrics.get("overfitting") and metrics["overfitting"].get("train_r2") is not None:
+                    of = metrics["overfitting"]
+                    log("info", f"Train vs Test R² -> Train: {of['train_r2']:.4f}, Test: {of['test_r2']:.4f}, Gap: {of['gap']:.4f} (Overfitting: {of['is_overfitting']}).")
+                if metrics.get("data_leakage") and metrics["data_leakage"].get("warning"):
+                    log("warning", f"Data Leakage Alert: {metrics['data_leakage']['warning']}")
 
                 # Feature Importance
                 feat_imp = ModelEvaluator.extract_feature_importance(
@@ -284,18 +302,19 @@ class MLTrainingEngine:
                     metrics["learning_curve"] = lc
                     log("info", f"Computed learning curve across {len(lc['curve_points'])} training increments.")
 
-            # Optional Cross Validation for supervised tasks
-            if config.cv_folds and config.cv_folds >= 2:
-                log("info", f"Running {config.cv_folds}-fold cross validation on training data...")
+            # Cross Validation for supervised tasks (default 5 folds if not explicitly configured)
+            cv_folds = config.cv_folds if config.cv_folds is not None else 5
+            if cv_folds and cv_folds >= 2 and len(X_train) >= cv_folds * 2:
+                log("info", f"Running {cv_folds}-fold cross validation on training data...")
                 cv_metric = "f1_weighted" if config.task == "classification" else "neg_root_mean_squared_error"
-                cv_scores = cross_val_score(build_res.pipeline, X_train, y_train, cv=config.cv_folds, scoring=cv_metric)
+                cv_scores = cross_val_score(build_res.pipeline, X_train, y_train, cv=cv_folds, scoring=cv_metric)
                 if config.task == "regression":
                     cv_scores = -cv_scores
                 metrics["cv_scores"] = [round(float(s), 4) for s in cv_scores]
                 metrics["cv_mean"] = round(float(np.mean(cv_scores)), 4)
                 metrics["cv_std"] = round(float(np.std(cv_scores)), 4)
                 metrics["cv_mean_score"] = metrics["cv_mean"]  # convenient alias
-                log("info", f"Cross Validation ({config.cv_folds}-fold) -> Mean: {metrics['cv_mean']}, Std: {metrics['cv_std']}.")
+                log("info", f"Cross Validation ({cv_folds}-fold) -> Mean: {metrics['cv_mean']}, Std: {metrics['cv_std']}.")
 
         elif config.task == "clustering":
             # Unsupervised Workflow

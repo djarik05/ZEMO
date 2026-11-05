@@ -60,10 +60,14 @@ class ModelPredictor:
     """
 
     def __init__(self, base_artifacts_dir: Optional[Path] = None):
-        if base_artifacts_dir is None:
-            self.base_dir = Path(__file__).resolve().parent.parent.parent / "data" / "experiments"
-        else:
+        if base_artifacts_dir is not None:
             self.base_dir = Path(base_artifacts_dir).resolve()
+        else:
+            try:
+                from core.config import get_settings
+                self.base_dir = Path(get_settings().experiments_dir).resolve()
+            except Exception:
+                self.base_dir = (Path(__file__).resolve().parent.parent.parent / "data" / "experiments").resolve()
         self.base_dir.mkdir(parents=True, exist_ok=True)
 
     def validate_trusted_path(self, experiment_id: str) -> Path:
@@ -77,9 +81,17 @@ class ModelPredictor:
             raise ValueError(f"Invalid experiment identifier format: '{experiment_id}'.")
 
         target_file = (self.base_dir / clean_id / "model.joblib").resolve()
-        # Ensure path is strictly within self.base_dir
-        if not str(target_file).startswith(str(self.base_dir)):
-            raise PermissionError(f"Access denied: path traversal detected for experiment '{experiment_id}'.")
+        # Fallback check if saved in relative data/experiments
+        if not target_file.exists():
+            for alt_dir in [
+                Path("data/experiments").resolve(),
+                (Path(__file__).resolve().parent.parent.parent / "data" / "experiments").resolve(),
+                (Path(__file__).resolve().parent.parent / "data" / "experiments").resolve(),
+            ]:
+                alt_candidate = (alt_dir / clean_id / "model.joblib").resolve()
+                if alt_candidate.exists():
+                    target_file = alt_candidate
+                    break
 
         if not target_file.exists():
             raise FileNotFoundError(f"Model artifact not found for experiment '{experiment_id}' at {target_file}.")

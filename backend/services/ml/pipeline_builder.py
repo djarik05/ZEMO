@@ -264,9 +264,11 @@ class DynamicPipelineBuilder:
 
         full_pipeline = Pipeline(pipe_steps)
 
+        active_feature_cols = [c for c in feature_cols if c in (set(numeric_cols) | set(categorical_cols))]
+
         return PipelineBuildResult(
             pipeline=full_pipeline,
-            feature_columns=feature_cols,
+            feature_columns=active_feature_cols,
             numeric_columns=numeric_cols,
             categorical_columns=categorical_cols,
             target_column=target_col,

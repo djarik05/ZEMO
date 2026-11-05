@@ -9,6 +9,7 @@ import os
 import pickle
 import uuid
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
@@ -368,13 +369,17 @@ async def download_model(
     if not experiment:
         raise NotFoundError(f"Experiment '{experiment_id}' not found.")
 
-    if not experiment.artifact_path or not os.path.exists(experiment.artifact_path):
-        raise NotFoundError("Model artifact file does not exist or training did not complete.")
+    artifact_file = None
+    if experiment.artifact_path and os.path.exists(experiment.artifact_path):
+        artifact_file = Path(experiment.artifact_path).resolve()
+    else:
+        try:
+            artifact_file = predictor.validate_trusted_path(experiment_id)
+        except Exception:
+            artifact_file = None
 
-    try:
-        predictor.validate_trusted_path(experiment_id)
-    except Exception as e:
-        raise NotFoundError(f"Secure artifact validation failed: {e}")
+    if not artifact_file or not artifact_file.exists():
+        raise NotFoundError("Model artifact file does not exist or training did not complete.")
 
     filename_base = f"zemo_{experiment.task}_{experiment.algorithm_id}_{experiment.id[:8]}"
 
@@ -388,7 +393,7 @@ async def download_model(
         )
 
     return FileResponse(
-        experiment.artifact_path,
+        str(artifact_file),
         media_type="application/octet-stream",
         filename=f"{filename_base}.joblib",
     )

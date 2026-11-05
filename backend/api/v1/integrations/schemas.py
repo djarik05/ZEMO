@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional, List, Dict, Any
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
 
 class ProviderType(str, Enum):
@@ -54,8 +54,8 @@ class ProviderResponse(ProviderBase):
     enabled: bool
     last_test_at: Optional[datetime] = None
     last_test_result: Optional[str] = None
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 
 class ProviderListResponse(BaseModel):
@@ -129,8 +129,34 @@ class ModelCapabilityResponse(ModelCapabilityBase):
 
     id: str
     provider_id: str
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def extract_metadata(cls, data: Any) -> Any:
+        if hasattr(data, "model_metadata"):
+            return {
+                "id": getattr(data, "id", None),
+                "provider_id": getattr(data, "provider_id", None),
+                "model_identifier": getattr(data, "model_identifier", ""),
+                "display_name": getattr(data, "display_name", ""),
+                "capabilities": getattr(data, "capabilities", []),
+                "max_context_tokens": getattr(data, "max_context_tokens", None),
+                "max_output_tokens": getattr(data, "max_output_tokens", None),
+                "supports_streaming": getattr(data, "supports_streaming", False),
+                "supports_system_prompt": getattr(data, "supports_system_prompt", True),
+                "supports_parallel_tool_calls": getattr(data, "supports_parallel_tool_calls", False),
+                "input_modalities": getattr(data, "input_modalities", []),
+                "output_modalities": getattr(data, "output_modalities", []),
+                "pricing_input_per_1k": getattr(data, "pricing_input_per_1k", None),
+                "pricing_output_per_1k": getattr(data, "pricing_output_per_1k", None),
+                "is_deprecated": getattr(data, "is_deprecated", False),
+                "metadata": getattr(data, "model_metadata", {}) or {},
+                "created_at": getattr(data, "created_at", None),
+                "updated_at": getattr(data, "updated_at", None),
+            }
+        return data
 
 
 class ModelCapabilityListResponse(BaseModel):

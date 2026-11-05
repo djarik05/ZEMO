@@ -147,10 +147,14 @@ class ModelEvaluator:
         pipeline: Pipeline,
         X_test: Union[pd.DataFrame, np.ndarray],
         y_test: Union[pd.Series, np.ndarray],
+        X_train: Optional[Union[pd.DataFrame, np.ndarray]] = None,
+        y_train: Optional[Union[pd.Series, np.ndarray]] = None,
     ) -> Dict[str, Any]:
         """
         Evaluate regression pipeline on unseen test data.
-        Calculates MAE, MSE, RMSE, R², Explained Variance, and residual diagnostics.
+        Calculates MAE, MSE, RMSE, R², Explained Variance, DummyRegressor baseline,
+        training split evaluation (overfitting gap), potential data leakage detection,
+        and residual diagnostics.
         """
         y_true = np.asarray(y_test, dtype=float)
         y_pred = np.asarray(pipeline.predict(X_test), dtype=float)
@@ -182,6 +186,60 @@ class ModelEvaluator:
             "bin_edges": [round(float(b), 4) for b in bin_edges],
         }
 
+        # Baseline DummyRegressor (strategy='mean')
+        dummy_mae: Optional[float] = None
+        dummy_mse: Optional[float] = None
+        dummy_rmse: Optional[float] = None
+        dummy_r2: Optional[float] = None
+        improvement_pct: Optional[float] = None
+
+        try:
+            from sklearn.dummy import DummyRegressor
+            dummy = DummyRegressor(strategy="mean")
+            fit_X = X_train if X_train is not None else X_test
+            fit_y = y_train if y_train is not None else y_test
+            dummy.fit(fit_X, fit_y)
+            y_dummy_pred = dummy.predict(X_test)
+
+            dummy_mae = float(mean_absolute_error(y_true, y_dummy_pred))
+            dummy_mse = float(mean_squared_error(y_true, y_dummy_pred))
+            dummy_rmse = float(np.sqrt(dummy_mse))
+            dummy_r2 = float(r2_score(y_true, y_dummy_pred))
+            if dummy_rmse > 0:
+                improvement_pct = round(((dummy_rmse - rmse) / dummy_rmse) * 100, 2)
+            else:
+                improvement_pct = 0.0
+        except Exception as e:
+            logger.warning(f"Could not compute DummyRegressor baseline: {e}")
+
+        # Overfitting check: evaluate on training set if available
+        train_r2: Optional[float] = None
+        train_rmse: Optional[float] = None
+        train_mae: Optional[float] = None
+        overfitting_gap: Optional[float] = None
+        is_overfitting = False
+
+        if X_train is not None and y_train is not None:
+            try:
+                y_train_arr = np.asarray(y_train, dtype=float)
+                y_train_pred = np.asarray(pipeline.predict(X_train), dtype=float)
+                train_r2 = float(r2_score(y_train_arr, y_train_pred))
+                train_rmse = float(np.sqrt(mean_squared_error(y_train_arr, y_train_pred)))
+                train_mae = float(mean_absolute_error(y_train_arr, y_train_pred))
+                overfitting_gap = round(train_r2 - r2, 4)
+                # Overfitting flagged if train R2 exceeds test R2 by > 0.15
+                is_overfitting = bool(overfitting_gap > 0.15)
+            except Exception as e:
+                logger.warning(f"Could not compute train-split evaluation: {e}")
+
+        # Data leakage check: R2 >= 0.999 is suspiciously high for real data
+        potential_data_leakage = bool(r2 >= 0.999)
+        leakage_warning = (
+            "Suspiciously high performance (R² >= 0.999) detected. Verify that predictive features do not contain the target or direct proxies."
+            if potential_data_leakage
+            else None
+        )
+
         return {
             "mae": round(mae, 4),
             "mse": round(mse, 4),
@@ -192,6 +250,29 @@ class ModelEvaluator:
             "std_residual": round(std_res, 4),
             "prediction_points": prediction_points,
             "residual_distribution": residual_hist,
+            "dummy_baseline": {
+                "strategy": "mean",
+                "mae": round(dummy_mae, 4) if dummy_mae is not None else None,
+                "mse": round(dummy_mse, 4) if dummy_mse is not None else None,
+                "rmse": round(dummy_rmse, 4) if dummy_rmse is not None else None,
+                "r2": round(dummy_r2, 4) if dummy_r2 is not None else None,
+                "improvement_pct": improvement_pct,
+            },
+            "train_metrics": {
+                "r2": round(train_r2, 4) if train_r2 is not None else None,
+                "rmse": round(train_rmse, 4) if train_rmse is not None else None,
+                "mae": round(train_mae, 4) if train_mae is not None else None,
+            } if train_r2 is not None else None,
+            "overfitting": {
+                "train_r2": round(train_r2, 4) if train_r2 is not None else None,
+                "test_r2": round(r2, 4),
+                "gap": overfitting_gap,
+                "is_overfitting": is_overfitting,
+            },
+            "data_leakage": {
+                "potential_leakage": potential_data_leakage,
+                "warning": leakage_warning,
+            },
         }
 
     @classmethod

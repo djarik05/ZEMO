@@ -120,5 +120,14 @@
   "tests/test_providers.py::TestProviderRegistryService::test_create_provider_service",
   "tests/test_providers.py::TestProviderRegistryService::test_delete_provider_service",
   "tests/test_providers.py::TestProviderRegistryService::test_get_provider_service",
-  "tests/test_providers.py::TestProviderRegistryService::test_list_providers_service"
+  "tests/test_providers.py::TestProviderRegistryService::test_list_providers_service",
+  "tests/test_sgpa_regression_audit.py::test_all_eight_regression_algorithms_train_and_evaluate[decision_tree_regressor]",
+  "tests/test_sgpa_regression_audit.py::test_all_eight_regression_algorithms_train_and_evaluate[gradient_boosting_regressor]",
+  "tests/test_sgpa_regression_audit.py::test_all_eight_regression_algorithms_train_and_evaluate[knn_regressor]",
+  "tests/test_sgpa_regression_audit.py::test_all_eight_regression_algorithms_train_and_evaluate[lasso_regression]",
+  "tests/test_sgpa_regression_audit.py::test_all_eight_regression_algorithms_train_and_evaluate[linear_regression]",
+  "tests/test_sgpa_regression_audit.py::test_all_eight_regression_algorithms_train_and_evaluate[random_forest_regressor]",
+  "tests/test_sgpa_regression_audit.py::test_all_eight_regression_algorithms_train_and_evaluate[ridge_regression]",
+  "tests/test_sgpa_regression_audit.py::test_all_eight_regression_algorithms_train_and_evaluate[svr]",
+  "tests/test_sgpa_regression_audit.py::test_sgpa_dataset_integrity"
 ]

@@ -46,6 +46,10 @@ class Settings(BaseSettings):
         default="./data/uploads",
         description="Directory for storing uploaded dataset files",
     )
+    experiments_dir: str = Field(
+        default="./data/experiments",
+        description="Directory for storing trained model artifacts",
+    )
     max_file_size_mb: int = Field(
         default=100,
         description="Maximum upload file size in MB",
@@ -193,9 +197,34 @@ class Settings(BaseSettings):
     @field_validator("upload_dir")
     @classmethod
     def validate_upload_dir(cls, v: str) -> str:
-        path = Path(v)
+        backend_dir = Path(__file__).resolve().parent.parent
+        p = Path(v)
+        if not p.is_absolute():
+            clean_rel = v.lstrip("./\\")
+            if (backend_dir / "data").exists():
+                path = (backend_dir / clean_rel).resolve()
+            else:
+                path = p.resolve()
+        else:
+            path = p.resolve()
         path.mkdir(parents=True, exist_ok=True)
-        return str(path.absolute())
+        return str(path)
+
+    @field_validator("experiments_dir")
+    @classmethod
+    def validate_experiments_dir(cls, v: str) -> str:
+        backend_dir = Path(__file__).resolve().parent.parent
+        p = Path(v)
+        if not p.is_absolute():
+            clean_rel = v.lstrip("./\\")
+            if (backend_dir / "data").exists():
+                path = (backend_dir / clean_rel).resolve()
+            else:
+                path = p.resolve()
+        else:
+            path = p.resolve()
+        path.mkdir(parents=True, exist_ok=True)
+        return str(path)
 
     @property
     def max_file_size_bytes(self) -> int:
